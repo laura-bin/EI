@@ -88,6 +88,13 @@
 
     %L'amélioration des performances est nécessaire par la qualité grandissante des données audio et video -> de plus en plus grandes, et le besoin de maintenir plusieurs flux en tant réel dans le broadcast
 
+    \paragraph{}
+
+
+    Ce travail commencera par une présentation d'EVS et du département dans lequel j'ai effectué mon stage. Parmi les nombreux produits d'EVS, je présenterai brièvement le serveur XT-VIA pour lequel le codec AAC a été spécifiquement développé.
+
+    % But : garder la max de performance en perdant le moins en qualité
+
 
 
     \section{EVS Broadcast Equipment}
@@ -108,23 +115,22 @@
         \begin{subfigure}[b]{0.4\linewidth}
             \includegraphics[width=\linewidth]{./images/XT-VIA-ar.jpg}
         \end{subfigure}
-        \caption{Vues avant et arrière (en configuration IP) de l'XT-VIA}
+        \caption{Vues avant et arrière (en configuration IP) de l'XT-VIA\cite{EVS:XT}}
     \end{figure}
 
-%    \paragraph{}
-%    Le serveur XT a connu plusieurs versions : XT, XT2, XT2+, XT3 et enfin l'XT-VIA. L'XT-VIA, la plus récente version du serveur XT, en quelques chiffres clés\cite{EVS:XT} :
-%    \begin{itemize}
-%        \item offre un espace de stockage de 18 à 54 TB, soit plus de 130h d'enregistrement en UHD-4k;
-%        \item supporte de nombreux formats d'encodage : UHD-4K (XAVC-Intra et DNxHR), HD/FHD (XAVC-I, AVC-I, DNxHD et ProRes), PROXY (MJPEG et H264);
-%        \item 
-%    \end{itemize}
-    
-    % C'est pour cette dernière version, la plus récente de l'XT, que le codec AAC est développé. 
+    \paragraph{}
+    Le serveur XT a connu plusieurs versions : XT, XT2, XT2+, XT3 et enfin l'XT-VIA. L'XT-VIA, la plus récente version du serveur XT, en quelques informations clés\cite{EVS:XT} :
+    \begin{itemize}
+        \item offre un espace de stockage de 18 à 54 TB, soit plus de 130h d'enregistrement en UHD-4K;
+        \item dispose de 2 à plus de 16 canaux selon le format choisi : 2 canaux en UHD-8K (4320p), 6 canaux en UHD-4K (2160p) et plus de 16 canaux en FHD and HD (720p, 1080i, 1080p);
+        \item permet une configuration hybride de ses entrées et sorties en IP (10G Ethernet SFP+, 100G en option, ST2022-6, ST2022-7, ST2022-8, ST2110, NMOS IS-04, IS-05, EMBER+, PTP) ou SDI (1.5G-SDI, 3G-SDI et 12G-SDI);
+        \item supporte de nombreux formats d'encodage vidéo : UHD-4K (XAVC-Intra et DNxHR), HD/FHD (XAVC-I, AVC-I, DNxHD et ProRes), PROXY (MJPEG et H264);
+        \item peut enregistrer 192 audio tracks non compressés et supporte les standards AES et MADI;
+        \item offre de nombreuses possibilités de connection avec du matériel EVS ou non.
+    \end{itemize}
 
-%    \paragraph{}
-%    Afin de répondre aux exigences de la production live, en particulier d'événements sportifs, l'XT-VIA offre un espace de stockage de 18TB
-%    \paragraph{}
-%    En quelques chiffres clés
+    \paragraph{}
+    C'est pour la dernière génération du serveur XT, l'XT-VIA, que le codec AAC est développé. TODO changement d'architecture
 
     \section{L'encodage audionumérique : généralités}
     \subsection{Le son}
