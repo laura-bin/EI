@@ -1,6 +1,6 @@
 \documentclass{article}
 
-\usepackage[francais]{babel}
+\usepackage[french]{babel}
 \usepackage[T1]{fontenc}
 \usepackage{moreverb}       % verbatim with tab
 
@@ -67,7 +67,7 @@
     \addcontentsline{toc}{section}{\protect\numberline{}Introduction}
 
     % Contexte du projet : serveur XT (XT VIA qui succède à ...) et passage d'une architecture Intel à une architecture ARM
-    % Travail qui s'incrit dans la continuité d'un travail théorique préalable
+    % Travail qui s'inscrit dans la continuité d'un travail théorique préalable
     % Optimisations possibles et choix de l'algorithme MDCT (mais on pourrait aussi faire la même chose pour le bloc quantization, etc.)
     % Optimisations du bloc MDCT mises en place : passage d'une arithmétique floating à fixed point et utilisation des fonctions SIMD qui offrent une meilleur capacité de calcul
     % Limite de l'optimisation : limite de temps (temps du stage) plutôt que gain de performance par rapport à ce qui est déjà en prod
@@ -83,10 +83,48 @@
         \item Test du système et documentation de son implémentation.
     \end{itemize}
 
+    \paragraph{}
+    %Mon travail s'inscrit dans la continuité de celui de Wafaa Heddari, stagiaire qui m'a précédée au sein du département hardware-firmware d'EVS pour y travailler sur le codec AAC. Après une étude du codec AAC et des différents blocs qui le composent, son mémoire dégage des pistes d'amélioration des performances du codec AAC : like Removal of block switching, Fast MDCT, and Optimized TNS. And then test their implementation on C Code to compare the compilation speed between the original Codec and the optimized one\cite{Wafaa}.
 
-    \section{EVS Brodcast Equipment}
+    %L'amélioration des performances est nécessaire par la qualité grandissante des données audio et video -> de plus en plus grandes, et le besoin de maintenir plusieurs flux en tant réel dans le broadcast
+
+
+
+    \section{EVS Broadcast Equipment}
     \subsection{L'entreprise en quelques infos}
-    \subsection{Les produits / le seveur XT}
+
+
+
+
+    \subsection{Le serveur XT}
+    \paragraph{}
+    EVS développe et commercialise de nombreux produits allant des serveurs de production aux interfaces permettant d'exploiter des données audio-visuelles ou de monitorer des systèmes de production\cite{EVS:products}. Le serveur de production live XT est un des produits emblématiques d'EVS. Il permet de stocker de grandes quantités de données audio-visuelles et d'y accéder en temps réel afin de répondre aux besoins de la production en live. Par exemple, la remote LSM (\emph{Live Slow Motion} permet d'accéder aux contenus des serveurs XT afin de créer les ralentis pour lesquels EVS est célèbre dans le monde.
+
+    \begin{figure}[H]
+        \centering
+        \begin{subfigure}[b]{0.4\linewidth}
+            \includegraphics[width=\linewidth]{./images/XT-VIA.png}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.4\linewidth}
+            \includegraphics[width=\linewidth]{./images/XT-VIA-ar.jpg}
+        \end{subfigure}
+        \caption{Vues avant et arrière (en configuration IP) de l'XT-VIA}
+    \end{figure}
+
+%    \paragraph{}
+%    Le serveur XT a connu plusieurs versions : XT, XT2, XT2+, XT3 et enfin l'XT-VIA. L'XT-VIA, la plus récente version du serveur XT, en quelques chiffres clés\cite{EVS:XT} :
+%    \begin{itemize}
+%        \item offre un espace de stockage de 18 à 54 TB, soit plus de 130h d'enregistrement en UHD-4k;
+%        \item supporte de nombreux formats d'encodage : UHD-4K (XAVC-Intra et DNxHR), HD/FHD (XAVC-I, AVC-I, DNxHD et ProRes), PROXY (MJPEG et H264);
+%        \item 
+%    \end{itemize}
+    
+    % C'est pour cette dernière version, la plus récente de l'XT, que le codec AAC est développé. 
+
+%    \paragraph{}
+%    Afin de répondre aux exigences de la production live, en particulier d'événements sportifs, l'XT-VIA offre un espace de stockage de 18TB
+%    \paragraph{}
+%    En quelques chiffres clés
 
     \section{L'encodage audionumérique : généralités}
     \subsection{Le son}
@@ -115,9 +153,24 @@
     % avec et sans perte, etc
     \subsection{Historique des normes MPEG}
 
+
+    %\paragraph{}
+    %Le codec AAC est le dernier...
+    %Le codec AAC a de nombreuses applications \cite{Wafaa}. Il est utilisé from low bitrate Internet audio to multichannel broadcasting services, thanks to its numerous working modes and configurations.
+
+    %Le codec AAC est défin par le standard ISO/IEC 13818-7 : 
+
+
+
+
     \section{Le codec AAC}
     \subsection{Présentation générale}
     % présentation des différents blocs
+    % \cite{wiki:AAC}
+
+%In this thesis, we are going to study the different blocks of an AAC encoder based on the standard ISO/IEC 13818-7 such as the psychoacoustic model, Gain control, Transform block, Spectral processing, Quantization and Entropy coding. \cite{Wafaa}
+
+
     \subsection{Le bloc MDCT}
     % \begin{itemize}
     %     \item particularités par rapport à la FFT
@@ -128,6 +181,9 @@
 
     \section{Développement de la MDCT}
     \subsection{Formule mathématique}
+
+
+
     \subsection{Fenêtre utilisée (autres paramètres ?)}
     % \begin{itemize}
     %     \item fenêtre de 1024
@@ -182,11 +238,11 @@
 
     % Intérêt de passer un integer: même si on ne gagne que 5\% de performance, on gagne du temps avant (les données qu'on reçoit sont en int16 -> pas de conversion vers le float après) et après (la quantification notament sera probablement plus rapide en integer)
 
-    % Test de perforfmance : il faut qu'à la fin l'implementation fixed point soit au moins aussi rapide que floating point
+    % Test de performance : il faut qu'à la fin l'implementation fixed point soit au moins aussi rapide que floating point
 
 
 
-    \section{Optmisations à l'architecture ARM}
+    \section{Optimisations à l'architecture ARM}
     \subsection{Spécificités de l'architecture ARMv8}
     \subsection{Utilisation de la FFT de la librairie Ne10}
     % FFT déjà optimisées pour Neon mais limitations sur ce qui entre et ce qui sort
@@ -201,7 +257,7 @@
     %     \item utilisation des instructions intrinsèques de GCC \url{https://fr.wikipedia.org/wiki/Fonction_intrins%C3%A8que}
     % \end{itemize}
 
-    % Les opérations SIMD permettent de faire plusieurs opérations en uen fois où l'algo normal n'en fait qu'une à la fois. L'algo SIMD permet de faire plusieurs modificatiosn à la fois -> il faut ranger les données de manière à pouvoir l'appliquer facilement (fonction fenêtre -> tri des données ? )
+    % Les opérations SIMD permettent de faire plusieurs opérations en uen fois où l'algo normal n'en fait qu'une à la fois. L'algo SIMD permet de faire plusieurs modifications à la fois -> il faut ranger les données de manière à pouvoir l'appliquer facilement (fonction fenêtre -> tri des données ? )
 
     % Plus les données sur lesquelles on travaille sont petites, plus on peut faire d'opérations en parallèle -> il faut voir si la perte de précision est ok. -> mettre une représentation graphique, c'est beaucoup plus simple à comprendre. D'où l'intérêt de passer à du 16 bits, plutôt que de rester en 32 bits et il faut absolument éviter le 64 bits (aucun intérêt).
 
@@ -232,11 +288,11 @@
 
 
 
-    \subsection{Gain de performance}
+    \subsection{Gain en performance}
     % Comparaison avec un implémentation de référence plain c mais aussi à titre indicatif avec l'algorithme de référence car le plain c est déjà optimisé
 
 
-    % L'impact de la window function : exemple avec un sinus : les composantes fréquencielles du sinus ressortent beaucoup mieux.
+    % L'impact de la window function : exemple avec un sinus : les composantes fréquentielles du sinus ressortent beaucoup mieux.
 
     \subsection{Perte de précision}
     % Comparaison avec l'algorithme de référence
@@ -247,7 +303,8 @@
     \addcontentsline{toc}{section}{\protect\numberline{}Conclusion}
     % Améliorations encore possible : faire les premières opérations de prétwiddling en Q15 8 par 8 avant de splitter, mêler les facteurs de la fenêtre aux facteurs de twiddling
 
-    \section*{Bibliographie}
-    \addcontentsline{toc}{section}{\protect\numberline{}Bibliographie}
-
+    \bibliography{biblio} 
+    \bibliographystyle{ieeetr.bst}
+    \addcontentsline{toc}{section}{\protect\numberline{}Références}
+    
 \end{document}
