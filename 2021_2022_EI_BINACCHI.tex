@@ -89,19 +89,31 @@
     %L'amélioration des performances est nécessaire par la qualité grandissante des données audio et video -> de plus en plus grandes, et le besoin de maintenir plusieurs flux en tant réel dans le broadcast
 
     \paragraph{}
-
-
     Ce travail commencera par une présentation d'EVS et du département dans lequel j'ai effectué mon stage. Parmi les nombreux produits d'EVS, je présenterai brièvement le serveur XT-VIA pour lequel le codec AAC a été spécifiquement développé.
 
     % But : garder la max de performance en perdant le moins en qualité
 
 
-
+    \newpage
     \section{EVS Broadcast Equipment}
-    \subsection{L'entreprise en quelques infos}
+    \subsection{Présentation d'EVS et du département R\&D}
+    \paragraph{}
+    Mon stage s'est déroulé au siège principal d'EVS Broadcast Equipment dans le parc scientifique du Sart Tilman. EVS est une entreprise d'origine liégeoise devenue internationale. Fondée en 1994 par Pierre L'Hoest, Laurent Minguet et Michel Counson, EVS compte aujourd'hui plus de 600 employés dans plus de 20 bureaux à travers le monde mais son siège principal se situe toujours à Liège.
 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.5\linewidth]{./images/EVS-logo.png}
+        \caption{Logo de la société EVS Broadcast Equipment\cite{EVS:website}}
+    \end{figure}
 
+    \paragraph{}
+    EVS est devenu leader dans le monde du broadcast avec ses serveurs permettant l'accès et la diffusion instantanée des données audio-visuelles enregistrées sur ses serveurs. L'entreprise est également célèbre pour ses ralentis instantanés. Ces technologies sont utilisées pour la production live des plus importants événements sportifs dans le monde : le matériel EVS est notamment utilisé pour la retransmission des Jeux Olympiques depuis 1998.
 
+    \paragraph{}
+    Plus de 50\% des employés d'EVS travaillent en recherche et développement afin de répondre au marché du broadcast en constante évolution. Outre ses solutions techniques innovantes, EVS se différencie de ses concurrents par la proximité entretenue avec les clients en leur proposant des solutions à l'écoute de leurs besoins et en leur offrant un service de support de qualité.
+
+    \paragraph{}
+    C'est en R\&D, dans l'équipe Hardware-Firmware, que s'est déroulé mon stage. Sous la direction de Justin Mannesberg, cette équipe se compose d'une vingtaine d'employés spécialisés en développement embarqué et en développement FPGA. La situation particulière dans laquelle s'est déroulé mon stage, en pleine pandémie de Covid et alors que tous les employés étaient confinés, ne m'a pas permis d'interagir avec beaucoup de membres de l'équipe et ni de pouvoir observer leur travail. Bernard Thilmant (Software Engineer dans l'équipe Hardware-Firmare) a cependant réussi à m'apporter le soutien nécessaire à la bonne réalisation de mon stage : il m'a permis de m'initier au C++, m'a aidée à ne pas me perdre dans les concepts parfois complexes de l'encodage audio et m'a aidée à apporter la rigueur scientifique nécessaire à la réalisation de mon travail. J'ai également pu bénéficier de l'expertise technique de Frédéric Lefranc (Principal Embedded System Architect dans l'équipe Hardware-Firmare) ainsi que du suivi de Justin Mannesberg (Manager de l'équipe Hardware-Firmware).
 
     \subsection{Le serveur XT}
     \paragraph{}
@@ -115,11 +127,11 @@
         \begin{subfigure}[b]{0.4\linewidth}
             \includegraphics[width=\linewidth]{./images/XT-VIA-ar.jpg}
         \end{subfigure}
-        \caption{Vues avant et arrière (en configuration IP) de l'XT-VIA\cite{EVS:XT}}
+        \caption{Vues avant et arrière (en configuration IP) de l'XT-VIA\cite{EVS:products}}
     \end{figure}
 
     \paragraph{}
-    Le serveur XT a connu plusieurs versions : XT, XT2, XT2+, XT3 et enfin l'XT-VIA. L'XT-VIA, la plus récente version du serveur XT, en quelques informations clés\cite{EVS:XT} :
+    Le serveur XT a connu plusieurs versions : XT, XT2, XT2+, XT3 et enfin l'XT-VIA. L'XT-VIA, la plus récente version du serveur XT, en quelques informations clés\cite{EVS:products} :
     \begin{itemize}
         \item offre un espace de stockage de 18 à 54 TB, soit plus de 130h d'enregistrement en UHD-4K;
         \item dispose de 2 à plus de 16 canaux selon le format choisi : 2 canaux en UHD-8K (4320p), 6 canaux en UHD-4K (2160p) et plus de 16 canaux en FHD and HD (720p, 1080i, 1080p);
@@ -130,8 +142,9 @@
     \end{itemize}
 
     \paragraph{}
-    C'est pour la dernière génération du serveur XT, l'XT-VIA, que le codec AAC est développé. TODO changement d'architecture
+    C'est pour la dernière génération du serveur XT, l'XT-VIA, que le codec AAC est développé. La compression avec perte de données de ce codec permet d'optimiser l'espace occupé par les données audio sans en altérer la qualité perçue. Outre la qualité audio, les performances de l'encodage sont importantes à prendre en compte pour permettre l'enregistrement de plusieurs canaux en parallèle tout en conservant un traitement de l'information qui tienne le temps réel. L'optimisation des performances doit tenir compte de l'architecture de l'XT-VIA : l'architecture ARM Neon remplace l'architecture Intel x86 de ses prédécesseurs avec des différences importantes dans les fonctions intrinsèques.
 
+    \newpage
     \section{L'encodage audionumérique : généralités}
     \subsection{Le son}
     % onde acoustique -> 
