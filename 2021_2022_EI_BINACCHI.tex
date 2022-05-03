@@ -89,7 +89,10 @@
     %L'amélioration des performances est nécessaire par la qualité grandissante des données audio et video -> de plus en plus grandes, et le besoin de maintenir plusieurs flux en tant réel dans le broadcast
 
     \paragraph{}
-    Ce travail commencera par une présentation d'EVS et du département dans lequel j'ai effectué mon stage. Parmi les nombreux produits d'EVS, je présenterai brièvement le serveur XT-VIA pour lequel le codec AAC a été spécifiquement développé.
+    Ce travail commencera par une présentation d'EVS et du département dans lequel s'est déroulé mon stage. Parmi les nombreux produits d'EVS, seul le serveur XT sera brièvement présenté puisque c'est spécifiquement pour ce dernier que le codec AAC est développé et optimisé.
+
+    \paragraph{}
+    Quelques notions théoriques indispensables à la compréhension du travail pratique seront ensuite développées avec une section consacrée au son et sa numérisation et une autre consacrée aux codecs MPEG, à leur fonctionnement et en particulier au fonctionnement du bloc MDCT de l'encodeur AAC.
 
     % But : garder la max de performance en perdant le moins en qualité
 
@@ -98,16 +101,17 @@
     \section{EVS Broadcast Equipment}
     \subsection{Présentation d'EVS et du département R\&D}
     \paragraph{}
-    Mon stage s'est déroulé au siège principal d'EVS Broadcast Equipment dans le parc scientifique du Sart Tilman. EVS est une entreprise d'origine liégeoise devenue internationale. Fondée en 1994 par Pierre L'Hoest, Laurent Minguet et Michel Counson, EVS compte aujourd'hui plus de 600 employés dans plus de 20 bureaux à travers le monde mais son siège principal se situe toujours à Liège.
+    Mon stage s'est déroulé au sein de la société EVS Broadcast Equipment dont la figure \ref{fig:logo} représente le logo. EVS est une entreprise d'origine liégeoise devenue internationale. Fondée en 1994 par Pierre L'Hoest, Laurent Minguet et Michel Counson, EVS compte aujourd'hui plus de 600 employés dans plus de 20 bureaux à travers le monde mais son siège principal se situe toujours à Liège.
 
     \begin{figure}[H]
         \centering
         \includegraphics[width=.5\linewidth]{./images/EVS-logo.png}
         \caption{Logo de la société EVS Broadcast Equipment\cite{EVS:website}}
+        \label{fig:logo}
     \end{figure}
 
     \paragraph{}
-    EVS est devenu leader dans le monde du broadcast avec ses serveurs permettant l'accès et la diffusion instantanée des données audio-visuelles enregistrées sur ses serveurs. L'entreprise est également célèbre pour ses ralentis instantanés. Ces technologies sont utilisées pour la production live des plus importants événements sportifs dans le monde : le matériel EVS est notamment utilisé pour la retransmission des Jeux Olympiques depuis 1998.
+    EVS est devenu leader dans le monde du broadcast avec ses serveurs permettant l'accès et la diffusion instantanée des données audiovisuelles enregistrées sur ses serveurs. L'entreprise est également célèbre pour ses ralentis instantanés. Ces technologies sont utilisées pour la production live des plus importants événements sportifs dans le monde : le matériel EVS est notamment utilisé pour la retransmission des Jeux Olympiques depuis 1998.
 
     \paragraph{}
     Plus de 50\% des employés d'EVS travaillent en recherche et développement afin de répondre au marché du broadcast en constante évolution. Outre ses solutions techniques innovantes, EVS se différencie de ses concurrents par la proximité entretenue avec les clients en leur proposant des solutions à l'écoute de leurs besoins et en leur offrant un service de support de qualité.
@@ -128,10 +132,11 @@
             \includegraphics[width=\linewidth]{./images/XT-VIA-ar.jpg}
         \end{subfigure}
         \caption{Vues avant et arrière (en configuration IP) de l'XT-VIA\cite{EVS:products}}
+        \label{fig:xt-via}
     \end{figure}
 
     \paragraph{}
-    Le serveur XT a connu plusieurs versions : XT, XT2, XT2+, XT3 et enfin l'XT-VIA. L'XT-VIA, la plus récente version du serveur XT, en quelques informations clés\cite{EVS:products} :
+    Le serveur XT a connu plusieurs versions : XT, XT2, XT2+, XT3 et enfin l'XT-VIA. L'XT-VIA (cf figure \ref{fig:xt-via}), la plus récente version du serveur XT, en quelques informations clés\cite{EVS:products} :
     \begin{itemize}
         \item offre un espace de stockage de 18 à 54 TB, soit plus de 130h d'enregistrement en UHD-4K;
         \item dispose de 2 à plus de 16 canaux selon le format choisi : 2 canaux en UHD-8K (4320p), 6 canaux en UHD-4K (2160p) et plus de 16 canaux en FHD and HD (720p, 1080i, 1080p);
@@ -143,6 +148,7 @@
 
     \paragraph{}
     C'est pour la dernière génération du serveur XT, l'XT-VIA, que le codec AAC est développé. La compression avec perte de données de ce codec permet d'optimiser l'espace occupé par les données audio sans en altérer la qualité perçue. Outre la qualité audio, les performances de l'encodage sont importantes à prendre en compte pour permettre l'enregistrement de plusieurs canaux en parallèle tout en conservant un traitement de l'information qui tienne le temps réel. L'optimisation des performances doit tenir compte de l'architecture de l'XT-VIA : l'architecture ARM Neon remplace l'architecture Intel x86 de ses prédécesseurs avec des différences importantes dans les fonctions intrinsèques.
+
 
     \newpage
     \section{L'encodage audionumérique : généralités}
@@ -161,33 +167,120 @@
     % - toute fonction p(x, t) peut être exprimée par une somme de fonctions (co-)sinusoidales : formule pour les fonctions périodiques + transformée de Fourier pour les fonctions n'est pas périodique dans le temps
 
     \subsection{La numérisation d'un signal}
+    \label{audionumerique}
     % transformation de fourier :
     % https://www.claudegabriel.be/Math%C3%A9matiques%20appliqu%C3%A9es,%20chapitre%204.pdf -> p12 sur N pair / impair
     % à la base -> signaux périodique (faire bref)
     % -> ce qui nous intéresse : transformation pour signal non périodique discret -> DCT
 
 
-    \section{Les codec audio}
+    \newpage
+    \section{Les codecs audio}
     \subsection{Définition d'un codec}
-    % avec et sans perte, etc
-    \subsection{Historique des normes MPEG}
+    \paragraph{}
+    Un codec est un procédé logiciel composé d'un encodeur (\emph{\textbf{co}der}) et d'un décodeur (\emph{\textbf{dec}oder})\cite{wiki:codec}. Un codec audio permet donc, d'une part, de coder un signal audio dans un flux de donnée numériques et, d'autre part, de décoder ces données afin de restituer le signal audio.
+
+    \paragraph{}
+    Les codecs sont dits avec perte (\emph{lossy}) ou sans perte (\emph{lossless}). Le PCM est par exemple un codec sans perte puisqu'il encode la totalité des informations sonores dans la bande de fréquences humainement audible. Ce type de codec permet de conserver la qualité de l'audio mais nécessite en contrepartie un espace de stockage conséquent, même avec une compression des données.
+
+    \paragraph{}
+    Afin de réduire l'espace de stockage nécessaire, les codecs avec perte permettent de supprimer une partie des données audio. C'est le cas des codecs définis par les normes MPEG dont fait partie le codec AAC.
+
+    \subsection{Les codecs MPEG}
+    \paragraph{}
+    MPEG (\emph{Moving Picture Experts Group}) désigne une alliance de différents groupes de travail définissant des normes d'encodage, de compression et décompression et de transmission de média audio, vidéo et graphiques\cite{wiki:MPEG}. Le groupe est actif depuis 1988 et a produit depuis de nombreuses normes.
+
+    \paragraph{}
+    Les codecs audio qui implémentent les normes MPEG ont pour point commun d'être des codecs avec perte de données basés sur un modèle psychoacoustique. Le premier est le MP3, défini par la norme MPEG-1 Layer-3 ISO/IEC 11172-3:1993. Le codec AAC est conçu en 1997 pour remplacer le MP3. Il est défini par les normes MPEG-2 partie 7 ISO/IEC 13818-7:2006\cite{ISO13818-7} et MPEG-4 partie 3 ISO/IEC 14496-3:2019\cite{ISO14496-3}.
+
+    \paragraph{}
+    Les normes MPEG définissent les grandes lignes de l'encodage et du décodage et le format du conteneur mais pas l'implémentation du codec qui peut de ce fait être plus ou moins performant. Les codecs MPEG sont typiquement composés des blocs suivants :
+    \begin{figure}[H]
+        \centering
+        \begin{subfigure}[b]{.6\linewidth}
+            \includegraphics[width=\linewidth]{./images/1999-Brandenburg-simple-AAC-encoder.png}
+            \caption{Schéma fonctionnel de l'encodeur}
+        \end{subfigure}
+        \begin{subfigure}[b]{.6\linewidth}
+            \includegraphics[width=\linewidth]{./images/1999-Brandenburg-simple-AAC-decoder.png}
+            \caption{Schéma fonctionnel du décodeur}
+        \end{subfigure}
+        \caption{Vue simplifiée d'un codec MPEG basé sur un modèle psychoacoustique\cite{1999-Brandenburg}}
+    \end{figure}
+    \paragraph{}
+    L'encodeur est composé des blocs suivants :
+    \begin{description}
+        \item[filter bank] la banque de filtres décompose le signal temporel d'entrée en différentes composantes fréquentielles
+        \item[perceptual model] le modèle psychoacoustique utilise le signal temporel et/ou sa décomposition fréquentielle pour éliminer les données audio dont l'absence ne nuira pas à la qualité perçue à l'écoute ()
+        \item[quantization and coding] la quantification attribue une valeur numérique aux données du spectre de fréquences : elle sont typiquement codées avec une méthode entropique qui peut être optimisée avec le modèle psychoacoustique
+        \item[encoding of bitstream] les données sont formatées en un flux contenant typiquement le spectre de fréquences codé et des informations supplémentaires permettant l'encodage
+    \end{description}
+    
+    \paragraph{}
+    Le décodeur a un fonctionnement inverse : le flux de données est décodé (\textbf{decoding of bitstream}), les composantes fréquentielles du signal sont retrouvées par l'opération inverse à la quantification (\textbf{inverse quantization}) et ces sous-bandes fréquentielles sont finalement rassemblées pour reconstituer le signal temporel (\textbf{synthesis filter bank}).
+
+    \paragraph{}
+    Le fonctionnement du décodeur ne sera pas plus développé dans ce travail car le bloc MDCT fait partie de la banque de filtres de l'encodeur. Le fonctionnement spécifique de l'encodeur AAC sera par contre détaillé dans la section \ref{sec:AAC}.
 
 
-    %\paragraph{}
-    %Le codec AAC est le dernier...
-    %Le codec AAC a de nombreuses applications \cite{Wafaa}. Il est utilisé from low bitrate Internet audio to multichannel broadcasting services, thanks to its numerous working modes and configurations.
+    \subsection{Les modèles psychoacoustiques}
+    \paragraph{}
+    Le section précédente a défini les codecs MPEG comme étant basés sur un modèle psychoacoustique. La psychoacoustique est une branche de la psychophysique qui étudie la manière dont l'oreille humaine perçoit le son\cite{wiki:psychoacoustic}. Cette discipline permet d'améliorer la compression d'un signal audio en éliminant les sons qui sont captés par un microphone mais qui ne peuvent pas être perçus par l'oreille humaine et les avancées dans cette discipline permettent de développer des encodeurs audio de plus en plus performants. Les codecs basés sur un modèle psychoacoustique sont toujours des codecs avec perte puisqu'une partie des informations auditives sera définitivement perdue, ce qui ne nuit pour autant pas à la qualité perçue du son.
 
-    %Le codec AAC est défin par le standard ISO/IEC 13818-7 : 
+    \paragraph{}
+    L'encodage audionumérique tient déjà compte des seuils de fréquences humainement audibles pour limiter les données audio enregistrées : nous l'avons vu dans la section \ref{audionumerique}, aucun son n'est perçu en-deça de 20Hz ou au-delà de 20kHz. La psychoacoustique permet de mieux dessiner limite entre ce qui est humainement audible ou non afin d'éliminer un maximum des informations non pertinentes et ainsi augmenter le facteur de compression des données : le facteur de compression des codecs MPEG est environ 15 fois supérieur à celui du CD\cite{2019-Herre-Dick}.
+
+    \paragraph{}
+    Les effets de masque sont au centre des différents modèles psychoacoustiques utilisés pour la compression audio. L'enjeu afin d'obtenir le meilleur taux de compression est de calculer le plus finement possible les seuils de masquage, i.e. la limite entre les informations pertinentes et celles qui peuvent être éliminées. Les effets de masques dans le domaine fréquentiel (\emph{spectral masking effects}) sont parmi les plus utilisés mais il en existe d'autres, e.g. dans le domaine temporel. La figure suivante représente différents effets de masque du domaine fréquentiel :
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.6\linewidth]{./images/2019-Herre-Dick-masking-effect.png}
+        \caption{Effets de masque dans le domaine fréquentiel\cite{2019-Herre-Dick}}
+    \end{figure}
+
+    \paragraph{}
+    Les lignes représentent le seuil 
+    \begin{description}
+        \item[Threshold in quiet] la ligne en pointillé représente le seuil d'audibilité dans le calme, indépendamment de tout autre élément qui pourrait interférer
+        \item[Masking threshold] 
+    \end{description}
 
 
+    % SPL) A frequency dependent threshold of in hearing in quiet describes the minimum sound pressure level of a sound to be perceivable isolation and under extremely quite conditions. (SPL) of a sound be perceivable in isolation and curve under extremely conditions. • In the presence of to a masker, the threshold in quiet changes into quite a masking threshold, which bell-shaped increase the in frequencies the vicinity of the masker, depending on its • shows In the a presence of a masker, threshold in in quiet curve changes into a masking threshold, frequency, level, and signal increase type. Any sound beneath threshold is masked by the louder which shows a bell-shaped in frequencies in the this vicinity of the masker, depending on its signal, and level, thus and inaudible the Any average perceptual coding, the louder coding signal, error frequency, signal for type. sound listener. beneath In this threshold audio is masked by the (i.e., the introduced quantization noise) corresponds to the probe signal in this experimental and thus inaudible for the average listener. In perceptual audio coding, the coding error (i.e., scenario. the introduced quantization noise) corresponds to the probe signal in this experimental scenario. • Masking effects are are strongest strongest signals are within the critical bandwidth of the masker. • Masking effects for for signals that that are within the critical bandwidth of the masker. Within Within the critical bandwidth, the masking threshold remains constant. Furthermore, the the critical bandwidth, the masking threshold remains constant. Furthermore, the masking effects masking spread to frequencies the (so-called critical bandwidth (so-called The inter-band spread to effects frequencies beyond the critical beyond bandwidth inter-band masking). upper masking). The upper slope of the masking threshold depends on multiple factors, such as absolute slope of the masking threshold depends on multiple factors, such as absolute frequency and sound frequency and of sound pressure whereas level of the the lower masker, whereas lower slope dependency. hardly shows a level pressure level the masker, slope hardly the shows a level dependency. • Depending on the type of masker, i.e., tone or (narrow-band) noise, the strength of the masking • Depending the type of masker, i.e., can tone or (narrow-band) the strength of the masking effect varies. on While noise-like maskers mask tone-like signals noise, very well (up to a masker-to-probe effect varies. maskers can mask tone-like signals very well (up to a masker-to- level ratio of While about noise-like 6 dB), tone-like maskers can mask noise only to a much weaker extent [29] probe level ratio of about 6 dB), tone-like maskers can mask noise only to a much weaker extent (about 20 dB). [29] (about 20 dB).      \paragraph{}     Le calcul des   
+
+
+    
+    
+    
+    Le calcul du seuil de masquage tient compte\cite{2019-Herre-Dick} :
+    \begin{itemize}
+        \item des effets de masquage monophonique de la perception non-linéaire des fréquences, plus fine pour les basses fréquences;
+        \item des effets de masque dans le temps;
+        \item de l'effet de masque dans une bande de fréquence ou entre bandes de fréquences;
+        \item l'impact de la tonalité sur le masquage
+        \item masking over time
+    \end{itemize}
 
 
     \section{Le codec AAC}
-    \subsection{Présentation générale}
+    \label{sec:AAC}
+    \subsection{Fonctionnement de l'encodeur AAC}
     % présentation des différents blocs
     % \cite{wiki:AAC}
 
-%In this thesis, we are going to study the different blocks of an AAC encoder based on the standard ISO/IEC 13818-7 such as the psychoacoustic model, Gain control, Transform block, Spectral processing, Quantization and Entropy coding. \cite{Wafaa}
+    %In this thesis, we are going to study the different blocks of an AAC encoder based on the standard ISO/IEC 13818-7 such as the psychoacoustic model, Gain control, Transform block, Spectral processing, Quantization and Entropy coding. \cite{Wafaa}
+
+    % Les codecs définis par les normes MPEG sont basés sur le modèle psychoacoustiquev
+    % Les performances des codecs audio définis par les normes MPEG sont rendues possibles par les recherches en psychoacoustique.
+
+
+    %AAC supports inclusion of 48 full-bandwidth (up to 96 kHz) audio channels in one stream plus 16 low frequency effects (LFE, limited to 120 Hz) channels, up to 16 "coupling" or dialog channels, and up to 16 data streams. The quality for stereo is satisfactory to modest requirements at 96 kbit/s in joint stereo mode; however, hi-fi transparency demands data rates of at least 128 kbit/s (VBR). Tests[which?] of MPEG-4 audio have shown that AAC meets the requirements referred to as "transparent" for the ITU at 128 kbit/s for stereo, and 320 kbit/s for 5.1 audio.[citation needed] 
+    % AAC uses only a modified discrete cosine transform (MDCT) algorithm, giving it higher compression efficiency than MP3, which uses a hybrid coding algorithm that is part MDCT and part FFT.[4]
+
+
+    \paragraph{}
+    Le codec AAC (Advanced Audio coding) est définit  , défini par la norme . Les recherches en psychoacoustique ont permis de développer un algorithme d'encodage plus performant pour l'AAC que pour le MP3 : il permet d'encoder moins données audio tout en gardant la même qualité perçue au décodage\cite{1999-Brandenburg}.
+
 
 
     \subsection{Le bloc MDCT}
@@ -200,7 +293,7 @@
 
     \section{Développement de la MDCT}
     \subsection{Formule mathématique}
-
+    \paragraph{}
 
 
     \subsection{Fenêtre utilisée (autres paramètres ?)}
@@ -325,5 +418,8 @@
     \bibliography{biblio} 
     \bibliographystyle{ieeetr.bst}
     \addcontentsline{toc}{section}{\protect\numberline{}Références}
+
+    attention référer la figure dans le texte
+    demain et ap main 21h45 jeudi plus tôt 19h30
     
 \end{document}
