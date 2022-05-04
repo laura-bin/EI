@@ -36,6 +36,37 @@
 \usepackage{fancyhdr}       % en-têtes
 \usepackage{lastpage}       % numéro de dernière page
 
+\usepackage{appendix}       % annexes
+
+% code
+\usepackage{xcolor}
+\usepackage{listings}
+
+\definecolor{mGreen}{rgb}{0,0.6,0}
+\definecolor{mGray}{rgb}{0.5,0.5,0.5}
+\definecolor{mPurple}{rgb}{0.58,0,0.82}
+\definecolor{backgroundColour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{CStyle}{
+    backgroundcolor=\color{backgroundColour},   
+    commentstyle=\color{mGreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{mGray},
+    stringstyle=\color{mPurple},
+    basicstyle=\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    language=C
+}
+
 \title{Développement d'un codec audio AAC : optimisation de l'algorithme MDCT pour une architecture ARM}
 \date{2020 -- 2021}
 \author{Laura Binacchi}
@@ -50,6 +81,12 @@
     \def\labelitemi{\textbullet}    % Redéfinition des puces dans les itemize
     \renewcommand{\times}{\text{×}} % Remplacer le gros «X» par un plus beau
     %\interfootnotelinepenalty=10000
+}
+
+\lstset { %
+    language=C++,
+    backgroundcolor=\color{black!5}, % set backgroundcolor
+    basicstyle=\footnotesize,% basic font setting
 }
 
 \begin{document}
@@ -291,9 +328,37 @@
     % \end{itemize}
 
 
+    \newpage
     \section{Développement de la MDCT}
-    \subsection{Formule mathématique}
+    \subsection{Description mathématique}
+    \label{sec:desc-math}
     \paragraph{}
+    La transformation effectuée par la MDCT est donnée par l'équation suivante\cite{wiki:MDCT} :
+    $$X_k = \sum_{n=0}^{2N-1} x_n \cos \left[ \frac{\pi}{N} \left( N + \frac{1}{2} + \frac{N}{2} \right) \left( k + \frac{1}{2} \right) \right]$$
+    \begin{description}
+        \item[$X_k$] avec $k \in [0, N[$ pour une fenêtre d'entrée de 2N échantillons
+        \item[$x_n$] avec $n \in [0, 2N[$ : la fenêtre d'entrée
+        \item[$F: R^{2N} \rightarrow R^N$] la MDCT est une fonction linaire qui pour 2N nombres réels d'entrée produit N nombre réels en sortie
+    \end{description}
+
+    \paragraph{}
+    La MDCT a été implémentée avec une fenêtre d'entrée de $2N = 1024$ échantillons. Le bloc de sortie, i.e. le spectre de fréquences de la fenêtre d'entrée, aura donc une taille de 512. Ces différentes valeurs, utilisées à de très nombreux endroits du code sont rassemblées dans le header \texttt{mdct\_constants.h} présenté dans l'annexe \ref{an:mdct_const}.
+
+    \paragraph{}
+    La section suivante présente deux implémentations simples de cette formule. Ces implémentations ne pourraient pas être utilisées sans avoir été optimisées car elles seraient beaucoup trop lentes pour un codec qui doit tenir le temps réel. La complexité d'une implémentation de cette formule est de $O(N^2)$ opérations (où N est la taille de la fenêtre d'entrée). Cette complexité peut être ramenée à $O(N \log N)$ opérations par une factorisation récursive. La complexité peut également être diminuée en se basant sur une autre transformation, e.g. une DFT (\emph{Discrete Fourier Transorm}) ou une autre DCT (\emph{Discrete Cosine Transform}) : la complexité sera alors de $O(N)$ opérations de pré et post processing en plus de la complexité de la DFT ou de la DCT choisie\cite{wiki:MDCT}. C'est cette dernière option qui a été retenue pour ce travail.
+
+    \subsection{Algorithmes de référence}
+    \paragraph{}
+    La formule mathématique de la MDCT donnée à la section \ref{sec:desc-math} a été implémentée très simplement en algorithmique flottante avec la possibilité d'obtenir le spectre de fréquences codés en \emph{float}, \emph{double} ou \emph{int32} depuis une fenêtre d'entrée en \emph{int16}. L'objectif de cet implémentation est de pouvoir vérifier les données des implémentations optimisées de la MDCT et de mesurer leur précision.
+
+    \paragraph{}
+    La première implémentation de l'équation de la MDCT est présentée dans l'annexe \ref{an:ref_float_mdct}. La fonction développée permet de faire ses calculs et d'obtenir un résultat aussi bien en \emph{float}) (32 bits) qu'en \emph{double} (64 bits) grâce à l'utilisation d'un \emph{template}.
+
+    \paragraph{}
+    La seconde fonction de référence est présentée dans l'annexe \ref{an:ref_int_mdct}. Elle permettra de vérifier les résultats des implémentations optimisées en \emph{fixed point}. Tous les calculs ne sont pas fait en algorithmique entière : la fonction fait les mêmes calculs que la fonction de référence en algorithmique flottante (uniquement en \emph{double} cette fois garder le plus de précision possible) et cast le résultat final dans un integer de 32 bits qui correspond à une notation Qx.15 signée.
+
+
+
 
 
     \subsection{Fenêtre utilisée (autres paramètres ?)}
@@ -303,8 +368,6 @@
     %     \item FFT
     %     \item post-twiddle -> 512
     % \end{itemize}
-    \subsection{Algorithme de référence}
-    % implémentation simple (en algo flottante), permet de valider les données des algos développés par la suite et d'en déterminer la précision
 
 
     \section{Optimisations algorithmiques}
@@ -353,6 +416,8 @@
     % Test de performance : il faut qu'à la fin l'implementation fixed point soit au moins aussi rapide que floating point
 
 
+
+    % \subsection{Code DSP related}
 
     \section{Optimisations à l'architecture ARM}
     \subsection{Spécificités de l'architecture ARMv8}
@@ -406,20 +471,96 @@
 
     % L'impact de la window function : exemple avec un sinus : les composantes fréquentielles du sinus ressortent beaucoup mieux.
 
+    % +difficultés au niveau des performances pas bonnes jusqu'à la fin
+
     \subsection{Perte de précision}
     % Comparaison avec l'algorithme de référence
     % Annexe : algo de référence, test de comparaison, résultats avec des données aléatoires et avec un sinus simple
 
     \newpage
+    \section{Améliorations possibles}
+    % Améliorations encore possible : faire les premières opérations de prétwiddling en Q15 8 par 8 avant de splitter, mêler les facteurs de la fenêtre aux facteurs de twiddling
+
+
+    % DIFFICULTES
+    % - calculs en Qx.x
+    % - implémentation avec Ne10 car format de sortie, headroom et autres infos utiles pas documentées
+
+    \newpage
     \section*{Conclusion}
     \addcontentsline{toc}{section}{\protect\numberline{}Conclusion}
-    % Améliorations encore possible : faire les premières opérations de prétwiddling en Q15 8 par 8 avant de splitter, mêler les facteurs de la fenêtre aux facteurs de twiddling
 
     \bibliography{biblio} 
     \bibliographystyle{ieeetr.bst}
     \addcontentsline{toc}{section}{\protect\numberline{}Références}
-
-    attention référer la figure dans le texte
-    demain et ap main 21h45 jeudi plus tôt 19h30
     
+    \newpage
+    \section*{Annexes}
+    \begin{appendix}
+        \section{Valeurs constantes utilisées dans le code}
+        \label{an:mdct_const}
+        \begin{lstlisting}
+// Sampling frequency: 48kHz
+#define FS                  48000
+
+// Window length and derived constants
+#define MDCT_WINDON_LEN     1024
+#define MDCT_M              (MDCT_WINDON_LEN>>1)    // spectrum size
+#define MDCT_M2             (MDCT_WINDON_LEN>>2)    // fft size
+#define MDCT_M4             (MDCT_WINDON_LEN>>3)
+#define MDCT_M32            (3*(MDCT_WINDON_LEN>>2))
+#define MDCT_M52            (5*(MDCT_WINDON_LEN>>2))
+        \end{lstlisting}
+
+
+
+        \section{Implémentation de référence de la MDCT en algorithmique flottante}
+        \label{an:ref_float_mdct}
+        \begin{lstlisting}
+template<typename FLOAT>
+void ref_float_mdct(FLOAT *time_signal, FLOAT *spectrum)
+{
+    FLOAT scale = 2.0 / sqrt(MDCT_WINDON_LEN);
+    FLOAT factor1 = 2.0 * M_PI / static_cast<FLOAT>(MDCT_WINDON_LEN);
+    FLOAT factor2 = 0.5 + static_cast<FLOAT>(MDCT_M2);
+    for (int k = 0; k < MDCT_M; ++k)
+    {
+        FLOAT result = 0.0;
+        FLOAT factor3 = (k + 0.5) * factor1;
+        for (int n = 0; n < MDCT_WINDON_LEN; ++n)
+        {
+            result += time_signal[n] * cos((static_cast<FLOAT>(n) + factor2) * factor3);
+        }
+        spectrum[k] = scale * result;
+    }
+}
+        \end{lstlisting}
+
+
+
+        \section{Implémentation de référence de la MDCT en algorithmique entière}
+        \label{an:ref_int_mdct}
+        \begin{lstlisting}
+void ref_int_mdct(int16_t *time_signal, int32_t *spectrum)
+{
+    double scale = sqrt(MDCT_WINDON_LEN) / 2;
+    double factor1 = 2.0 * M_PI / MDCT_WINDON_LEN;
+    double factor2 = 0.5 + MDCT_M2;
+    for (int k = 0; k < MDCT_M; ++k)
+    {
+        double result = 0.0;
+        double factor3 = (k + 0.5) * factor1;
+        for (int n = 0; n < MDCT_WINDON_LEN; ++n)
+        {
+            result += time_signal[n] * cos((n + factor2) * factor3);
+        }
+        assert(round(result*scale) == static_cast<int32_t>(round(result*scale)));
+        spectrum[k] = static_cast<int32_t>(round(result/scale));
+    }
+}
+        \end{lstlisting}
+
+    
+    \end{appendix}
 \end{document}
+
