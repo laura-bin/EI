@@ -299,6 +299,7 @@
     \end{itemize}
 
 
+    \newpage
     \section{Le codec AAC}
     \label{sec:AAC}
     \subsection{Fonctionnement de l'encodeur AAC}
@@ -329,12 +330,12 @@
 
 
     \newpage
-    \section{Développement de la MDCT}
+    \section{Algorithmes MDCT de référence}
     \subsection{Description mathématique}
     \label{sec:desc-math}
     \paragraph{}
     La transformation effectuée par la MDCT est donnée par l'équation suivante\cite{wiki:MDCT} :
-    $$X_k = \sum_{n=0}^{2N-1} x_n \cos \left[ \frac{\pi}{N} \left( N + \frac{1}{2} + \frac{N}{2} \right) \left( k + \frac{1}{2} \right) \right]$$
+    $$X_k = \frac{2}{\sqrt{2N}} \sum_{n=0}^{2N-1} x_n \cos \left[ \frac{\pi}{N} \left( N + \frac{1}{2} + \frac{N}{2} \right) \left( k + \frac{1}{2} \right) \right]$$
     \begin{description}
         \item[$X_k$] avec $k \in [0, N[$ pour une fenêtre d'entrée de 2N échantillons
         \item[$x_n$] avec $n \in [0, 2N[$ : la fenêtre d'entrée
@@ -347,7 +348,7 @@
     \paragraph{}
     La section suivante présente deux implémentations simples de cette formule. Ces implémentations ne pourraient pas être utilisées sans avoir été optimisées car elles seraient beaucoup trop lentes pour un codec qui doit tenir le temps réel. La complexité d'une implémentation de cette formule est de $O(N^2)$ opérations (où N est la taille de la fenêtre d'entrée). Cette complexité peut être ramenée à $O(N \log N)$ opérations par une factorisation récursive. La complexité peut également être diminuée en se basant sur une autre transformation, e.g. une DFT (\emph{Discrete Fourier Transorm}) ou une autre DCT (\emph{Discrete Cosine Transform}) : la complexité sera alors de $O(N)$ opérations de pré et post processing en plus de la complexité de la DFT ou de la DCT choisie\cite{wiki:MDCT}. C'est cette dernière option qui a été retenue pour ce travail.
 
-    \subsection{Algorithmes de référence}
+    \subsection{Algorithmes développé et utilisation}
     \paragraph{}
     La formule mathématique de la MDCT donnée à la section \ref{sec:desc-math} a été implémentée très simplement en algorithmique flottante avec la possibilité d'obtenir le spectre de fréquences codés en \emph{float}, \emph{double} ou \emph{int32} depuis une fenêtre d'entrée en \emph{int16}. L'objectif de cet implémentation est de pouvoir vérifier les données des implémentations optimisées de la MDCT et de mesurer leur précision.
 
@@ -357,21 +358,24 @@
     \paragraph{}
     La seconde fonction de référence est présentée dans l'annexe \ref{an:ref_int_mdct}. Elle permettra de vérifier les résultats des implémentations optimisées en \emph{fixed point}. Tous les calculs ne sont pas fait en algorithmique entière : la fonction fait les mêmes calculs que la fonction de référence en algorithmique flottante (uniquement en \emph{double} cette fois garder le plus de précision possible) et cast le résultat final dans un integer de 32 bits qui correspond à une notation Qx.15 signée.
 
+    \subsection{Validation}
+
+    \paragraph{}% TODO
+    Validation avec un code d'exemple qui correspond à un signal sinusoidal (single tone) -> annexes : génération d'un signal single tone + code qui sort les données.
+
+    \paragraph{}% TODO
+    Présentation des résultats sous forme de données brutes ou de graphique.
+
+    \paragraph{}% TODO
+    Explication de la lecture des résultats, calcul des bandes de fréquences représentées. Mise en évidence qu'on a bien une seule composante fréquentielle comme attendu pour un signal single tone
+
+    \paragraph{}% TODO
+    + les résultats auraient été plus précis avec la fonction de fenêtre -> voir améliorations possibles
 
 
-
-
-    \subsection{Fenêtre utilisée (autres paramètres ?)}
-    % \begin{itemize}
-    %     \item fenêtre de 1024
-    %     \item pre-twiddle -> 256
-    %     \item FFT
-    %     \item post-twiddle -> 512
-    % \end{itemize}
-
-
-    \section{Optimisations algorithmiques}
-    \subsection{Appel à un algorithme de FFT (nombres complexes)}
+    \newpage
+    \section{Algorithme MDCT basé sur la FFT}
+    \subsection{Optimisations attentues}
     % algo qui vient du code d'exemple dsprelated, basé sur la FFT
 %    \url{https://infoscience.epfl.ch/record/59946}
 %    \url{https://www.cis.rit.edu/class/simg716/Gauss_History_FFT.pdf}
@@ -384,18 +388,59 @@
     % Annexes : code de la MDCT, test et procédure d'installation de la librairie FFTW
 
     % au code de base, il faut aussi ajouter la fonction de fenêtre (MLT) qui n'était pas présente.
+    \paragraph{}
+    Choix de l'optimisation de la MDCT basé sur sur une DCT : la FFT -> complexité de O (N log N) (N taille de la fenetre) + O(N) opérations de pré et de post processing.
+
+    \paragraph{}
+    But : utiliser une FFT déjà optimisée pour n'avoir à optimiser "que" les opérations de pré et de post processing
+    Exemple trouvé sur le site DSP related -> Annexe ? Citation ?
+
+    \subsection{Implémentation de la MDCT basée sur la FFT de la librairie FFTW3}
+    \paragraph{}
+    Code développé à partir de cet exemple en annexe. Il est basé sur la librairie FFTW3 qu'on ne peut pas garder car ne permet pas de travailler en integer -> sera amené à être retravaillé.
+
+    \paragraph{}
+    Explications des paramètres du code :
+    \begin{itemize}
+        \item fenêtre de 1024
+        \item pre-twiddle -> 256
+        \item FFT => FFT avec une fenêtre d'entrée réduite et donc une complexité réduite
+        \item post-twiddle -> 512
+    \end{itemize}
+
+    % \subsection{Réduction de la fenêtre d'entrée}
+    % (pre et post processing/twiddles pour faire moins de FFT) -> réduction de la fenêtre de la FFT
+
+    \subsection{Validation}
+    \paragraph{}
+    Validé avec un single tone signal + l'algo de référence.
+
+    \paragraph{}
+    Code d'exemple qui teste l'algo de référence et l'algo FFTW3 avec les mêmes données d'entrée pour comparaison. (on fait la différence pour la précision ? ce n'est peut être pas pertinent de la faire déjà)
+
+    \paragraph{}
+    Présentation des résultats sous forme de données brutes ou de graphiques.
 
 
-    \subsection{Réduction de la fenêtre d'entrée}
-        % (pre et post processing/twiddles pour faire moins de FFT) -> réduction de la fenêtre de la FFT
+    \newpage
+    \section{Utilisation de la librairie Ne10}
+    \subsection{Choix de la librairie}
+    \paragraph{}
+    Changement obligatoire car la FFT de FFTW3 est uniquement dispo en algo flottante et on veut une implémentation en fixed point.
+    % Le code de dsp related faisait appel à la librairie FFTW mais elle ne propose pas de FFT en fixed point => Ne10 qui propose une FFT fixed point optimisée pour ARM (avec ou sans instructions Neon)
+
+    \paragraph{}
+    Librairie optimisée pour l'architecture ARMv8. Mais a aussi des implémentation plain C (intéressant car permet de mesurer la diff de perf entre les 2).
+
+    \subsection{Implémentation de la MDCT basée sur la FFT Ne10 en arithmétique \emph{floating point}}
+    \paragraph{}
+    Explications de l'algo en annexe
+
+
+    \section{Algorithme MDCT en arithmétique fixed point}
     \subsection{Arithmétique fixed point}
-    % \subsection{Arithmétique fixed point}
-    % Le code de DSP related est en floating point -> passage en fixed point : opérations sur des entiers plus performantes + meilleure intégration (éviter le passage artificiel de l'entier au flottant et inversément)
-
-
-    % à ce niveau, résultats pas intéressants car + d'opérations qu'en flottant et ARM a des fonctions d'algo flottante
-    %     \paragraph{Rem} trivial en float (reprendre le code de dsp) mais pour l'implémentation en arithmétique entière, attention à mettre dans les bonnes ranges
-
+    \paragraph{}
+    trivial en float (reprendre le code de dsp) mais pour l'implémentation en arithmétique entière, attention à mettre dans les bonnes ranges
     % \paragraph{Points d'attention}
     % \begin{itemize}
     %     \item les dépassements : 16 bits + 32 bits -> potentiellement 33 bits, 16*16 -> 32, etc. à voir en fonction des valeurs réelles
@@ -403,8 +448,10 @@
     % \end{itemize}
 
     % Attention à la manière d'écrire le code. Ici on n'a pas besoin de faire attention à ce que le compilateur puisse faire du inline (ex remplacer l'appel à z = add(a, d) par z = a+d pour économiser le call) car l'algo est déjà très optimisé -> pas d'optimisations de compilateur possible et en plus on a une grosse routine -> économiser un call n'est pas forcément intéressant.
-    % Pas trop de C++ parce que faire un objet avec plein d'accessors, ce n'est pas très optimisé (on se retrouve avec un gros objet avec plein de variables). Derrière on fait de l'assembleur => il y a un trop grand écart. D'habitude les codesc audio sotn codés en C mais c'est aussi peut-être juste pour une raison historique.
 
+    \subsection{Améliorations attendues}
+    \paragraph{}
+    Le code de DSP related est en floating point -> passage en fixed point : opérations sur des entiers plus performantes + meilleure intégration (éviter le passage artificiel de l'entier au flottant et inversement)
     % Sur le format Qx.y :
     % https://www.pathpartnertech.com/representing-decimal-data-in-q-format/
     % https://www.allaboutcircuits.com/technical-articles/fixed-point-representation-the-q-format-and-addition-examples/
@@ -416,17 +463,40 @@
     % Test de performance : il faut qu'à la fin l'implementation fixed point soit au moins aussi rapide que floating point
 
 
+    \subsection{Implémentation de la MDCT basée sur la FFT Ne10 en arithmétique \emph{fixed point}}
+    \paragraph{}
+    Explication du code en annexe en accord avec les explications de la première subsection sur le fixed point
 
-    % \subsection{Code DSP related}
+    \subsection{Performances}
+    \paragraph{}
+    Explication du code en annexe qui permet de mesurer les performance (avec code Timer)
+
+    \paragraph{}
+    Démonstration des résultats
+
+    \paragraph{}
+    Explication des résultats pas attendus : à ce niveau, résultats pas intéressants car + d'opérations qu'en flottant et ARM a des fonctions d'algo flottante
+
+    \paragraph{}
+    Pour soutenir cette hypothèse :  Test de la librairie et des performances des différentes FFT : performances équivalentes en 32 bits (floating ou fixed) et deux fois plus rapides en 16 bits
+
+
+
+
+    \subsection{Arithmétique fixed point}
+ 
+
+    % Pas trop de C++ parce que faire un objet avec plein d'accessors, ce n'est pas très optimisé (on se retrouve avec un gros objet avec plein de variables). Derrière on fait de l'assembleur => il y a un trop grand écart. D'habitude les codesc audio sotn codés en C mais c'est aussi peut-être juste pour une raison historique.
+
+
 
     \section{Optimisations à l'architecture ARM}
     \subsection{Spécificités de l'architecture ARMv8}
-    \subsection{Utilisation de la FFT de la librairie Ne10}
+    \paragraph{}
+    Globalement reprend les tutos ARM
     % FFT déjà optimisées pour Neon mais limitations sur ce qui entre et ce qui sort
     % \subsubsection{FFT de la librairie Ne10}
-    % Le code de dsp related faisait appel à la librairie FFTW mais elle ne propose pas de FFT en fixed point => Ne10 qui propose une FFT fixed point optimisée pour ARM (avec ou sans instructions Neon)
 
-    % Test de la librairie et des performances des différentes FFT : performances équivalentes en 32 bits (floating ou fixed) et deux fois plus rapides en 16 bits
     \subsection{Utilisation des fonctions Neon SIMD (intrinsic)}
     % \begin{itemize}
     %     \item voir la doc de neon \url{https://developer.arm.com/documentation/dht0002/a/Introducing-NEON/What-is-SIMD-/ARM-SIMD-instructions}
@@ -434,15 +504,17 @@
     %     \item utilisation des instructions intrinsèques de GCC \url{https://fr.wikipedia.org/wiki/Fonction_intrins%C3%A8que}
     % \end{itemize}
 
-    % Les opérations SIMD permettent de faire plusieurs opérations en uen fois où l'algo normal n'en fait qu'une à la fois. L'algo SIMD permet de faire plusieurs modifications à la fois -> il faut ranger les données de manière à pouvoir l'appliquer facilement (fonction fenêtre -> tri des données ? )
+    \paragraph{}
+    Les opérations SIMD permettent de faire plusieurs opérations en une fois où l'algo normal n'en fait qu'une à la fois. L'algo SIMD permet de faire plusieurs modifications à la fois -> il faut ranger les données de manière à pouvoir l'appliquer facilement (fonction fenêtre -> tri des données ? )
 
-    % Plus les données sur lesquelles on travaille sont petites, plus on peut faire d'opérations en parallèle -> il faut voir si la perte de précision est ok. -> mettre une représentation graphique, c'est beaucoup plus simple à comprendre. D'où l'intérêt de passer à du 16 bits, plutôt que de rester en 32 bits et il faut absolument éviter le 64 bits (aucun intérêt).
+
+    \paragraph{}
+    Plus les données sur lesquelles on travaille sont petites, plus on peut faire d'opérations en parallèle -> il faut voir si la perte de précision est ok. -> mettre une représentation graphique, c'est beaucoup plus simple à comprendre. D'où l'intérêt de passer à du 16 bits, plutôt que de rester en 32 bits et il faut absolument éviter le 64 bits (aucun intérêt).
 
 
     \section{Résultats}
     \subsection{Protocole de validation}
     %Validation aux différentes étapes des données : validation de la FFT, etc
-
 
     % \begin{itemize}
     %     \item sortie des données et générations de graphiques avec gnuplot
@@ -479,6 +551,10 @@
 
     \newpage
     \section{Améliorations possibles}
+    \begin{itemize}
+        \item Fonction fenêtre intégrée aux opérations de pre twiddling
+        \item Quantification intégrée au post twiddling
+    \end{itemize}
     % Améliorations encore possible : faire les premières opérations de prétwiddling en Q15 8 par 8 avant de splitter, mêler les facteurs de la fenêtre aux facteurs de twiddling
 
 
@@ -489,6 +565,7 @@
     \newpage
     \section*{Conclusion}
     \addcontentsline{toc}{section}{\protect\numberline{}Conclusion}
+    % Résultats obtenus + améliorations possibles
 
     \bibliography{biblio} 
     \bibliographystyle{ieeetr.bst}
@@ -499,6 +576,8 @@
     \begin{appendix}
         \section{Valeurs constantes utilisées dans le code}
         \label{an:mdct_const}
+        \paragraph{}
+        % TODO expliquer ce que fait le code
         \begin{lstlisting}
 // Sampling frequency: 48kHz
 #define FS                  48000
@@ -563,4 +642,3 @@ void ref_int_mdct(int16_t *time_signal, int32_t *spectrum)
     
     \end{appendix}
 \end{document}
-
