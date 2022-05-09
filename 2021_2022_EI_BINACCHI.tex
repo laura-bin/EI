@@ -39,33 +39,7 @@
 \usepackage{appendix}       % annexes
 
 % code
-\usepackage{xcolor}
 \usepackage{listings}
-
-\definecolor{mGreen}{rgb}{0,0.6,0}
-\definecolor{mGray}{rgb}{0.5,0.5,0.5}
-\definecolor{mPurple}{rgb}{0.58,0,0.82}
-\definecolor{backgroundColour}{rgb}{0.95,0.95,0.92}
-
-\lstdefinestyle{CStyle}{
-    backgroundcolor=\color{backgroundColour},   
-    commentstyle=\color{mGreen},
-    keywordstyle=\color{magenta},
-    numberstyle=\tiny\color{mGray},
-    stringstyle=\color{mPurple},
-    basicstyle=\footnotesize,
-    breakatwhitespace=false,         
-    breaklines=true,                 
-    captionpos=b,                    
-    keepspaces=true,                 
-    numbers=left,                    
-    numbersep=5pt,                  
-    showspaces=false,                
-    showstringspaces=false,
-    showtabs=false,                  
-    tabsize=2,
-    language=C
-}
 
 \title{Développement d'un codec audio AAC : optimisation de l'algorithme MDCT pour une architecture ARM}
 \date{2020 -- 2021}
@@ -121,6 +95,9 @@
     \end{itemize}
 
     \paragraph{}
+    % sur base du cahier des charges, il a été décidé avec les personnes qui ont supervisé mon travail de me consacrer à l'optimisation du bloc MDCT
+
+    \paragraph{}
     %Mon travail s'inscrit dans la continuité de celui de Wafaa Heddari, stagiaire qui m'a précédée au sein du département hardware-firmware d'EVS pour y travailler sur le codec AAC. Après une étude du codec AAC et des différents blocs qui le composent, son mémoire dégage des pistes d'amélioration des performances du codec AAC : like Removal of block switching, Fast MDCT, and Optimized TNS. And then test their implementation on C Code to compare the compilation speed between the original Codec and the optimized one\cite{Wafaa}.
 
     %L'amélioration des performances est nécessaire par la qualité grandissante des données audio et video -> de plus en plus grandes, et le besoin de maintenir plusieurs flux en tant réel dans le broadcast
@@ -133,6 +110,9 @@
 
     % But : garder la max de performance en perdant le moins en qualité
 
+
+    %\paragraph{}
+    %Si les sections de présentation des différentes itérations de la MDCT ont déjà permis de mettre en avant certains résultats en terme de performance ou de précision, c'est la section suivante qui présentera la protocole de valitation ainsi que les résultats obtenus pour la version finale de l'algorithme MDCT en \emph{integer}.
 
     \newpage
     \section{EVS Broadcast Equipment}
@@ -330,6 +310,20 @@
 
 
     \newpage
+    \section{Environnement de développement}
+    \paragraph{}
+    Platformes : passage de Intel à ARM nécessaire à cause de la lib Ne10 et impossibilité de maintenir une version de référence Intel
+
+    \paragraph{}
+    Développement remote sur RPI + photo raspberry
+
+    \paragraph{}
+    CentOS7 parce que utilisé sur tout le matériel linux EVS
+
+    \paragraph{}
+    Compilation Cmake + exemple de la création d'un exécutable avec paramètres
+
+    \newpage
     \section{Algorithmes MDCT de référence}
     \subsection{Description mathématique}
     \label{sec:desc-math}
@@ -361,13 +355,19 @@
     \subsection{Validation}
 
     \paragraph{}% TODO
-    Validation avec un code d'exemple qui correspond à un signal sinusoidal (single tone) -> annexes : génération d'un signal single tone + code qui sort les données.
+    Validation avec un code d'exemple qui correspond à un signal sinusoidal (single tone) -> annexes : génération d'un signal single tone \ref{an:sin_wave_int}+ code qui sort les données.
 
     \paragraph{}% TODO
     Présentation des résultats sous forme de données brutes ou de graphique.
 
     \paragraph{}% TODO
     Explication de la lecture des résultats, calcul des bandes de fréquences représentées. Mise en évidence qu'on a bien une seule composante fréquentielle comme attendu pour un signal single tone
+
+    % \begin{itemize}
+    %     \item sortie des données et générations de graphiques avec gnuplot
+    %     \item résolution en fréquence pour une fenetre de 1024 samples pour un signal échantillonné à 48kHz : sur les graphiques $\frac{48000}{1024} = \SI{46.875}{\hertz}$ 1.3333... ms -> f = 1 / 1.33333 = 750 Hz OU res = fs / samples -> sur les graphiques on a des raies de fréquence de 750 Hz. Pour une fenêtre de 1024 = Hz
+    % \end{itemize}
+    % Graphiques sur sinusoide simple : augmenter la fréquence (i * qch pour déplacer la bande de fréquence), 
 
     \paragraph{}% TODO
     + les résultats auraient été plus précis avec la fonction de fenêtre -> voir améliorations possibles
@@ -432,12 +432,19 @@
     \paragraph{}
     Librairie optimisée pour l'architecture ARMv8. Mais a aussi des implémentation plain C (intéressant car permet de mesurer la diff de perf entre les 2).
 
+    \paragraph{}
+    Mesure de la différence de performance entre différentes FFT : code en annexe
+
+    \paragraph{}
+
+
     \subsection{Implémentation de la MDCT basée sur la FFT Ne10 en arithmétique \emph{floating point}}
     \paragraph{}
     Explications de l'algo en annexe
 
 
     \section{Algorithme MDCT en arithmétique fixed point}
+    \label{sec:fixed_point}
     \subsection{Arithmétique fixed point}
     \paragraph{}
     trivial en float (reprendre le code de dsp) mais pour l'implémentation en arithmétique entière, attention à mettre dans les bonnes ranges
@@ -512,25 +519,22 @@
     Plus les données sur lesquelles on travaille sont petites, plus on peut faire d'opérations en parallèle -> il faut voir si la perte de précision est ok. -> mettre une représentation graphique, c'est beaucoup plus simple à comprendre. D'où l'intérêt de passer à du 16 bits, plutôt que de rester en 32 bits et il faut absolument éviter le 64 bits (aucun intérêt).
 
 
+    \newpage
     \section{Résultats}
-    \subsection{Protocole de validation}
-    %Validation aux différentes étapes des données : validation de la FFT, etc
+    \subsection{Validation de l'algorithme}
+    \paragraph{}
+    Les sections précédentes ont montré que la les différentes itérations de la MDCT développées ont été validées à chaque étape. Cette validation consiste essentiellement en une vérification manuelle des données de sortie de la MDCT : avec un signal sinusoïdal connu en entrée, il est facile de vérifier que l'analyse fréquentielle ne contient bien qu'une seule composante fréquentielle, que la vérification se fasse en lisant les données brutes à la sortie de l'algorithme ou par une analyse graphique de celle-ci.
 
-    % \begin{itemize}
-    %     \item sortie des données et générations de graphiques avec gnuplot
-    %     \item résolution en fréquence pour une fenetre de 1024 samples pour un signal échantillonné à 48kHz : sur les graphiques $\frac{48000}{1024} = \SI{46.875}{\hertz}$ 1.3333... ms -> f = 1 / 1.33333 = 750 Hz OU res = fs / samples -> sur les graphiques on a des raies de fréquence de 750 Hz. Pour une fenêtre de 1024 = Hz
-    % \end{itemize}
-    % Graphiques sur sinusoide simple : augmenter la fréquence (i * qch pour déplacer la bande de fréquence), 
+    \paragraph{}
+    La MDCT a également été validée par comparaison de ses données de sortie avec des algorithmes de référence : les implémentations de la formule mathématique de la MDCT présentée dans les annexes \ref{an:ref_float_mdct} pour l'implémentation en arithmétique \emph{floating point} et \ref{an:ref_int_mdct} en \emph{fixed point}.
+
+    \paragraph{}
+    Ces tests auraient pu être améliorés en automatisant la vérification, e.g. en générant une fois les données de référence attendues pour permettre le développement d'un code de test qui compare automatiquement les données de références avec les données à vérifier. En effet, devoir relancer les tests et vérifier les données à chaque fois qu'une modification est faite dans le code peut s'avérer laborieux et mettre en place des tests automatiques aurait permis de gagner un temps précieux.
+
 
     %     Réaliser une fonction qui calcule la somme des cosinus (formule de wikipedia) pour chaque samples (pas du tout optimisée donc super lente). Pour la calcul en integer, on peut autoriser un manque de précision de max 1 LSB.
 
 
-    % \begin{itemize}
-    %     \item Voir les normes de test et règles d'acceptance des DCT et IDCT
-    % \end{itemize}
-    
-    % \paragraph{}
-    % Quand est-ce que la MDCT est assez optimisée ? Ici pas de critère de fin type 50 5 ou 2,5 \% plus rapide car pas de comparaison possible avec ce qui est actuellement en prod.
 
     % \paragraph{}
     % Pour les codecs c'est important de garder l'implémentation de référence mais à un moment on ne peut plus tester sur l'architecture intel. En pratique on utilise des pointeurs de fonction à déréférencer pour appeler l'implémentation voulue. En fonction du CPU ID, on sait quelles instructions on utilise. Au runtime, on choisit une ou l'autre implémentation en fonction de l'architecture, e.g. certains ARM n'ont pas les routines NEON
@@ -538,6 +542,18 @@
 
 
     \subsection{Gain en performance}
+    \paragraph{}
+    La mesure des performances a pour but de valider le bloc MDCT avant de l'intégrer au codec AAC. Le cahier des charges du stage ne contenait pas d'objectif à atteindre en terme de performance, ni absolu (e.g. un temps d'exécution maximal à respecter dans des conditions données), ni relatif (e.g. gagner un certain pourcentage de performances par rapport à une MDCT de référence).
+
+    \paragraph{}
+    L'objectif en terme de temps d'exécution n'étant pas fini, il a été décidé de tenter de gagner le maximum de performances sur le temps de mon stage. Le critère de réussite est dès lors d'obtenir des performances au moins équivalentes pour la version finale de la MDCT que pour ses versions moins optimisées. Le temps d'exécution de la MDCT \emph{fixed point} doit évidemment être inférieur au temps d'exécution de l'algorithme de référence puisque celui-ci ne contient aucune optimisation. Ce temps peut toutefois être équivalent au temps d'exécution de la MDCT \emph{floating point} : à performances équivalentes, l'algorithme \emph{fixed point} rendra tout de même l'encodeur AAC plus performant en économisant les conversions \emph{integer}-\emph{floating point} à l'entrée et à la sortie du bloc MDCT. En effet, les données sont reçues par la MDCT en \emph{integer} et devront être traitées en \emph{integer} par le bloc de quantification à la sortie de la MDCT.
+    
+    \paragraph{}
+    Le temps d'exécution de la MDCT a été mesuré sur base du code de l'annexe \ref{an:run_mdcts}, plusieurs exécutables sont générés, chacun d'eux permettant d'exécuter l'algorithme MDCT un certain nombre de fois (donné en paramètre à l'exécution). La fréquence du signal sinusoïdal utilisé en entrée de la MDCT peut également être donnée en paramètre mais elle ne varie pas entre les différentes exécutions afin de ne pas introduire d'aléatoire dans les mesures.
+
+    \paragraph{}
+    L'annexe \ref{an:cmake_run_mdcts} En fonction du paramètre défini à la création des exécutables, le code exécuté sera celui de la MDCT de référence en \emph{double floating point} (paramètre \texttt{-DREF}) ou de la MDCT basée sur la FFT de la librairie Ne10 en \emph{floating point} (paramètre \texttt{-DFLOATING\_POINT}) ou en \emph{fixed point} en \emph{plain C} (paramètre \texttt{-DFLOATING\_POINT}) 
+ 
     % Comparaison avec un implémentation de référence plain c mais aussi à titre indicatif avec l'algorithme de référence car le plain c est déjà optimisé
 
 
@@ -554,6 +570,9 @@
     \begin{itemize}
         \item Fonction fenêtre intégrée aux opérations de pre twiddling
         \item Quantification intégrée au post twiddling
+        \item tests automatisés
+        \item code en C
+        \item tests de performances plus poussés avec comparaison avec un algo existant
     \end{itemize}
     % Améliorations encore possible : faire les premières opérations de prétwiddling en Q15 8 par 8 avant de splitter, mêler les facteurs de la fenêtre aux facteurs de twiddling
 
@@ -565,6 +584,8 @@
     \newpage
     \section*{Conclusion}
     \addcontentsline{toc}{section}{\protect\numberline{}Conclusion}
+    \paragraph{}
+    Sur base du cahier des charges de début de stage, il a été décidé que mon travail s
     % Résultats obtenus + améliorations possibles
 
     \bibliography{biblio} 
@@ -639,6 +660,167 @@ void ref_int_mdct(int16_t *time_signal, int32_t *spectrum)
 }
         \end{lstlisting}
 
-    
+
+
+        \section{Code de génération d'un signal sinusoïdal}
+        \label{an:sin_wave_int}
+        \begin{lstlisting}
+template<typename FLOAT>
+void sin_float(FLOAT *out, int n_samples, double amplitude,
+    double frequency, double phase_shift, int sampling_frequency)
+{
+    FLOAT omega = 2.0 * M_PI * frequency / static_cast<FLOAT>(sampling_frequency);
+    for (int i = 0; i < n_samples; ++i)
+    {
+        out[i] = amplitude * sin(static_cast<FLOAT>(i) * omega + phase_shift);
+    }
+}
+        \end{lstlisting}
+
+
+
+        \section{Code de test des performances}
+        \label{an:run_mdcts}
+        \begin{lstlisting}
+#include <iomanip>
+#include <iostream>
+#include <cstring>
+
+#include "args_parser.h"
+#include "mdct_constants.h"
+#include "sin_wave.h"
+#include "Timers.h"
+
+using namespace EvsHwLGPL;
+
+#ifdef FIXED_POINT_C    // fixed point arithmetic
+#include "ne10_fixed_point_mdct_c.h"
+
+#define INPUT_DATA              int16_t
+#define OUTPUT_DATA             int32_t
+#define GENERATE_SIN            sin_int
+#define MDCT                    ne10_fixed_point_mdct_c
+
+#elif FIXED_POINT_NEON  // fixed point arithmetic
+#include "ne10_fixed_point_mdct_neon.h"
+
+#define INPUT_DATA              int16_t
+#define OUTPUT_DATA             int32_t
+#define GENERATE_SIN            sin_int
+#define MDCT                    ne10_fixed_point_mdct_neon
+
+#elif FLOATING_POINT    // floating point arithmetic
+#include "ne10_floating_point_mdct.h"
+
+#define INPUT_DATA              double
+#define OUTPUT_DATA             double
+#define GENERATE_SIN            sin_float
+#define MDCT                    ne10_floating_point_mdct
+
+#else                   // reference algorithm in floating point arithmetic
+#include "reference_mdct.h"
+
+#define INPUT_DATA              double
+#define OUTPUT_DATA             double
+#define GENERATE_SIN            sin_float
+
+#endif
+
+/**
+    * @brief Run the MDCT on a single frame x times
+    * the signal is a single tone configurable via the --sin parameter (200Hz by default)
+    * the number of runs is setted by the --run parameter (1 by default)
+    */
+int main(int argc, char **argv) {
+    // initialize the parameters
+    params p;
+    try
+    {
+        p = parse_args(argc, argv);
+    }
+    catch(const std::runtime_error &err)
+    {
+        std::cerr << err.what() << std::endl;
+        usage();
+        return 1;
+    }
+
+    // generate the time signal
+    INPUT_DATA time_signal[MDCT_WINDON_LEN]__attribute__((aligned(16)));
+    memset(&time_signal, 0, MDCT_WINDON_LEN*sizeof(INPUT_DATA));
+    GENERATE_SIN(time_signal, MDCT_WINDON_LEN, 0.9, p.frequency, 0.0, FS);
+
+    OUTPUT_DATA mdct_spectrum[MDCT_M]__attribute__((aligned(16)));
+    memset(&mdct_spectrum, 0, MDCT_M*sizeof(OUTPUT_DATA));
+
+    // perform the MDCT
+    CTimers timer;
+    int64_t sum = 0;
+    int64_t *runtimes = static_cast<int64_t *>(malloc(p.runs * sizeof(int64_t)));
+
+#ifdef REF
+    for (unsigned i = 0; i < p.runs; ++i) {
+        timer.Start();
+        ref_float_mdct<double>(time_signal, mdct_spectrum);
+        timer.Stop();
+        runtimes[i] = timer.GetTimeElapsed();
+        sum += timer.GetTimeElapsed();
+    }
+#else
+    MDCT ne10_mdct;
+    for (unsigned i = 0; i < p.runs; ++i) {
+        timer.Start();
+        ne10_mdct.mdct(time_signal, mdct_spectrum);
+        timer.Stop();
+        runtimes[i] = timer.GetTimeElapsed();
+        sum += timer.GetTimeElapsed();
+    }
+#endif
+
+    // compute the average
+    double avg = static_cast<double>(sum) / static_cast<double>(p.runs);
+    std::cout << "average run time: " << avg << " ns" << std::endl;
+
+    return 0;
+}
+        \end{lstlisting}
+
+
+
+        \section{CMake file générant les exécutables de test performance}
+        \label{an:cmake_run_mdcts}
+        \begin{lstlisting}
+# Run the MDCT x times (single frame, floating point)
+add_executable(run_mdct_float test/performance/run_mdct.cpp
+    src/args_parser src/sin_wave.cpp src/Timers.cpp
+    src/ne10_floating_point_mdct.cpp)
+target_compile_definitions(run_mdct_float PUBLIC -DFLOATING_POINT)
+target_link_libraries(run_mdct_float NE10)
+
+# Run the MDCT x times (single frame, fixed point arithmetic, plain C implementation)
+add_executable(run_mdct_fixed_c test/performance/run_mdct.cpp
+    src/args_parser src/sin_wave.cpp src/Timers.cpp
+    src/ne10_fixed_point_mdct_c.cpp src/ne10_fixed_point_mdct_neon.cpp)
+target_compile_definitions(run_mdct_fixed_c PUBLIC -DFIXED_POINT_C)
+target_link_libraries(run_mdct_fixed_c NE10)
+
+# Run the MDCT x times (single frame, fixed point arithmetic, neon implementation)
+add_executable(run_mdct_fixed_neon test/performance/run_mdct.cpp
+    src/args_parser src/sin_wave.cpp src/Timers.cpp
+    src/ne10_fixed_point_mdct_c.cpp src/ne10_fixed_point_mdct_neon.cpp)
+target_compile_definitions(run_mdct_fixed_neon PUBLIC -DFIXED_POINT_NEON)
+target_link_libraries(run_mdct_fixed_neon NE10)
+
+# Run the MDCT x times (single frame, reference algorithm)
+add_executable(run_mdct_ref test/performance/run_mdct.cpp
+    src/args_parser src/sin_wave.cpp src/Timers.cpp
+    src/reference_mdct.cpp)
+target_compile_definitions(run_mdct_ref PUBLIC -DREF)
+target_link_libraries(run_mdct_ref NE10)
+        \end{lstlisting}
+
+
+
+
     \end{appendix}
 \end{document}
