@@ -321,7 +321,7 @@
     CentOS7 parce que utilisé sur tout le matériel linux EVS
 
     \paragraph{}
-    Compilation Cmake + exemple de la création d'un exécutable avec paramètres
+    Compilation Cmake + exemple de la création d'un exécutable avec paramètres : reproduire le cmake du projet aac et expliquer qu'il appelle celui de Ne10 + celui du projet audio encoding qui sera reproduits dans les sections suivantes
 
     \newpage
     \section{Algorithmes MDCT de référence}
@@ -342,7 +342,7 @@
     \paragraph{}
     La section suivante présente deux implémentations simples de cette formule. Ces implémentations ne pourraient pas être utilisées sans avoir été optimisées car elles seraient beaucoup trop lentes pour un codec qui doit tenir le temps réel. La complexité d'une implémentation de cette formule est de $O(N^2)$ opérations (où N est la taille de la fenêtre d'entrée). Cette complexité peut être ramenée à $O(N \log N)$ opérations par une factorisation récursive. La complexité peut également être diminuée en se basant sur une autre transformation, e.g. une DFT (\emph{Discrete Fourier Transorm}) ou une autre DCT (\emph{Discrete Cosine Transform}) : la complexité sera alors de $O(N)$ opérations de pré et post processing en plus de la complexité de la DFT ou de la DCT choisie\cite{wiki:MDCT}. C'est cette dernière option qui a été retenue pour ce travail.
 
-    \subsection{Algorithmes développé et utilisation}
+    \subsection{Implémentations des MDCT de référence en algorithmiques \emph{floating point} et \emph{fixed point}}
     \paragraph{}
     La formule mathématique de la MDCT donnée à la section \ref{sec:desc-math} a été implémentée très simplement en algorithmique flottante avec la possibilité d'obtenir le spectre de fréquences codés en \emph{float}, \emph{double} ou \emph{int32} depuis une fenêtre d'entrée en \emph{int16}. L'objectif de cet implémentation est de pouvoir vérifier les données des implémentations optimisées de la MDCT et de mesurer leur précision.
 
@@ -352,7 +352,7 @@
     \paragraph{}
     La seconde fonction de référence est présentée dans l'annexe \ref{an:ref_int_mdct}. Elle permettra de vérifier les résultats des implémentations optimisées en \emph{fixed point}. Tous les calculs ne sont pas fait en algorithmique entière : la fonction fait les mêmes calculs que la fonction de référence en algorithmique flottante (uniquement en \emph{double} cette fois garder le plus de précision possible) et cast le résultat final dans un integer de 32 bits qui correspond à une notation Qx.15 signée.
 
-    \subsection{Validation}
+    \subsection{Validation des algorithmes de référence}
 
     \paragraph{}% TODO
     Validation avec un code d'exemple qui correspond à un signal sinusoidal (single tone) -> annexes : génération d'un signal single tone \ref{an:sin_wave_int}+ code qui sort les données.
@@ -423,11 +423,70 @@
 
 
     \newpage
-    \section{Utilisation de la librairie Ne10}
+    \section{Intégration de la librairie \emph{Ne10}}
     \subsection{Choix de la librairie}
     \paragraph{}
+    La librairie \emph{FFTW3} utilisée pour l'itération précédente de la MDCT ne propose pas de FFT en algorithmique entière. Le passage à une autre librairie était donc nécessaire et le choix s'est porté sur la librairie \emph{Ne10} qui propose différentes FFT en \emph{fixed point}.
+
+    \paragraph{}
+    Le projet \emph{Ne10} propose toute une série de fonctions mathématiques et physiques de base ainsi que des fonctions de traitement de signal et de traitement d'image. La librairie est spécifiquement développée pour les architectures ARM possédant les opérations SIMD Neon (ARMv7 et ARMv8-A)\cite{Ne10}. Elle propose à la fois des fonctions développées en \emph{plain C} et des fonctions optimisées avec les instructions SIMD Neon.
+
+    \paragraph{}
+    L'utilisation de la librairie \emph{Ne10} est soumise à la licence \emph{3-Clause BSD}, license permissive qui permet un usage commercial des produits intégrant la librairie et qui ne contraint pas à en distribuer le code source\cite{BSD}.
+
+    \subsection{Implémentation de la MDCT basée sur la FFT \emph{Ne10} en arithmétique \emph{floating point}}
+    \paragraph{}
+    La librairie \emph{Ne10} s'installe simplement en suivant les instructions données par la documentation : clone du projet GitHub, run du CMake et build du projet\cite{Ne10}. La librairie ne peut cependant être installée que sur une plateforme Linux, Android ou iOS reposant sur une architecture ARM. À partir de ce moment, il n'est donc plus possible de maintenir une implémentation de référence de la MDCT pour une architecture Intel.
+
+    \paragraph{}
+    \emph{Ne10} propose des algorithmes de FFT \emph{real to complex} et \emph{complex to complex} en \emph{floating point} (32 bits) ou en \emph{integer} (32 bits et 16 bits). L'objectif est évidemment de passer toute la MDCT en \emph{integer} mais pour un premier test de la librairie, l'algorithme de la section précédente a tout d'abord été repris en remplaçant la FFT de \emph{FFTW3} par la fonction \texttt{ne10\_fft\_c2c\_1d\_float32\_neon} de \emph{Ne10} : FFT en \emph{complex to complex} en \emph{float32}, i.e. l'entrée et la sortie de la FFT sont représentées sous forme de tableaux de nombres complexes codés en \emph{float} sur 32 bits.
+
+    \paragraph{}
+    L'annexe \ref{an:mdct_ne10_f32} présente le code de cette implémentation. L'annexe \ref{an:mdct_ne10_f32_header} montre que ce code est construit sur le même modèle que le code utilisant la librairie \emph{FFTW3}. La classe contient la configuration de la FFT et les tableaux contenant les données d'entrée, les données de sortie et les facteurs de twiddling. La classe définit trois fonctions publiques : le constructeur, le destructeur et la fonction MDCT.
+
+    \paragraph{}
+    L'annexe \ref{an:mdct_ne10_f32_constructor} montre l'initialisation de la MDCT dans le constructeur de la classe. Le constructeur initialise les tableau de facteurs de twiddling de le même manière que l'algorithme basé sur la FFT de \emph{FFTW3}. La configuration de la FFT de \emph{Ne10} se fait conformément au code d'exemple donné par la documentation de la librairie\cite{Ne10} avec en paramètre la taille de la FFT qui correspond au quart de la taille de la fenêtre d'entrée.
+
+    \paragraph{}
+    Le destructeur présenté à l'annexe \ref{an:mdct_ne10_f32_destructor} permet de libérer la mémoire allouée pour la FFT en appelant la fonction adéquate de la librairie \emph{Ne10}.
+
+    \paragraph{}
+    La fonction MDCT présentée dans l'annexe \ref{an:mdct_ne10_f32_func}, comme pour l'algorithme précédent :
+    \begin{itemize}
+        \item effectue les opérations de pre-processing ou pre-twiddling : ce sont les mêmes que celle de la MDCT \emph{FFTW3} en arithmétique \emph{floating point} sur 32 bits;
+        \item appelle l'algorithme de FFT : la FFT de \emph{Ne10} prend en paramètres les tableaux contenant les données d'entrée et de sortie, la configuration de la FFT et un \emph{integer} à \texttt{0} pour réaliser la FFT ou à \texttt{1} pour réaliser l'opération inverse;
+        \item effectue les opérations de post-processing ou post-twiddling : ici aussi les mêmes que celles de la MDCT \emph{FFTW3} en arithmétique \emph{floating point} sur 32 bits.
+    \end{itemize}
+
+    \paragraph{}
+    L'algorithme développé ici ne diffère donc pas de l'algorithme présenté à la section précédente. Son développement est trivial mais il permet de tester et de valider le fonctionnement de la librairie \emph{Ne10}.
+
+    \subsection{Validation}
+    \paragraph{}
+    L'utilisation de la librairie \emph{Ne10} est validé en comparant les spectres de fréquence produits par la MDCT de référence en \emph{floating point}, par la MDCT basée sur la FFT de \emph{FFTW3} en \emph{float 32} et la MDCT basée sur la FFT de \emph{Ne10} en \emph{float 32} également.
+
+    \paragraph{}
+    TODO : présentation du code de comparaison
+
+    \paragraph{}
+    TODO : présentation des données en graphique
+
+    \paragraph{}
+    TODO : présentation de la précision
+
+
+
+    \paragraph{}
+    % et comme le traitement de signal sur architecture ARM avec la librairie \emph{Ne10} est un sujet de niche, peu de ressources permettent de combler ce manque.
+
+    \subsection{Performances}
+
+
+
     Changement obligatoire car la FFT de FFTW3 est uniquement dispo en algo flottante et on veut une implémentation en fixed point.
     % Le code de dsp related faisait appel à la librairie FFTW mais elle ne propose pas de FFT en fixed point => Ne10 qui propose une FFT fixed point optimisée pour ARM (avec ou sans instructions Neon)
+
+     
 
     \paragraph{}
     Librairie optimisée pour l'architecture ARMv8. Mais a aussi des implémentation plain C (intéressant car permet de mesurer la diff de perf entre les 2).
@@ -488,6 +547,11 @@
     Pour soutenir cette hypothèse :  Test de la librairie et des performances des différentes FFT : performances équivalentes en 32 bits (floating ou fixed) et deux fois plus rapides en 16 bits
 
 
+    Pour comparaison, le temps d'exécution de la FFT de la librairie \emph{FFTW3} a également été mesuré, en \emph{float32} puisque la FFT de \emph{Ne10} est en \emph{float32}. Le code de la 
+
+    Pendant mon stage, j'ai aussi essayé l'algo en Q15 mais échec à cause du manque de documentation des fonctions (quelle headroom prévoir ?) -> on n'avait pas seulement une perte de précision mais des dépassements -> pas admissible d'avoir des données fausses
+
+
 
 
     \subsection{Arithmétique fixed point}
@@ -505,6 +569,7 @@
     % \subsubsection{FFT de la librairie Ne10}
 
     \subsection{Utilisation des fonctions Neon SIMD (intrinsic)}
+    % instructions principales utilisées + contraintes associées : types d'entrée + sortie -> comment ça s'agence avec le reste
     % \begin{itemize}
     %     \item voir la doc de neon \url{https://developer.arm.com/documentation/dht0002/a/Introducing-NEON/What-is-SIMD-/ARM-SIMD-instructions}
     %     \item voir comment faire ce qui doit être fait en fonction des instructions SIMD dispo : souvent il faut ranger correctement, splitter les registres correctement
@@ -520,8 +585,8 @@
 
 
     \newpage
-    \section{Résultats}
-    \subsection{Validation de l'algorithme}
+    \section{Analyse des résultats}
+    \subsection{Validation des données}
     \paragraph{}
     Les sections précédentes ont montré que la les différentes itérations de la MDCT développées ont été validées à chaque étape. Cette validation consiste essentiellement en une vérification manuelle des données de sortie de la MDCT : avec un signal sinusoïdal connu en entrée, il est facile de vérifier que l'analyse fréquentielle ne contient bien qu'une seule composante fréquentielle, que la vérification se fasse en lisant les données brutes à la sortie de l'algorithme ou par une analyse graphique de celle-ci.
 
@@ -549,10 +614,15 @@
     L'objectif en terme de temps d'exécution n'étant pas fini, il a été décidé de tenter de gagner le maximum de performances sur le temps de mon stage. Le critère de réussite est dès lors d'obtenir des performances au moins équivalentes pour la version finale de la MDCT que pour ses versions moins optimisées. Le temps d'exécution de la MDCT \emph{fixed point} doit évidemment être inférieur au temps d'exécution de l'algorithme de référence puisque celui-ci ne contient aucune optimisation. Ce temps peut toutefois être équivalent au temps d'exécution de la MDCT \emph{floating point} : à performances équivalentes, l'algorithme \emph{fixed point} rendra tout de même l'encodeur AAC plus performant en économisant les conversions \emph{integer}-\emph{floating point} à l'entrée et à la sortie du bloc MDCT. En effet, les données sont reçues par la MDCT en \emph{integer} et devront être traitées en \emph{integer} par le bloc de quantification à la sortie de la MDCT.
     
     \paragraph{}
-    Le temps d'exécution de la MDCT a été mesuré sur base du code de l'annexe \ref{an:run_mdcts}, plusieurs exécutables sont générés, chacun d'eux permettant d'exécuter l'algorithme MDCT un certain nombre de fois (donné en paramètre à l'exécution). La fréquence du signal sinusoïdal utilisé en entrée de la MDCT peut également être donnée en paramètre mais elle ne varie pas entre les différentes exécutions afin de ne pas introduire d'aléatoire dans les mesures.
+    Le temps d'exécution de la MDCT a été mesuré sur base du code de l'annexe \ref{an:run_mdcts} compilé par les commandes CMake présentée à l'annexe \ref{an:cmake_run_mdcts}. Le code permet de générer plusieurs exécutables en fonction de la variable d'environnement définie. Par défaut, l'exécutable permet de mesurer le temps d'exécution de de l'algorithme de référence en , plusieurs exécutables sont générés, chacun d'eux permettant d'exécuter l'algorithme MDCT un certain nombre de fois (donné en paramètre à l'exécution). La fréquence du signal sinusoïdal utilisé en entrée de la MDCT peut également être donnée en paramètre mais elle ne varie pas entre les différentes exécutions afin de ne pas introduire d'aléatoire dans les mesures.
 
     \paragraph{}
-    L'annexe \ref{an:cmake_run_mdcts} En fonction du paramètre défini à la création des exécutables, le code exécuté sera celui de la MDCT de référence en \emph{double floating point} (paramètre \texttt{-DREF}) ou de la MDCT basée sur la FFT de la librairie Ne10 en \emph{floating point} (paramètre \texttt{-DFLOATING\_POINT}) ou en \emph{fixed point} en \emph{plain C} (paramètre \texttt{-DFLOATING\_POINT}) 
+    L'annexe  En fonction du paramètre défini à la création des exécutables, le code exécuté sera celui de la MDCT de référence en \emph{double floating point} (paramètre \texttt{-DREF}) ou de la MDCT basée sur la FFT de la librairie Ne10 en \emph{floating point} (paramètre \texttt{-DFLOATING\_POINT}) ou en \emph{fixed point} en \emph{plain C} (paramètre \texttt{-DFLOATING\_POINT}) 
+
+
+    perfs de la MDCT basée sur la FFT de FFTW3 en f32 pour comparaison :
+    average run time:   7686.56 ns
+    standard deviation: 6.61219e-07 ns
  
     % Comparaison avec un implémentation de référence plain c mais aussi à titre indicatif avec l'algorithme de référence car le plain c est déjà optimisé
 
@@ -560,6 +630,8 @@
     % L'impact de la window function : exemple avec un sinus : les composantes fréquentielles du sinus ressortent beaucoup mieux.
 
     % +difficultés au niveau des performances pas bonnes jusqu'à la fin
+
+    % projet compilé en release pour les tests de perf
 
     \subsection{Perte de précision}
     % Comparaison avec l'algorithme de référence
@@ -679,7 +751,119 @@ void sin_float(FLOAT *out, int n_samples, double amplitude,
 
 
 
-        \section{Code de test des performances}
+        \section{Implémentation de la MDCT basée sur la FFT Ne10 en arithmétique \emph{floating point}}
+        \label{an:mdct_ne10_f32}
+
+        \subsection{Header}
+        \label{an:mdct_ne10_f32_header}
+        \begin{lstlisting}
+#include "mdct_constants.h"
+#include "NE10.h"
+
+class ne10_floating_point_mdct
+{
+private:
+    ne10_fft_cfg_float32_t cfg;                                          // Ne10 configuration
+    ne10_fft_cpx_float32_t fft_in[MDCT_M2]__attribute__((aligned(16)));  // Ne10 FFT input buffer
+    ne10_fft_cpx_float32_t fft_out[MDCT_M2]__attribute__((aligned(16))); // Ne10 FFT output buffer
+    double twiddle[MDCT_M]__attribute__((aligned(16)));                  // twiddle factors
+
+public:
+    ne10_floating_point_mdct();
+    ~ne10_floating_point_mdct();
+    void mdct(double *time_signal, double *spectrum);
+};
+        \end{lstlisting}
+
+        \subsection{Implémentation du constructeur}
+        \label{an:mdct_ne10_f32_constructor}
+        \begin{lstlisting}
+#include <cmath>
+
+#include "ne10_floating_point_mdct.h"
+
+ne10_floating_point_mdct::ne10_floating_point_mdct()
+{
+    double alpha = M_PI / (8.0 * static_cast<double>(MDCT_M));
+    double omega = M_PI / static_cast<double>(MDCT_M);
+    double scale = sqrt(sqrt(2.0 / static_cast<double>(MDCT_M)));
+    for (int i = 0; i < MDCT_M2; ++i) 
+    {
+        double x = omega * i + alpha;
+        twiddle[2*i] = static_cast<double>(scale * cos(x));
+        twiddle[2*i+1] = static_cast<double>(scale * sin(x));
+    }
+
+    cfg = ne10_fft_alloc_c2c_float32_neon(MDCT_M2);
+}
+        \end{lstlisting}
+
+        \subsection{Implémentation du destructeur}
+        \label{an:mdct_ne10_f32_destructor}
+        \begin{lstlisting}
+ne10_floating_point_mdct::~ne10_floating_point_mdct()
+{
+    ne10_fft_destroy_c2c_float32(cfg);
+}
+        \end{lstlisting}
+
+        \subsection{Implémentation de la fonction MDCT}
+        \label{an:mdct_ne10_f32_func}
+        \begin{lstlisting}
+void ne10_floating_point_mdct::mdct(double *time_signal, double *spectrum)
+{
+    // pre-twiddling
+    double *cos_tw = twiddle;
+    double *sin_tw = cos_tw + 1;
+    for (int i = 0; i < MDCT_M2; i += 2)
+    {
+        double r0 = time_signal[MDCT_M32-1-i] + time_signal[MDCT_M32+i];
+        double i0 = time_signal[MDCT_M2+i] - time_signal[MDCT_M2-1-i];
+
+        double c = cos_tw[i];
+        double s = sin_tw[i];
+
+        fft_in[i/2].r = r0*c + i0*s;
+        fft_in[i/2].i = i0*c - r0*s;
+    }
+
+    for (int i = MDCT_M2; i < (MDCT_M); i += 2)
+    {
+        double r0 = time_signal[MDCT_M32-1-i] - time_signal[-MDCT_M2+i];
+        double i0 = time_signal[MDCT_M2+i] + time_signal[MDCT_M52-1-i];
+
+        double c = cos_tw[i];
+        double s = sin_tw[i];
+
+        fft_in[i/2].r = r0*c + i0*s;
+        fft_in[i/2].i = i0*c - r0*s;
+    }
+
+
+    // FFT
+    ne10_fft_c2c_1d_float32_neon(fft_out, fft_in, cfg, 0);
+
+    // post-twiddling
+    for (int i = 0; i < (MDCT_M); i += 2)
+    {
+        double r0 = fft_out[i/2].r;
+        double i0 = fft_out[i/2].i;
+
+        double c = cos_tw[i];
+        double s = sin_tw[i];
+
+        spectrum[i] = -r0*c - i0*s;
+        spectrum[(MDCT_M)-1-i] = -r0*s + i0*c;
+    }
+}
+        \end{lstlisting}
+
+
+
+
+
+        \section{Test des performances des algorithmes MDCT}
+        \subsection{Code utilisé pour la mesure des performances}
         \label{an:run_mdcts}
         \begin{lstlisting}
 #include <iomanip>
@@ -787,7 +971,7 @@ int main(int argc, char **argv) {
 
 
 
-        \section{CMake file générant les exécutables de test performance}
+        \subsection{Commandes CMake générant les exécutables}
         \label{an:cmake_run_mdcts}
         \begin{lstlisting}
 # Run the MDCT x times (single frame, floating point)
