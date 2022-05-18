@@ -4,6 +4,23 @@
 \usepackage[T1]{fontenc}
 \usepackage{moreverb}       % verbatim with tab
 
+% https://tug.org/FontCatalogue/libertinusserif/
+%\usepackage{libertinus}
+%\usepackage[T1]{fontenc}
+\usepackage{libertine} % Police Linux Libertine en sérif, Linux Biolinum en sans-sérif.
+\usepackage[libertine]{newtxmath} % Math avec la police Libertine
+%\addtokomafont{disposition}{\normalfont\sffamily} % Police des titres (ajouter \normalfont pour enlever le bold)
+%\addtokomafont{paragraph}{\bfseries} % Titre des paragraphes en gras
+%\addtokomafont{subsubsection}{\bfseries} % Titre des subsubsections en gras
+%\usepackage[scaled=.8]{beramono} % Police monospace
+\renewcommand\ttdefault{cmvtt}
+
+\AtBeginDocument{
+    \def\labelitemi{\textbullet}    % Redéfinition des puces dans les itemize
+    \renewcommand{\times}{\text{×}} % Remplacer le gros «X» par un plus beau
+    %\interfootnotelinepenalty=10000
+}
+
 \usepackage{wrapfig}
 \usepackage{graphicx}
 \usepackage{geometry}
@@ -21,35 +38,8 @@
 \usepackage{enumitem}
 \usepackage{lscape}
 
-% https://tug.org/FontCatalogue/libertinusserif/
-%\usepackage{libertinus}
-%\usepackage[T1]{fontenc}
-
-\usepackage{libertine} % Police Linux Libertine en sérif, Linux Biolinum en sans-sérif.
-
-\usepackage[libertine]{newtxmath} % Math avec la police Libertine
-%\addtokomafont{disposition}{\normalfont\sffamily} % Police des titres (ajouter \normalfont pour enlever le bold)
-%\addtokomafont{paragraph}{\bfseries} % Titre des paragraphes en gras
-%\addtokomafont{subsubsection}{\bfseries} % Titre des subsubsections en gras
-%\usepackage[scaled=.8]{beramono} % Police monospace
-
 \usepackage{fancyhdr}       % en-têtes
 \usepackage{lastpage}       % numéro de dernière page
-
-\usepackage{appendix}       % annexes
-
-% code
-\usepackage{listings}
-
-\usepackage{tocloft}
-
-\newlistof{appendix}{tce}{Annexes}
-\newcommand\asection[1]{%
-    \addcontentsline{tce}{section}{\protect\makebox[1.3em][l]{\thesection}#1}}
-\newcommand\asubsection[1]{%
-    \addcontentsline{tce}{subsection}{\protect\makebox[2em][l]{\thesubsection}#1}}
-%\renewcommand{\cfttcetitlefont}{\normalfont\Large\bfseries}
-
 
 
 \title{Développement d'un codec audio AAC : optimisation de l'algorithme MDCT pour une architecture ARM}
@@ -62,19 +52,6 @@
 \fancyhead[C]{Développement d'un codec audio AAC}
 \fancyhead[R]{2021 -- 2022}
 
-\AtBeginDocument{
-    \def\labelitemi{\textbullet}    % Redéfinition des puces dans les itemize
-    \renewcommand{\times}{\text{×}} % Remplacer le gros «X» par un plus beau
-    %\interfootnotelinepenalty=10000
-}
-
-\lstset { %
-    language=C++,
-    backgroundcolor=\color{black!5}, % set backgroundcolor
-    basicstyle=\footnotesize,% basic font setting
-}
-
-
 
 \begin{document}
     \pagenumbering{gobble}
@@ -83,15 +60,13 @@
     \tableofcontents
     \newpage
     \listoffigures
-    \newpage
-    \listofappendix
 
     \newpage
     \section*{Remerciements}
     % TODO
 
     \newpage
-    \pagenumbering{arabic}  
+    \pagenumbering{arabic}
     \section*{Introduction}
     \addcontentsline{toc}{section}{\protect\numberline{}Introduction}
 
@@ -514,12 +489,47 @@
     \subsection{Performances}
     Une fois l'utilisation de la librairie \emph{Ne10} validée,  Mesure de la différence de performance entre différentes FFT : code en annexe
 
+    FFT Ne10 f32 plain C
+    average run time:   5632.06 ns
+    standard deviation: 4.38439e-09 ns
 
+    FFT Ne10 f32 Neon
+    average run time:   3115.18 ns
+    standard deviation: 2.81769e-06 ns
+
+    FFT Ne10 i32 plain C
+    average run time:   10723.1 ns
+    standard deviation: 1.77145e-06 ns
+
+    FFT Ne10 i32 Neon
+    average run time:   3455.78 ns
+    standard deviation: 5.35823e-07 ns
+
+    FFT Ne10 i16 plain C
+    average run time:   9557.52 ns
+    standard deviation: 1.69145e-07 ns
+
+    FFT Ne10 i16 Neon
+    average run time:   2007.07 ns
+    standard deviation: 2.58836e-07 ns
+
+    FFT FFTW3 f32 plain C
+    average run time:   4641.64 ns
+    standard deviation: 2.69836e-07 ns
 
     \section{Algorithme MDCT en arithmétique fixed point}
     \label{sec:fixed_point}
-    \subsection{Arithmétique fixed point}
     \paragraph{}
+    Le passage d'une algorithmique flottante à une algorithmique entière est une des optimisations envisagées par l'analyse préalable à ce travail. Le bénéfice attendu est double : l'agorithmique entière est généralement plus rapide et un bloc MDCT en algorithmique entière permettrait d'économiser des opérations de transtypage des données entières en \emph{float} à l'entrée de la MDCT et inversement en sortie.
+
+    \paragraph{}
+
+
+
+    \subsection{Arithmétique fixed point}
+    donner quelques exemple de remplacement d'une opération floating point en fixed point
+
+
     trivial en float (reprendre le code de dsp) mais pour l'implémentation en arithmétique entière, attention à mettre dans les bonnes ranges
 
     La notation \emph{fixed point} peut se faire 
@@ -533,6 +543,8 @@
     % Attention à la manière d'écrire le code. Ici on n'a pas besoin de faire attention à ce que le compilateur puisse faire du inline (ex remplacer l'appel à z = add(a, d) par z = a+d pour économiser le call) car l'algo est déjà très optimisé -> pas d'optimisations de compilateur possible et en plus on a une grosse routine -> économiser un call n'est pas forcément intéressant.
 
     \subsection{Améliorations attendues}
+    \paragraph{}
+
     \paragraph{}
     Le code de DSP related est en floating point -> passage en fixed point : opérations sur des entiers plus performantes + meilleure intégration (éviter le passage artificiel de l'entier au flottant et inversement)
     % Sur le format Qx.y :
@@ -698,800 +710,6 @@
     \bibliographystyle{ieeetr.bst}
     \addcontentsline{toc}{section}{\protect\numberline{}Références}
 
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    \newpage
-    \setcounter{page}{1}
-    \pagenumbering{Roman}
-
-    \appendix
-    \setcounter{section}{1}
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % 5 Environnement de développement
-    %       - an:cmake_super
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    \asection{CMake principal}\label{an:cmake_super}
-    \paragraph{}
-    Fichier CMake principal placé à la racine du projet. Il permet de compiler :
-    \begin{itemize}
-        \item le projet \emph{audio\_encoding} contenant les différentes MDCT et leurs tests : les commandes CMake de ce sous projet sont présentées dans les annexes suivantes sous le code qu'elles permettent de compiler;
-        \item la librairie \emph{Ne10} : les variables \texttt{NE10\_LINUX\_TARGET\_ARCH} et \texttt{GNULINUX\_PLATFORM} sont initialisées conformément aux recommendations de la documentation pour la compilation de la librairie.
-    \end{itemize}
-    \begin{lstlisting}
-cmake_minimum_required(VERSION 3.13)
-
-set(NE10_LINUX_TARGET_ARCH armv7)
-set(GNULINUX_PLATFORM ON)
-if (CMAKE_BUILD_TYPE STREQUAL "DEBUG")
-    set(BUILD_DEBUG ON)
-endif (CMAKE_BUILD_TYPE STREQUAL "DEBUG")
-
-add_subdirectory(audio_encoding)
-add_subdirectory(Ne10)
-    \end{lstlisting}
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % 6 Algorithmes MDCT de référence
-    %   6.2 Implémentations des MDCT de référence en algorithmiques floating point et fixed point
-    %       - an:mdct_const
-    %       - an:mdct_ref
-    %           - an:mdct_ref_float
-    %           - an:mdct_ref_int
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    \asection{Valeurs constantes des MDCT}\label{an:mdct_const}
-    \paragraph{}
-    Le fichier \texttt{mdct\_constants.h} rassemble les valeurs constantes des MDCT pour une fenêtre d'entrée de 1024 échantillons.
-    \begin{lstlisting}
-// Sampling frequency: 48kHz
-#define FS                  48000
-
-// Window length and derived constants
-#define MDCT_WINDON_LEN     1024
-#define MDCT_M              (MDCT_WINDON_LEN>>1)    // spectrum size
-#define MDCT_M2             (MDCT_WINDON_LEN>>2)    // fft size
-#define MDCT_M4             (MDCT_WINDON_LEN>>3)
-#define MDCT_M32            (3*(MDCT_WINDON_LEN>>2))
-#define MDCT_M52            (5*(MDCT_WINDON_LEN>>2))
-    \end{lstlisting}
-
-    \asection{Algorithmes de référence}\label{an:mdct_ref}
-    \asubsection{MDCT de référence en \emph{float}}\label{an:mdct_ref_float}
-    \paragraph{}
-    Algorithme de référence de la MDCT basé sur la formule mathématique de la MDCT. Le template permet de réaliser les calculs en \emph{float} ou en \emph{double}.
-    \begin{lstlisting}
-#include <cmath>
-
-#include "mdct_constants.h"
-
-template<typename FLOAT>
-void ref_float_mdct(FLOAT *time_signal, FLOAT *spectrum)
-{
-    FLOAT scale = 2.0 / sqrt(MDCT_WINDON_LEN);
-    FLOAT factor1 = 2.0 * M_PI / static_cast<FLOAT>(MDCT_WINDON_LEN);
-    FLOAT factor2 = 0.5 + static_cast<FLOAT>(MDCT_M2);
-    for (int k = 0; k < MDCT_M; ++k)
-    {
-        FLOAT result = 0.0;
-        FLOAT factor3 = (k + 0.5) * factor1;
-        for (int n = 0; n < MDCT_WINDON_LEN; ++n)
-        {
-            result += time_signal[n] * cos((static_cast<FLOAT>(n) + factor2) * factor3);
-        }
-        spectrum[k] = scale * result;
-    }
-}
-    \end{lstlisting}
-    \asubsection{MDCT de référence en \emph{integer}}\label{an:mdct_ref_int}
-    \paragraph{}
-    Algorithme de référence de la MDCT basé sur la formule mathématique de la MDCT. Le spectre est calculé en \emph{double} puis convertit en \emph{integer} sur 32 bits.
-    \begin{lstlisting}
-#include <cassert>
-
-#include "ref_mdct.h"
-
-void ref_int_mdct(int16_t *time_signal, int32_t *spectrum)
-{
-    double scale = sqrt(MDCT_WINDON_LEN) / 2.0;     // MDCT scale (2/sqrt(WIN_LEN)) + Q15 scale
-    double factor1 = 2.0 * M_PI / MDCT_WINDON_LEN;
-    double factor2 = 0.5 + MDCT_M2;
-    for (int k = 0; k < MDCT_M; ++k)
-    {
-        double result = 0.0;
-        double factor3 = (k + 0.5) * factor1;
-        for (int n = 0; n < MDCT_WINDON_LEN; ++n)
-        {
-            result += time_signal[n] * cos((n + factor2) * factor3);
-        }
-        assert(round(result*scale) == static_cast<int32_t>(round(result*scale)));
-        spectrum[k] = static_cast<int32_t>(round(result/scale));
-    }
-}
-    \end{lstlisting}
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %   6.3 Validation des algorithmes de référence
-    %       - an:sin_wave
-    %           - an:sin_wave_float
-    %           - an:sin_wave_int
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    \asection{Génération d'un signal sinusoïdal}\label{an:sin_wave}
-    \asubsection{Génération d'un signal sinusoïdal en \emph{float}}\label{an:sin_wave_float}
-    \paragraph{}
-    Code de génération d'un signal sinusoïdal en \emph{float} ou en \emph{double}.
-    \begin{lstlisting}
-#include <cmath>
-
-template<typename FLOAT>
-void sin_float(FLOAT *out, int n_samples, double amplitude,
-    double frequency, double phase_shift, int sampling_frequency)
-{
-    FLOAT omega = 2.0 * M_PI * frequency / static_cast<FLOAT>(sampling_frequency);
-    for (int i = 0; i < n_samples; ++i)
-    {
-        out[i] = amplitude * sin(static_cast<FLOAT>(i) * omega + phase_shift);
-    }
-}
-    \end{lstlisting}
-
-    \asubsection{Génération d'un signal sinusoïdal en \emph{integer}}\label{an:run_ref_mdct_fint}
-    \paragraph{}
-    La génération du signal sinusoïdal en \emph{integer} fait appel à la génération du signal sinusoïdal en \emph{double} avant de convertir le résultat en \emph{integer} (représentation Q15).
-    \begin{lstlisting}
-#include <cstring>
-
-#include "sin_wave.h"
-
-void sin_int(int16_t *out, int n_samples, double amplitude,
-    double frequency, double phase_shift, int sampling_frequency)
-{
-    double scale = 1.0;
-    if (abs(amplitude) < 1.0) scale *= amplitude;
-
-    double *temp_sin = static_cast<double *>(malloc(n_samples*sizeof(double)));
-    memset(temp_sin, 0, n_samples*sizeof(double));
-
-    sin_float<double>(temp_sin, n_samples, scale, frequency, phase_shift, sampling_frequency);
-
-    for (int i = 0; i < n_samples; ++i)
-    {
-        out[i] = static_cast<int16_t>(temp_sin[i]*pow(2.0, 15.0));
-    }
-}
-    \end{lstlisting}
-
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % 7 Algorithme MDCT basé sur la FFT
-    %   7.2 Implémentation de la MDCT basée sur la FFT de la librairie FFTW3
-    %       - an:mdct_fftw3_f32_header
-    %       - an:mdct_fftw3_f32_constructeur
-    %       - an:mdct_fftw3_f32_destructeur
-    %       - an:mdct_fftw3_f32_func
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    \asection{Implémentation de la MDCT basée sur la FFT de \emph{FFTW3}}\label{an:mdct_fftw3_f32}
-    \asubsection{Header}\label{an:mdct_fftw3_f32_header}
-    \paragraph{}
-    Header de la classe \texttt{mdct\_fftw3\_f32} : MDCT basée sur la FFT de la librairie \emph{FFTW3} en \emph{float} (32 bits). La classe contient les structures de données \texttt{fft\_in} et \texttt{fft\_out}, le tableau de facteurs de \texttt{twiddle} utilisé pour le pre- et le post-processing et la configuration de la FFT (\texttt{fft\_plan}). L'implémentation des ses fonction est présenté dans les annexes suivantes.
-    \begin{lstlisting}
-#include <fftw3.h>
-
-#include "mdct_constants.h"
-
-class fftw3_mdct_f32
-{
-private:
-    fftwf_plan fft_plan;      // FFT configuration
-    fftwf_complex *fft_in;    // FFT input buffer
-    fftwf_complex *fft_out;   // FFT output buffer
-    float twiddle[MDCT_M];
-
-public:
-    fftw3_mdct_f32();
-    ~fftw3_mdct_f32();
-    void mdct(float *time_signal, float *spectrum);
-    void imdct(float *spectrum, float *time_signal);
-};
-    \end{lstlisting}
-
-    \asubsection{Constructeur}\label{an:mdct_fftw3_f32_constructor}
-    \paragraph{}
-    Initialisation de la MDCT dans le constructeur de la classe \texttt{mdct\_fftw3\_f32} :
-    \begin{itemize}
-        \item Le tableau de \texttt{twiddle} est initialisé en \emph{float} sur 32 bits;
-        \item La FFT de \emph{FFTW3} est initialisée en une dimension (pour l'audio) avec la taille de la FFT réduite à un quart de la taille de la fenêtre d'entrée par le pre-processing et avec l'option \texttt{FFTW\_MEASURE} plus lente à l'initialisation mais qui permet d'optimiser le temps d'exécution de la FFT;
-        \item Les tableaux contenant les données d'entrée (\texttt{fft\_in}) et de sortie (\texttt{fft\_out}) de la FFT sont alloués dynamiquement avec la fonction de \emph{FFTW3} et ils sont passé en paramètre à la configuration de la FFT.
-    \end{itemize}
-    \begin{lstlisting}
-#include <cmath>
-
-fftw3_mdct_f32::fftw3_mdct_f32()
-{
-    float alpha = M_PI / (8.f * MDCT_M);
-    float omega = M_PI / MDCT_M;
-    float scale = sqrt(sqrt(2.f / MDCT_M));
-
-    for (int i = 0; i < MDCT_M2; ++i)
-    {
-        float x = omega*i + alpha;
-        twiddle[2*i] = scale * cos(x);
-        twiddle[2*i+1] = scale * sin(x);
-    }
-
-    fft_in = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * MDCT_M2);
-    fft_out = (fftwf_complex *)fftwf_malloc(sizeof(fftwf_complex) * MDCT_M2);
-    fft_plan = fftwf_plan_dft_1d(MDCT_M2, fft_in, fft_out, FFTW_FORWARD, FFTW_MEASURE);
-}
-    \end{lstlisting}
-
-    \asubsection{Destructeur}\label{an:mdct_fftw3_f32_destructor}
-    \paragraph{}
-    Destructeur de la classe \texttt{mdct\_fftw3\_f32} qui permet de libérer la mémoire allouée aux tableaux d'entrée et de sortie de la FFT et à sa configuration avec les fonctions de la librairie \emph{FFTW3}.
-    \begin{lstlisting}
-fftw3_mdct_f32::~fftw3_mdct_f32()
-{
-    fftwf_destroy_plan(fft_plan);
-    fftwf_free(fft_in);
-    fftwf_free(fft_out);
-}
-    \end{lstlisting}
-
-    \asubsection{Fonction MDCT}\label{an:mdct_fftw3_f32_func}
-    \paragraph{}
-    Implémentation de l'algorithme de MDCT basé sur la FFT de la librairie \emph{FFTW3} :
-    \begin{itemize}
-        \item Initialisation du tableau d'entrée de la FFT : les opérations de \emph{pre-twiddling} permettent de réduire la fenêtre d'entrée de la FFT;
-        \item Appel de la fonction FFT de \emph{FFTW3};
-        \item Calcul du spectre de fréquence : les opérations de \emph{post-twiddling} permettent de calculer le spectre à partir des données de sortie de la FFT et des facteurs de \emph{twiddle}.
-    \end{itemize}
-    \begin{lstlisting}
-void fftw3_mdct_f32::mdct(float *time_signal, float *spectrum)
-{
-    float *cos_tw = twiddle;
-    float *sin_tw = cos_tw + 1;
-
-    /* odd/even folding and pre-twiddle */
-    float *xr = (float *)fft_in;
-    float *xi = xr + 1;
-
-    for (int i = 0; i < MDCT_M2; i += 2)
-    {
-        float r0 = time_signal[MDCT_M32-1-i] + time_signal[MDCT_M32+i];
-        float i0 = time_signal[MDCT_M2+i] - time_signal[MDCT_M2-1-i];
-
-        float c = cos_tw[i];
-        float s = sin_tw[i];
-
-        xr[i] = r0*c + i0*s;
-        xi[i] = i0*c - r0*s;
-    }
-
-    for(int i = MDCT_M2; i < MDCT_M; i += 2)
-    {
-        float r0 = time_signal[MDCT_M32-1-i] - time_signal[-MDCT_M2+i];
-        float i0 = time_signal[MDCT_M2+i] + time_signal[MDCT_M52-1-i];
-
-        float c = cos_tw[i];
-        float s = sin_tw[i];
-
-        xr[i] = r0*c + i0*s;
-        xi[i] = i0*c - r0*s;
-    }
-
-    /* complex FFT of size MDCT_M2 */
-    fftwf_execute(fft_plan);
-
-    /* post-twiddle */
-    xr = (float *)fft_out;
-    xi = xr + 1;
-
-    for (int i = 0; i < MDCT_M; i += 2)
-    {
-        float r0 = xr[i];
-        float i0 = xi[i];
-
-        float c = cos_tw[i];
-        float s = sin_tw[i];
-
-        spectrum[i] = -r0*c - i0*s;
-        spectrum[MDCT_M-1-i] = -r0*s + i0*c;
-    }
-}
-    \end{lstlisting}
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    %   7.3 Validation
-    %       - an:fftw3_example
-    %           - an:fftw3_example_code
-    %           - an:fftw3_example_compilation
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    \asection{Validation de la MDCT \emph{FFTW3} en \emph{float 32}}\label{an:fftw3_example}
-    \asubsection{Code source}\label{an:fftw3_example_code}
-    \paragraph{}
-    Test de la MDCT basée sur la FFT de \emph{} avec un signal d'entrée sinusoïdal à 200Hz :
-    \begin{itemize}
-        \item Génération et affichage d'un signal sinusoïdal à 200Hz;
-        \item Calcul et affichage du spectre de fréquences de ce signal;
-        \item Opération inverse de la MDCT et affichage du signal temporel calculé à partir du spectre.
-    \end{itemize}
-    \begin{lstlisting}
-#include <iomanip>
-#include <iostream>
-
-#include <cstring>
-
-#include "mdct_constants.h"
-#include "fftw3_mdct_f32.h"
-#include "sin_wave.h"
-
-/**
-    * @brief MDCT algorithm calling the FFT of the fftw3 library
-    * Code based on https://www.dsprelated.com/showcode/196.php
-    */
-int main(void)
-{
-    float time_in[MDCT_WINDON_LEN];        // input time signal
-    sin_float(time_in, MDCT_WINDON_LEN, 0.9, 200.0, 0.0, FS);
-
-    float time_out[MDCT_WINDON_LEN];       // output time signal (generated by the IMDCT)
-    memset(time_out, 0, MDCT_WINDON_LEN*sizeof(float));
-
-    float spectrum[MDCT_M];    // frequency spectrum
-    memset(spectrum, 0, MDCT_M*sizeof(float));
-
-    fftw3_mdct_f32 fftw3_mdct;
-    fftw3_mdct.mdct(time_in, spectrum);
-    fftw3_mdct.imdct(spectrum, time_out);
-
-    for (int i = 0; i < MDCT_WINDON_LEN; ++i)
-    {
-        std::cout << "time_in[" << std::setw(4) << i << "]" << std::setw(12) << time_in[i]
-            << " | time_out[" << std::setw(4) << i << "]" << std::setw(12) << time_out[i]
-            << std::endl;
-    }
-    std::cout << std::endl;
-
-    for (int i = 0; i < MDCT_M; ++i)
-    {
-        std::cout << "spectrum[" << std::setw(4) << i << "]"
-            << std::setw(12) << spectrum[i] << std::endl;
-    }
-    std::cout << std::endl;
-
-    return 0;
-}
-    \end{lstlisting}
-
-    \asubsection{Compilation}\label{an:fftw3_example_compilation}
-    \paragraph{}
-    Commandes CMake permettant de compiler le code d'exemple.
-    \begin{lstlisting}
-# MDCT using the fftw3 library f32
-add_executable(fftw3_mdct_f32 test/validation/fftw3_example.cpp
-    src/fftw3_mdct_f32.cpp src/sin_wave.cpp)
-target_link_libraries(fftw3_mdct_f32 fftw3f)
-    \end{lstlisting}
-
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % 8 Intégration de la librairie Ne10
-    %   8.2 Implémentation de la MDCT basée sur la FFT Ne10 en arithmétique floating point
-    %       - an:mdct_ne10_f32
-    %           - an:mdct_ne10_f32_header
-    %           - an:mdct_ne10_f32_constructor
-    %           - an:mdct_ne10_f32_destructor
-    %           - an:mdct_ne10_f32_func
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    \asection{Implémentation de la MDCT basée sur la FFT de \emph{Ne10} en \emph{floating point}}\label{an:mdct_ne10_f32}
-    \asubsection{Header}\label{an:mdct_ne10_f32_header}
-    \paragraph{}
-    Header de la classe \texttt{mdct\_ne10\_f32\_c} : MDCT basée sur la FFT de la librairie \emph{Ne10} en \emph{float} (32 bits). La classe contient les structures de données \texttt{fft\_in} et \texttt{fft\_out}, le tableau de facteurs de \texttt{twiddle} utilisé pour le pre- et le post-processing et la configuration de la FFT (\texttt{cfg}). L'implémentation des ses fonction est présenté dans les annexes suivantes.
-    \begin{lstlisting}
-#pragma once
-
-#include "mdct_constants.h"
-#include "NE10.h"
-
-class ne10_mdct_f32_c
-{
-private:
-    ne10_fft_cfg_float32_t cfg;                                          // Ne10 configuration
-    ne10_fft_cpx_float32_t fft_in[MDCT_M2]__attribute__((aligned(16)));  // Ne10 FFT input buffer
-    ne10_fft_cpx_float32_t fft_out[MDCT_M2]__attribute__((aligned(16))); // Ne10 FFT output buffer
-    float twiddle[MDCT_M]__attribute__((aligned(16)));                   // twiddle factors
-
-public:
-    ne10_mdct_f32_c();
-    ~ne10_mdct_f32_c();
-    void mdct(float *time_signal, float *spectrum);
-};
-    \end{lstlisting}
-
-    \asubsection{Constructeur}\label{an:mdct_ne10_f32_constructor}
-    \paragraph{}
-    Initialisation de la MDCT dans le constructeur de la classe \texttt{mdct\_ne10\_f32\_c} :
-    \begin{itemize}
-        \item Le tableau de \texttt{twiddle} est initialisé en \emph{float} sur 32 bits;
-        \item La configuration de la FFT de \emph{Ne10} est initialisée an \emph{complex to complex} en \emph{float 32} avec en paramètre la taille de la fenêtre de la FFT réduite à un quart de la taille de la fenêtre d'entrée.
-    \end{itemize}
-    \begin{lstlisting}
-ne10_mdct_f32_c::ne10_mdct_f32_c()
-{
-    float alpha = M_PI / (8.0 * static_cast<float>(MDCT_M));
-    float omega = M_PI / static_cast<float>(MDCT_M);
-    float scale = sqrt(sqrt(2.0 / static_cast<float>(MDCT_M)));
-    for (int i = 0; i < MDCT_M2; ++i) 
-    {
-        float x = omega * i + alpha;
-        twiddle[2*i] = static_cast<float>(scale * cos(x));
-        twiddle[2*i+1] = static_cast<float>(scale * sin(x));
-    }
-
-    cfg = ne10_fft_alloc_c2c_float32_c(MDCT_M2);
-}
-    \end{lstlisting}
-
-    \asubsection{Destructeur}\label{an:mdct_ne10_f32_destructor}
-    \paragraph{}
-    Destructeur de la classe \texttt{mdct\_ne10\_f32\_c} qui permet de libérer la mémoire allouée à la configuration de la FFT avec la fonction appropriée de la librairie \emph{Ne10}.
-    \begin{lstlisting}
-ne10_mdct_f32_c::~ne10_mdct_f32_c()
-{
-    ne10_fft_destroy_c2c_float32(cfg);
-}
-    \end{lstlisting}
-
-    \asubsection{Fonction MDCT}\label{an:mdct_ne10_f32_func}
-    \paragraph{}
-    Implémentation de l'algorithme de MDCT basé sur la FFT de la librairie \emph{Ne10} en \emph{float 32} et en \emph{plain C} :
-    \begin{itemize}
-        \item Initialisation du tableau d'entrée de la FFT : les opérations de \emph{pre-twiddling} permettent de réduire la fenêtre d'entrée de la FFT;
-        \item Appel de la fonction FFT de \emph{Ne10};
-        \item Calcul du spectre de fréquence : les opérations de \emph{post-twiddling} permettent de calculer le spectre à partir des données de sortie de la FFT et des facteurs de \emph{twiddle}.
-    \end{itemize}
-    \begin{lstlisting}
-void ne10_mdct_f32_c::mdct(float *time_signal, float *spectrum)
-{
-    // pre-twiddling
-    float *cos_tw = twiddle;
-    float *sin_tw = cos_tw + 1;
-    for (int i = 0; i < MDCT_M2; i += 2)
-    {
-        float r0 = time_signal[MDCT_M32-1-i] + time_signal[MDCT_M32+i];
-        float i0 = time_signal[MDCT_M2+i] - time_signal[MDCT_M2-1-i];
-
-        float c = cos_tw[i];
-        float s = sin_tw[i];
-
-        fft_in[i/2].r = r0*c + i0*s;
-        fft_in[i/2].i = i0*c - r0*s;
-    }
-
-    for (int i = MDCT_M2; i < (MDCT_M); i += 2)
-    {
-        float r0 = time_signal[MDCT_M32-1-i] - time_signal[-MDCT_M2+i];
-        float i0 = time_signal[MDCT_M2+i] + time_signal[MDCT_M52-1-i];
-
-        float c = cos_tw[i];
-        float s = sin_tw[i];
-
-        fft_in[i/2].r = r0*c + i0*s;
-        fft_in[i/2].i = i0*c - r0*s;
-    }
-
-    // FFT
-    ne10_fft_c2c_1d_float32_c(fft_out, fft_in, cfg, 0);
-
-    // post-twiddling
-    for (int i = 0; i < (MDCT_M); i += 2)
-    {
-        float r0 = fft_out[i/2].r;
-        float i0 = fft_out[i/2].i;
-
-        float c = cos_tw[i];
-        float s = sin_tw[i];
-
-        spectrum[i] = -r0*c - i0*s;
-        spectrum[(MDCT_M)-1-i] = -r0*s + i0*c;
-    }
-}
-    \end{lstlisting}
-
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % 9 Algorithme MDCT en arithmétique fixed point
-    %   9.3 Implémentation de la MDCT basée sur la FFT Ne10 en arithmétique fixed point
-    %       - an:mdct_ne10_i32_c
-    %           - an:mdct_ne10_i32_c_header
-    %           - an:mdct_ne10_i32_c_constructor
-    %           - an:mdct_ne10_i32_c_destructor
-    %           - an:mdct_ne10_i32_c_func
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    \asection{Implémentation de la MDCT basée sur la FFT de \emph{Ne10} en \emph{fixed point}}\label{an:mdct_ne10_i32_c}
-    \asubsection{Header}\label{an:mdct_ne10_i32_c_header}
-    Header de la classe \texttt{mdct\_ne10\_i32\_c} : MDCT basée sur la FFT de la librairie \emph{Ne10} en \emph{integer} (32 bits). La classe contient les structures de données \texttt{fft\_in} en représentation Q1.15 et \texttt{fft\_out} en Q9.15, le tableau de facteurs de \texttt{twiddle} utilisé pour le pre- et le post-processing et la configuration de la FFT (\texttt{cfg}). L'implémentation des ses fonction est présenté dans les annexes suivantes.
-    \paragraph{}
-    \begin{lstlisting}
-#pragma once
-
-#include "mdct_constants.h"
-#include "NE10.h"
-
-class ne10_mdct_i32_c
-{
-private:
-    ne10_fft_cfg_int32_t cfg;                                          // Ne10 configuration
-    ne10_fft_cpx_int32_t fft_in[MDCT_M2]__attribute__((aligned(16)));  // Ne10 FFT input buffer Q1.15
-    ne10_fft_cpx_int32_t fft_out[MDCT_M2]__attribute__((aligned(16))); // Ne10 FFT output buffer Q9.15
-    int16_t twiddle[MDCT_M]__attribute__((aligned(16)));               // MDCT twiddle factors
-
-public:
-    ne10_mdct_i32_c();
-    ~ne10_mdct_i32_c();
-    void mdct(int16_t *time_signal, int32_t *spectrum);
-};
-    \end{lstlisting}
-
-    \asubsection{Constructeur}\label{an:mdct_ne10_i32_c_constructor}
-    \paragraph{}
-    Initialisation de la MDCT dans le constructeur de la classe \texttt{mdct\_ne10\_i32\_c} :
-    \begin{itemize}
-        \item Le tableau de \texttt{twiddle} est initialisé en \emph{double} puis converti en \emph{integer} (représentation Q15);
-        \item La configuration de la FFT de \emph{Ne10} est initialisée an \emph{complex to complex} en \emph{integer 32} avec en paramètre la taille de la fenêtre de la FFT réduite à un quart de la taille de la fenêtre d'entrée.
-    \end{itemize}
-    \begin{lstlisting}
-ne10_mdct_i32_c::ne10_mdct_i32_c()
-{
-    // intialize the twiddling factors
-    double alpha = M_PI / (8.0*MDCT_M);
-    double omega = M_PI / MDCT_M;
-    double scale = sqrt(sqrt(2.0 / static_cast<double>MDCT_M));
-    for (int i = 0; i < MDCT_M2; ++i)
-    {
-        double x = omega * i + alpha;
-        twiddle[2*i] = static_cast<int16_t>(cos(x)*scale*pow(2.0, 15.0));
-        twiddle[2*i+1] = static_cast<int16_t>(sin(x)*scale*pow(2.0, 15.0));
-    }
-
-    // initialize the Ne10 FFT configuration
-    cfg = ne10_fft_alloc_c2c_int32_c(MDCT_M2);
-}
-    \end{lstlisting}
-
-    \asubsection{Destructeur}\label{an:mdct_ne10_i32_c_destructor}
-    \paragraph{}
-    Destructeur de la classe \texttt{mdct\_ne10\_i32\_c} qui permet de libérer la mémoire allouée à la configuration de la FFT avec la fonction appropriée de la librairie \emph{Ne10}.
-    \begin{lstlisting}
-ne10_mdct_i32_c::~ne10_mdct_i32_c()
-{
-    ne10_fft_destroy_c2c_int32(cfg);
-}
-    \end{lstlisting}
-
-    \asubsection{Fonction MDCT}\label{an:mdct_ne10_i32_c_func}
-    \paragraph{}
-    Implémentation de l'algorithme de MDCT basé sur la FFT de la librairie \emph{Ne10} en \emph{integer 32} et en \emph{plain C} :
-    \begin{itemize}
-        \item Initialisation du tableau d'entrée de la FFT : les opérations de \emph{pre-twiddling} permettant de réduire la fenêtre d'entrée de la FFT sont faites en algorithmique \emph{fixed point};
-        \item Appel de la fonction FFT de \emph{Ne10};
-        \item Calcul du spectre de fréquence : les opérations de \emph{post-twiddling} permettant de calculer le spectre à partir des données de sortie de la FFT et des facteurs de \emph{twiddle} sont faites en algorithmique \emph{fixed point}.
-    \end{itemize}
-    \begin{lstlisting}
-void ne10_mdct_i32_c::mdct(int16_t *time_signal, int32_t *spectrum)
-{
-    // pre-twiddling
-    // fft_in = (Q1.15 + Q1.15) * Q1.15/4 + (Q1.15 + Q1.15) * Q1.15/4
-    //          1/4 Q1.30 + 1/4 Q1.30 + 1/4 Q1.30 + 1/4 Q1.30 -> Q1.30
-    //          >>7 -> Q1.23 + 8 bits reserved for the FFT
-    int16_t *cos_tw = twiddle;
-    int16_t *sin_tw = cos_tw + 1;
-    for (int i = 0; i < MDCT_M2; i += 2)
-    {
-        int32_t r0 = static_cast<int32_t>(time_signal[MDCT_M32-1-i]) + time_signal[MDCT_M32+i];
-        int32_t i0 = static_cast<int32_t>(time_signal[MDCT_M2+i]) - time_signal[MDCT_M2-1-i];
-
-        int16_t c = cos_tw[i];
-        int16_t s = sin_tw[i];
-
-        fft_in[i/2].r = (((r0*c)+64)>>7) + (((i0*s)+64)>>7);
-        fft_in[i/2].i = (((i0*c)+64)>>7) - (((r0*s)+64)>>7);
-    }
-
-    for (int i = MDCT_M2; i < MDCT_M; i += 2)
-    {
-        int32_t r0 = static_cast<int32_t>(time_signal[MDCT_M32-1-i]) - time_signal[-MDCT_M2+i];
-        int32_t i0 = static_cast<int32_t>(time_signal[MDCT_M2+i]) + time_signal[MDCT_M52-1-i];
-
-        int16_t c = cos_tw[i];
-        int16_t s = sin_tw[i];
-
-        fft_in[i/2].r = (((r0*c)+64)>>7) + (((i0*s)+64)>>7);
-        fft_in[i/2].i = (((i0*c)+64)>>7) - (((r0*s)+64)>>7);
-    }
-
-    // perform the FFT
-    ne10_fft_c2c_1d_int32_c(fft_out, fft_in, cfg, 0, 0);
-
-    // post-twiddling
-    // spectrum = Q9.23>>8 * Q1.15/4 + Q9.23>>8 * Q1.15/4
-    //          = Q9.15 * Q1.15/4 + Q9.15 * Q1.15/4
-    //          = Q10.30/4 + Q10.30/4
-    //          = Q11.30/4
-    //          = Q9.30 >> 15 = Q9.15
-    for (int i = 0; i < MDCT_M; i += 2)
-    {
-        int32_t r0 = fft_out[i/2].r;
-        int32_t i0 = fft_out[i/2].i;
-
-        int16_t c = cos_tw[i];
-        int16_t s = sin_tw[i];
-
-        spectrum[i] = ((((-r0+128)>>8)*c+16384)>>15) - ((((i0+128)>>8)*s+16384)>>15);
-        spectrum[MDCT_M-1-i] = ((((-r0+128)>>8)*s+16384)>>15) + ((((i0+128)>>8)*c+16384)>>15);
-    }
-}
-    \end{lstlisting}
-
-
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    \asection{}\label{}
-    \paragraph{}
-    \begin{lstlisting}
-    \end{lstlisting}
-
-
-
-        \section{Test des performances des algorithmes MDCT}
-        \subsection{Code utilisé pour la mesure des performances}
-        \label{an:run_mdcts}
-        \begin{lstlisting}
-#include <iomanip>
-#include <iostream>
-#include <cstring>
-
-#include "args_parser.h"
-#include "mdct_constants.h"
-#include "sin_wave.h"
-#include "Timers.h"
-
-using namespace EvsHwLGPL;
-
-#ifdef FIXED_POINT_C    // fixed point arithmetic
-#include "ne10_fixed_point_mdct_c.h"
-
-#define INPUT_DATA              int16_t
-#define OUTPUT_DATA             int32_t
-#define GENERATE_SIN            sin_int
-#define MDCT                    ne10_fixed_point_mdct_c
-
-#elif FIXED_POINT_NEON  // fixed point arithmetic
-#include "ne10_fixed_point_mdct_neon.h"
-
-#define INPUT_DATA              int16_t
-#define OUTPUT_DATA             int32_t
-#define GENERATE_SIN            sin_int
-#define MDCT                    ne10_fixed_point_mdct_neon
-
-#elif FLOATING_POINT    // floating point arithmetic
-#include "ne10_floating_point_mdct.h"
-
-#define INPUT_DATA              double
-#define OUTPUT_DATA             double
-#define GENERATE_SIN            sin_float
-#define MDCT                    ne10_floating_point_mdct
-
-#else                   // reference algorithm in floating point arithmetic
-#include "reference_mdct.h"
-
-#define INPUT_DATA              double
-#define OUTPUT_DATA             double
-#define GENERATE_SIN            sin_float
-
-#endif
-
-/**
-    * @brief Run the MDCT on a single frame x times
-    * the signal is a single tone configurable via the --sin parameter (200Hz by default)
-    * the number of runs is setted by the --run parameter (1 by default)
-    */
-int main(int argc, char **argv) {
-    // initialize the parameters
-    params p;
-    try
-    {
-        p = parse_args(argc, argv);
-    }
-    catch(const std::runtime_error &err)
-    {
-        std::cerr << err.what() << std::endl;
-        usage();
-        return 1;
-    }
-
-    // generate the time signal
-    INPUT_DATA time_signal[MDCT_WINDON_LEN]__attribute__((aligned(16)));
-    memset(&time_signal, 0, MDCT_WINDON_LEN*sizeof(INPUT_DATA));
-    GENERATE_SIN(time_signal, MDCT_WINDON_LEN, 0.9, p.frequency, 0.0, FS);
-
-    OUTPUT_DATA mdct_spectrum[MDCT_M]__attribute__((aligned(16)));
-    memset(&mdct_spectrum, 0, MDCT_M*sizeof(OUTPUT_DATA));
-
-    // perform the MDCT
-    CTimers timer;
-    int64_t sum = 0;
-    int64_t *runtimes = static_cast<int64_t *>(malloc(p.runs * sizeof(int64_t)));
-
-#ifdef REF
-    for (unsigned i = 0; i < p.runs; ++i) {
-        timer.Start();
-        ref_float_mdct<double>(time_signal, mdct_spectrum);
-        timer.Stop();
-        runtimes[i] = timer.GetTimeElapsed();
-        sum += timer.GetTimeElapsed();
-    }
-#else
-    MDCT ne10_mdct;
-    for (unsigned i = 0; i < p.runs; ++i) {
-        timer.Start();
-        ne10_mdct.mdct(time_signal, mdct_spectrum);
-        timer.Stop();
-        runtimes[i] = timer.GetTimeElapsed();
-        sum += timer.GetTimeElapsed();
-    }
-#endif
-
-    // compute the average
-    double avg = static_cast<double>(sum) / static_cast<double>(p.runs);
-    std::cout << "average run time: " << avg << " ns" << std::endl;
-
-    return 0;
-}
-        \end{lstlisting}
-
-
-
-        \subsection{Commandes CMake générant les exécutables}
-        \label{an:cmake_run_mdcts}
-        \begin{lstlisting}
-# Run the MDCT x times (single frame, floating point)
-add_executable(run_mdct_float test/performance/run_mdct.cpp
-    src/args_parser src/sin_wave.cpp src/Timers.cpp
-    src/ne10_floating_point_mdct.cpp)
-target_compile_definitions(run_mdct_float PUBLIC -DFLOATING_POINT)
-target_link_libraries(run_mdct_float NE10)
-
-# Run the MDCT x times (single frame, fixed point arithmetic, plain C implementation)
-add_executable(run_mdct_fixed_c test/performance/run_mdct.cpp
-    src/args_parser src/sin_wave.cpp src/Timers.cpp
-    src/ne10_fixed_point_mdct_c.cpp src/ne10_fixed_point_mdct_neon.cpp)
-target_compile_definitions(run_mdct_fixed_c PUBLIC -DFIXED_POINT_C)
-target_link_libraries(run_mdct_fixed_c NE10)
-
-# Run the MDCT x times (single frame, fixed point arithmetic, neon implementation)
-add_executable(run_mdct_fixed_neon test/performance/run_mdct.cpp
-    src/args_parser src/sin_wave.cpp src/Timers.cpp
-    src/ne10_fixed_point_mdct_c.cpp src/ne10_fixed_point_mdct_neon.cpp)
-target_compile_definitions(run_mdct_fixed_neon PUBLIC -DFIXED_POINT_NEON)
-target_link_libraries(run_mdct_fixed_neon NE10)
-
-# Run the MDCT x times (single frame, reference algorithm)
-add_executable(run_mdct_ref test/performance/run_mdct.cpp
-    src/args_parser src/sin_wave.cpp src/Timers.cpp
-    src/reference_mdct.cpp)
-target_compile_definitions(run_mdct_ref PUBLIC -DREF)
-target_link_libraries(run_mdct_ref NE10)
-        \end{lstlisting}
-
-
-
+    \includepdf[pages=-]{annexes}
 
 \end{document}
