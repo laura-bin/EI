@@ -51,9 +51,9 @@
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % 5 Environnement de développement
-    %       - an:cmake_super
+    %       - app:cmake_super
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{CMake principal}\label{an:cmake_super}
+\section{CMake principal}\label{app:cmake_super}
 \paragraph{}
 Fichier CMake principal placé à la racine du projet. Il permet de compiler :
 \begin{itemize}
@@ -77,14 +77,14 @@ add_subdirectory(Ne10)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % 6 Algorithmes MDCT de référence
     %   6.2 Implémentations des MDCT de référence en algorithmiques floating point et fixed point
-    %       - an:mdct_const
-    %       - an:mdct_ref
-    %           - an:mdct_ref_float
-    %           - an:mdct_ref_int
+    %       - app:mdct_const
+    %       - app:mdct_ref
+    %           - app:mdct_ref_float
+    %           - app:mdct_ref_int
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
-\section{Valeurs constantes des MDCT}\label{an:mdct_const}
+\section{Valeurs constantes des MDCT}\label{app:mdct_const}
 \paragraph{}
 Le fichier \texttt{mdct\_constants.h} rassemble les valeurs constantes des MDCT pour une fenêtre d'entrée de 1024 échantillons.
 \lstset{language=C++}
@@ -104,8 +104,8 @@ Le fichier \texttt{mdct\_constants.h} rassemble les valeurs constantes des MDCT 
 
 
 \newpage
-\section{Algorithmes de référence}\label{an:mdct_ref}
-\subsection{MDCT de référence en \emph{float}}\label{an:mdct_ref_float}
+\section{Algorithmes de référence}\label{app:mdct_ref}
+\subsection{MDCT de référence en \emph{float}}\label{app:mdct_ref_float}
 \paragraph{}
 Algorithme de référence basé sur la formule mathématique de la MDCT. Le template permet de réaliser les calculs en \emph{float} ou en \emph{double}.
 \lstset{language=C++}
@@ -133,7 +133,7 @@ void ref_float_mdct(FLOAT *time_signal, FLOAT *spectrum)
 }
 \end{lstlisting}
 
-\subsection{MDCT de référence en \emph{integer}}\label{an:mdct_ref_int}
+\subsection{MDCT de référence en \emph{integer}}\label{app:mdct_ref_int}
 \paragraph{}
 Algorithme de référence basé sur la formule mathématique de la MDCT. Le spectre est calculé en \emph{double} puis converti en \emph{integer} sur 32 bits en représentation Q15.
 \lstset{language=C++}
@@ -163,14 +163,14 @@ void ref_int_mdct(int16_t *time_signal, int32_t *spectrum)
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %   6.3 Validation des algorithmes de référence
-    %       - an:sin_wave
-    %           - an:sin_wave_float
-    %           - an:sin_wave_int
+    %       - app:sin_wave
+    %           - app:sin_wave_float
+    %           - app:sin_wave_int
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
-\section{Génération d'un signal sinusoïdal}\label{an:sin_wave}
-\subsection{Génération d'un signal sinusoïdal en \emph{float}}\label{an:sin_wave_float}
+\section{Génération d'un signal sinusoïdal}\label{app:sin_wave}
+\subsection{Génération d'un signal sinusoïdal en \emph{float}}\label{app:sin_wave_float}
 \paragraph{}
 Code de génération d'un signal sinusoïdal en \emph{float} ou en \emph{double}.
 \lstset{language=C++}
@@ -189,7 +189,7 @@ void sin_float(FLOAT *out, int n_samples, double amplitude,
 }
 \end{lstlisting}
 
-\subsection{Génération d'un signal sinusoïdal en \emph{integer}}\label{an:run_ref_mdct_fint}
+\subsection{Génération d'un signal sinusoïdal en \emph{integer}}\label{app:run_ref_mdct_fint}
 \paragraph{}
 La génération du signal sinusoïdal en \emph{integer} fait appel à la génération du signal sinusoïdal en \emph{double} avant de convertir le résultat en \emph{integer} (représentation Q15).
 \lstset{language=C++}
@@ -221,15 +221,15 @@ void sin_int(int16_t *out, int n_samples, double amplitude,
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % 7 Algorithme MDCT basé sur la FFT
     %   7.2 Implémentation de la MDCT basée sur la FFT de la librairie FFTW3
-    %       - an:mdct_fftw3_f32_header
-    %       - an:mdct_fftw3_f32_constructeur
-    %       - an:mdct_fftw3_f32_destructeur
-    %       - an:mdct_fftw3_f32_func
+    %       - app:mdct_fftw3_f32_header
+    %       - app:mdct_fftw3_f32_constructeur
+    %       - app:mdct_fftw3_f32_destructeur
+    %       - app:mdct_fftw3_f32_func
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
-\section{Implémentation de la MDCT basée sur la FFT de \emph{FFTW3}}\label{an:mdct_fftw3_f32}
-\subsection{Header}\label{an:mdct_fftw3_f32_header}
+\section{Implémentation de la MDCT basée sur la FFT de \emph{FFTW3}}\label{app:mdct_fftw3_f32}
+\subsection{Header}\label{app:mdct_fftw3_f32_header}
 \paragraph{}
 Header de la classe \texttt{mdct\_fftw3\_f32} : MDCT basée sur la FFT de la librairie \emph{FFTW3} en \emph{float} (32 bits). La classe contient les structures de données \texttt{fft\_in} et \texttt{fft\_out}, le tableau de facteurs de \texttt{twiddle} utilisé pour le pre- et le post-processing et la configuration de la FFT (\texttt{fft\_plan}). L'implémentation des fonctions de ce header est présentée dans les annexes suivantes.
 \lstset{language=C++}
@@ -254,7 +254,7 @@ class fftw3_mdct_f32
 };
 \end{lstlisting}
 
-\subsection{Constructeur}\label{an:mdct_fftw3_f32_constructor}
+\subsection{Constructeur}\label{app:mdct_fftw3_f32_constructor}
 \paragraph{}
 Initialisation de la MDCT dans le constructeur de la classe \texttt{mdct\_fftw3\_f32} :
 \begin{itemize}
@@ -285,7 +285,7 @@ fftw3_mdct_f32::fftw3_mdct_f32()
 }
 \end{lstlisting}
 
-\subsection{Destructeur}\label{an:mdct_fftw3_f32_destructor}
+\subsection{Destructeur}\label{app:mdct_fftw3_f32_destructor}
 \paragraph{}
 Destructeur de la classe \texttt{mdct\_fftw3\_f32} qui permet de libérer la mémoire allouée aux tableaux d'entrée et de sortie de la FFT et à sa configuration avec les fonctions appropriées fournies par la librairie \emph{FFTW3}.
 \lstset{language=C++}
@@ -298,7 +298,7 @@ fftw3_mdct_f32::~fftw3_mdct_f32()
 }
 \end{lstlisting}
 
-\subsection{Fonction MDCT}\label{an:mdct_fftw3_f32_func}
+\subsection{Fonction MDCT}\label{app:mdct_fftw3_f32_func}
 \paragraph{}
 Implémentation de l'algorithme de MDCT basé sur la FFT de la librairie \emph{FFTW3} :
 \begin{itemize}
@@ -366,14 +366,14 @@ void fftw3_mdct_f32::mdct(float *time_signal, float *spectrum)
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %   7.3 Validation
-    %       - an:fftw3_example
-    %           - an:fftw3_example_code
-    %           - an:fftw3_example_compilation
+    %       - app:fftw3_example
+    %           - app:fftw3_example_code
+    %           - app:fftw3_example_compilation
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
-\section{Validation de la MDCT \emph{FFTW3} en \emph{float 32}}\label{an:fftw3_example}
-\subsection{Code source}\label{an:fftw3_example_code}
+\section{Validation de la MDCT \emph{FFTW3} en \emph{float 32}}\label{app:fftw3_example}
+\subsection{Code source}\label{app:fftw3_example_code}
 \paragraph{}
 Test de la MDCT basée sur la FFT de \emph{FFTW3} avec un signal d'entrée sinusoïdal à 200Hz :
 \begin{itemize}
@@ -430,7 +430,7 @@ int main(void)
 }
 \end{lstlisting}
 
-\subsection{Compilation}\label{an:fftw3_example_compilation}
+\subsection{Compilation}\label{app:fftw3_example_compilation}
 \paragraph{}
 Commandes CMake permettant de compiler le code d'exemple.
 \lstset{language=make}
@@ -446,16 +446,16 @@ target_link_libraries(fftw3_mdct_f32 fftw3f)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % 8 Intégration de la librairie Ne10
     %   8.2 Implémentation de la MDCT basée sur la FFT Ne10 en arithmétique floating point
-    %       - an:mdct_ne10_f32
-    %           - an:mdct_ne10_f32_header
-    %           - an:mdct_ne10_f32_constructor
-    %           - an:mdct_ne10_f32_destructor
-    %           - an:mdct_ne10_f32_func
+    %       - app:mdct_ne10_f32
+    %           - app:mdct_ne10_f32_header
+    %           - app:mdct_ne10_f32_constructor
+    %           - app:mdct_ne10_f32_destructor
+    %           - app:mdct_ne10_f32_func
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
-\section{Implémentation de la MDCT basée sur la FFT de \emph{Ne10} en \emph{floating point}}\label{an:mdct_ne10_f32}
-\subsection{Header}\label{an:mdct_ne10_f32_header}
+\section{Implémentation de la MDCT basée sur la FFT de \emph{Ne10} en \emph{floating point}}\label{app:mdct_ne10_f32}
+\subsection{Header}\label{app:mdct_ne10_f32_header}
 \paragraph{}
 Header de la classe \texttt{mdct\_ne10\_f32\_c} : MDCT basée sur la FFT de la librairie \emph{Ne10} en \emph{float} (32 bits). La classe contient les structures de données \texttt{fft\_in} et \texttt{fft\_out}, le tableau de facteurs de \texttt{twiddle} utilisé pour le pre- et le post-processing et la configuration de la FFT (\texttt{cfg}). L'implémentation des fonctions de ce header est présentée dans les annexes suivantes.
 \lstset{language=C++}
@@ -480,7 +480,7 @@ class ne10_mdct_f32_c
 };
 \end{lstlisting}
 
-\subsection{Constructeur}\label{an:mdct_ne10_f32_constructor}
+\subsection{Constructeur}\label{app:mdct_ne10_f32_constructor}
 \paragraph{}
 Initialisation de la MDCT dans le constructeur de la classe \texttt{mdct\_ne10\_f32\_c} :
 \begin{itemize}
@@ -505,7 +505,7 @@ ne10_mdct_f32_c::ne10_mdct_f32_c()
 }
 \end{lstlisting}
 
-\subsection{Destructeur}\label{an:mdct_ne10_f32_destructor}
+\subsection{Destructeur}\label{app:mdct_ne10_f32_destructor}
 \paragraph{}
 Destructeur de la classe \texttt{mdct\_ne10\_f32\_c} qui permet de libérer la mémoire allouée à la configuration de la FFT avec la fonction appropriée de la librairie \emph{Ne10}.
 \lstset{language=C++}
@@ -516,7 +516,7 @@ ne10_mdct_f32_c::~ne10_mdct_f32_c()
 }
 \end{lstlisting}
 
-\subsection{Fonction MDCT}\label{an:mdct_ne10_f32_func}
+\subsection{Fonction MDCT}\label{app:mdct_ne10_f32_func}
 \paragraph{}
 Implémentation de l'algorithme de MDCT basé sur la FFT de la librairie \emph{Ne10} en \emph{float 32} et en \emph{plain C} :
 \begin{itemize}
@@ -577,17 +577,17 @@ void ne10_mdct_f32_c::mdct(float *time_signal, float *spectrum)
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %   8.4 Performances
-    %       - an:perf_fft_ne10
-    %           - an:perf_fft_ne10_code
-    %           - an:perf_fft_ne10_cmake
-    %       - an:perf_fft_fftw3
-    %           - an:perf_fft_fftw3_code
-    %           - an:perf_fft_fftw3_cmake
+    %       - app:perf_fft_ne10
+    %           - app:perf_fft_ne10_code
+    %           - app:perf_fft_ne10_cmake
+    %       - app:perf_fft_fftw3
+    %           - app:perf_fft_fftw3_code
+    %           - app:perf_fft_fftw3_cmake
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
-\section{Mesure des performances des FFT de \emph{Ne10}}\label{an:perf_fft_ne10}
-\subsection{Code source}\label{an:perf_fft_ne10_code}
+\section{Mesure des performances des FFT de \emph{Ne10}}\label{app:perf_fft_ne10}
+\subsection{Code source}\label{app:perf_fft_ne10_code}
 \paragraph{}
 Code permettant de tester la vitesse d'exécution moyenne de différentes FFT proposées par la librairie \emph{Ne10}. La moyenne est calculée sur 10.000.000 exécutions avec des données aléatoires en entrée de la FFT différentes pour chaque exécution. Les variables de préprocesseur définies à la compilation permettent sur base du même code de mesurer le temps d'exécution moyen avec écart type :
 \begin{itemize}
@@ -738,7 +738,7 @@ int main()
 }
 \end{lstlisting}
 
-\subsection{Compilation}\label{an:perf_fft_ne10_cmake}
+\subsection{Compilation}\label{app:perf_fft_ne10_cmake}
 \paragraph{}
 Commandes CMake utilisées pour générer les exécutables permettant de mesurer le temps d'exécution de différentes FFT proposées par la librairie \emph{Ne10}. En fonction des variables de préprocesseur définies, les exéctables suivants sont générés :
 \begin{itemize}
@@ -785,8 +785,8 @@ target_link_libraries(run_ne10_fft_i16_neon NE10)
 
 
 \newpage
-\section{Mesure des performances des FFT de \emph{FFTW3}}\label{an:perf_fft_fftw3}
-\subsection{Code source}\label{an:perf_fft_fftw3_code}
+\section{Mesure des performances des FFT de \emph{FFTW3}}\label{app:perf_fft_fftw3}
+\subsection{Code source}\label{app:perf_fft_fftw3_code}
 \paragraph{}
 Code permettant de tester la vitesse d'exécution moyenne de la FFT en \emph{float 32} de la librairie \emph{FFTW3}. La moyenne est calculée sur 10.000.000 exécutions avec des données aléatoires en entrée de la FFT différentes pour chaque exécution.
 \lstset{language=C++}
@@ -860,7 +860,7 @@ int main()
 }
 \end{lstlisting}
 
-\subsection{Compilation}\label{an:perf_fft_fftw3_cmake}
+\subsection{Compilation}\label{app:perf_fft_fftw3_cmake}
 \paragraph{}
 Commandes CMake utilisées pour générer l'exécutable permettant de mesurer le temps d'exécution de la FFT \emph{float 32} de la librairie \emph{FFTW3}.
 \lstset{language=make}
@@ -875,16 +875,16 @@ target_link_libraries(run_fftw3_fft_f32 fftw3f)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % 9 Algorithme MDCT en arithmétique fixed point
     %   9.3 Implémentation de la MDCT basée sur la FFT Ne10 en arithmétique fixed point
-    %       - an:mdct_ne10_i32_c
-    %           - an:mdct_ne10_i32_c_header
-    %           - an:mdct_ne10_i32_c_constructor
-    %           - an:mdct_ne10_i32_c_destructor
-    %           - an:mdct_ne10_i32_c_func
+    %       - app:mdct_ne10_i32_c
+    %           - app:mdct_ne10_i32_c_header
+    %           - app:mdct_ne10_i32_c_constructor
+    %           - app:mdct_ne10_i32_c_destructor
+    %           - app:mdct_ne10_i32_c_func
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
-\section{Implémentation de la MDCT basée sur la FFT de \emph{Ne10} en \emph{fixed point}}\label{an:mdct_ne10_i32_c}
-\subsection{Header}\label{an:mdct_ne10_i32_c_header}
+\section{Implémentation de la MDCT basée sur la FFT de \emph{Ne10} en \emph{fixed point}}\label{app:mdct_ne10_i32_c}
+\subsection{Header}\label{app:mdct_ne10_i32_c_header}
 \paragraph{}
 Header de la classe \texttt{mdct\_ne10\_i32\_c} : MDCT basée sur la FFT de la librairie \emph{Ne10} en \emph{integer} (32 bits). La classe contient les structures de données \texttt{fft\_in} en représentation Q1.15 et \texttt{fft\_out} en Q9.15, le tableau de facteurs de \texttt{twiddle} utilisé pour le pre- et le post-processing et la configuration de la FFT (\texttt{cfg}). L'implémentation des fonctions de ce header est présentée dans les annexes suivantes.
 \lstset{language=C++}
@@ -911,7 +911,7 @@ class ne10_mdct_i32_c
 };
 \end{lstlisting}
 
-\subsection{Constructeur}\label{an:mdct_ne10_i32_c_constructor}
+\subsection{Constructeur}\label{app:mdct_ne10_i32_c_constructor}
 \paragraph{}
 Initialisation de la MDCT dans le constructeur de la classe \texttt{mdct\_ne10\_i32\_c} :
 \begin{itemize}
@@ -938,7 +938,7 @@ ne10_mdct_i32_c::ne10_mdct_i32_c()
 }
 \end{lstlisting}
 
-\subsection{Destructeur}\label{an:mdct_ne10_i32_c_destructor}
+\subsection{Destructeur}\label{app:mdct_ne10_i32_c_destructor}
 \paragraph{}
 Destructeur de la classe \texttt{mdct\_ne10\_i32\_c} qui permet de libérer la mémoire allouée à la configuration de la FFT avec la fonction appropriée de la librairie \emph{Ne10}.
 \lstset{language=C++}
@@ -949,7 +949,7 @@ ne10_mdct_i32_c::~ne10_mdct_i32_c()
 }
 \end{lstlisting}
 
-\subsection{Fonction MDCT}\label{an:mdct_ne10_i32_c_func}
+\subsection{Fonction MDCT}\label{app:mdct_ne10_i32_c_func}
 \paragraph{}
 Implémentation de l'algorithme de MDCT basé sur la FFT de la librairie \emph{Ne10} en \emph{integer 32} et en \emph{plain C} :
 \begin{itemize}
@@ -1021,16 +1021,16 @@ void ne10_mdct_i32_c::mdct(int16_t *time_signal, int32_t *spectrum)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % 10 Optimisations à l’architecture ARM
     %   10.3 Implémentation de la MDCT basée sur la FFT Ne10 en arithmétique fixed point avec opérations SIMD Neon
-    %       - an:mdct_ne10_i32_neon
-    %       - an:mdct_ne10_i32_neon_header
-    %       - an:mdct_ne10_i32_neon_constructor
-    %       - an:mdct_ne10_i32_neon_destructor
-    %       - an:mdct_ne10_i32_neon_func
+    %       - app:mdct_ne10_i32_neon
+    %       - app:mdct_ne10_i32_neon_header
+    %       - app:mdct_ne10_i32_neon_constructor
+    %       - app:mdct_ne10_i32_neon_destructor
+    %       - app:mdct_ne10_i32_neon_func
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
-\section{Implémentation de la MDCT basée sur la FFT de \emph{Ne10} en \emph{fixed point} avec optimisations \emph{Neon}}\label{an:mdct_ne10_i32_neon}
-\subsection{Header}\label{an:mdct_ne10_i32_neon_header}
+\section{Implémentation de la MDCT basée sur la FFT de \emph{Ne10} en \emph{fixed point} avec optimisations \emph{Neon}}\label{app:mdct_ne10_i32_neon}
+\subsection{Header}\label{app:mdct_ne10_i32_neon_header}
 \paragraph{}
 Header de la classe \texttt{mdct\_ne10\_i32\_neaon} : MDCT basée sur la FFT de la librairie \emph{Ne10} en \emph{integer} (32 bits) optimisée par l'utilisation des opérations SIMD Neon. La classe contient les structures de données \texttt{fft\_in} en représentation Q1.15 et \texttt{fft\_out} en Q9.15, les tableaux de facteurs de \texttt{twiddle} utilisé pour le pre- et le post-processing et la configuration de la FFT (\texttt{cfg}). Contrairement aux autres implémentations, les facteurs de twiddle non sont pas rassemblés dans un seul tableau. Les tableaux de facteurs de \emph{pre-twiddling} et de \emph{post-twiddling} sont séparés car ils sont utilisés en 16 bits pour le \emph{pre-twiddling} et en 32 bits pour le \emph{post-twiddling}. Chacun de ses tableaux est séparé en deux car pour que chaque moitié puisse être initialisée dans un ordre qui facilite l'utilisation des opérations SIMD. L'implémentation des fonctions de ce header est présentée dans les annexes suivantes.
 \lstset{language=C++}
@@ -1061,7 +1061,7 @@ public:
 };
 \end{lstlisting}
 
-\subsection{Constructeur}\label{an:mdct_ne10_i32_neon_constructor}
+\subsection{Constructeur}\label{app:mdct_ne10_i32_neon_constructor}
 \paragraph{}
 Initialisation de la MDCT dans le constructeur de la classe \texttt{mdct\_ne10\_i32\_neon} :
 \begin{itemize}
@@ -1098,7 +1098,7 @@ ne10_mdct_i32_neon::ne10_mdct_i32_neon()
 }
 \end{lstlisting}
 
-\subsection{Destructeur}\label{an:mdct_ne10_i32_neon_destructor}
+\subsection{Destructeur}\label{app:mdct_ne10_i32_neon_destructor}
 \paragraph{}
 Destructeur de la classe \texttt{mdct\_ne10\_i32\_c} qui permet de libérer la mémoire allouée à la configuration de la FFT avec la fonction appropriée de la librairie \emph{Ne10}.
 \lstset{language=C++}
@@ -1109,7 +1109,7 @@ ne10_mdct_i32_neon::~ne10_mdct_i32_neon()
 }
 \end{lstlisting}
 
-\subsection{Fonction MDCT}\label{an:mdct_ne10_i32_neon_func}
+\subsection{Fonction MDCT}\label{app:mdct_ne10_i32_neon_func}
 \paragraph{}
 Implémentation de l'algorithme de MDCT basé sur la FFT de la librairie \emph{Ne10} en \emph{integer 32} avec utilisation des instructions SIMD Neon :
 \begin{itemize}

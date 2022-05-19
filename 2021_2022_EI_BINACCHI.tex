@@ -303,7 +303,7 @@
     \newpage
     \section{Environnement de développement}
     \paragraph{}
-    Platformes : passage de Intel à ARM nécessaire à cause de la lib Ne10 et impossibilité de maintenir une version de référence Intel
+    Plateformes : passage de Intel à ARM nécessaire à cause de la lib Ne10 et impossibilité de maintenir une version de référence Intel
 
     \paragraph{}
     Développement remote sur RPI + photo raspberry
@@ -317,13 +317,17 @@
     \paragraph{}
     Le build du projet se fait grâce à un fichier CMake à la racine du projet. Ce fichier présenté dans l'annexe \ref{an:cmake_super} permet d'appeler les CMake du projet \emph{audio\_encoding} (projet contenant les MDCT et ses tests) et de la librairie \emph{Ne10}. Contrairement à l'usage, ces deux projets sont construits par défaut en mode \emph{release} et non en mode \emph{debug} afin de ne pas risquer de faire tourner les tests de performance en mode \emph{debug}. Les commandes du CMake générant les exécutables de tests seront fournies en annexe à la suite du code source de ces tests.
 
+
+
     \newpage
     \section{Algorithmes MDCT de référence}
+
     \paragraph{}
     La première étape de ce travail consiste à développer des algorithmes de référence afin de valider les différentes MDCT implémentées par la suite. Ces algorithmes de référence sont développés en algorithmique flottante sur base de la formule mathématique de la MDCT. Ils permettent de générer des spectres de fréquence en \emph{float} ou en \emph{integer} afin de valider les données de sortie des MDCT optimisées.
 
     \subsection{Description mathématique}
     \label{sec:desc-math}
+
     \paragraph{}
     La transformation effectuée par la MDCT est donnée par l'équation suivante\cite{wiki:MDCT} :
     $$X_k = \frac{2}{\sqrt{2N}} \sum_{n=0}^{2N-1} x_n \cos \left[ \frac{\pi}{N} \left( N + \frac{1}{2} + \frac{N}{2} \right) \left( k + \frac{1}{2} \right) \right]$$
@@ -331,23 +335,24 @@
         \item[$X_k$] avec $k \in [0, N[$ pour une fenêtre d'entrée de 2N échantillons
         \item[$x_n$] avec $n \in [0, 2N[$ : la fenêtre d'entrée
         \item[$F: R^{2N} \rightarrow R^N$] la MDCT est une fonction linéaire qui pour 2N nombres réels en entrée produit N nombres réels en sortie
-    \end{description}
+    \end{description}\label{test}
 
     \paragraph{}
-    La MDCT a été implémentée avec une fenêtre d'entrée de $2N = 1024$ échantillons. Le bloc de sortie, i.e. le spectre de fréquences de la fenêtre d'entrée, aura donc une taille de 512. Ces valeurs, utilisées à de très nombreux endroits du code, sont rassemblées dans le header \texttt{mdct\_constants.h} présenté dans l'annexe \ref{an:mdct_const}. Ce fichier contient également d'autres valeurs précalculée sur base de la taille de la fenêtre d'entrée.
+    La MDCT a été implémentée avec une fenêtre d'entrée de $2N = 1024$ échantillons. Le bloc de sortie, i.e. le spectre de fréquences de la fenêtre d'entrée, aura donc une taille de 512. Ces valeurs, utilisées à de très nombreux endroits du code, sont rassemblées dans le header \texttt{mdct\_constants.h} présenté dans l'\textbf{annexe B}. Ce fichier contient également d'autres valeurs précalculées sur base de la taille de la fenêtre d'entrée.
 
     \paragraph{}
-    La section suivante présente deux implémentations simples de cette formule. Ces implémentations ne pourraient pas être utilisées sans avoir été optimisées car elles seraient beaucoup trop lentes pour un codec qui doit tenir le temps réel. La complexité d'une implémentation de cette formule est de $O(N^2)$ opérations (où N est la taille de la fenêtre d'entrée). Cette complexité peut être ramenée à $O(N \log N)$ opérations par une factorisation récursive. La complexité peut également être diminuée en se basant sur une autre transformation, e.g. une DFT (\emph{Discrete Fourier Transorm}) ou une autre DCT (\emph{Discrete Cosine Transform}) : la complexité sera alors de $O(N)$ opérations de pré et post processing en plus de la complexité de la DFT ou de la DCT choisie\cite{wiki:MDCT}. C'est cette dernière option qui a été retenue pour ce travail.
+    La section suivante présente deux implémentations simples de cette formule. Ces implémentations ne pourraient pas être utilisées sans avoir été optimisées car elles seraient beaucoup trop lentes pour un codec qui doit tenir le temps réel sur plusieurs canaux. La complexité de implémentation de cette formule est de $O(N^2)$ opérations (où N est la taille de la fenêtre d'entrée). Cette complexité peut être ramenée à $O(N \log N)$ opérations par une factorisation récursive. La complexité peut également être diminuée en se basant sur une autre transformation, e.g. une DFT (\emph{Discrete Fourier Transorm}) ou une autre DCT (\emph{Discrete Cosine Transform}) : la complexité sera alors de $O(N)$ opérations de pre- et post-processing en plus de la complexité de la DFT ou de la DCT choisie\cite{wiki:MDCT}. C'est cette dernière option qui a été retenue pour ce travail.
 
     \subsection{Implémentations des MDCT de référence en \emph{floating point} et \emph{fixed point}}
-    \paragraph{}
-    La formule mathématique de la MDCT a été implémentée très simplement en algorithmique flottante avec la possibilité d'obtenir le spectre de fréquences codés en \emph{float}, \emph{double} ou \emph{int32} depuis une fenêtre d'entrée en \emph{int16}. L'objectif de cet implémentation est de pouvoir vérifier les données des implémentations optimisées de la MDCT et de mesurer leur précision.
 
     \paragraph{}
-    La première implémentation de l'équation de la MDCT est présentée dans l'annexe \ref{an:ref_mdct_float}. La fonction développée permet de faire ses calculs et d'obtenir un résultat aussi bien en \emph{float} (32 bits) qu'en \emph{double} (64 bits) grâce à l'utilisation d'un \emph{template}.
+    La formule mathématique de la MDCT a été implémentée très simplement en algorithmique flottante avec la possibilité d'obtenir le spectre de fréquences codés en \emph{float}, \emph{double} ou \emph{int32}. L'objectif de ces implémentations est de pouvoir valider les spectres de fréquence calculés par les implémentations optimisées de la MDCT. Les MDCT de référence serviront égaelement à mesurer la précision des MDCT optimisées.
 
     \paragraph{}
-    La seconde fonction de référence est présentée dans l'annexe \ref{an:ref_mdct_int}. Elle permettra de vérifier les résultats des implémentations optimisées en \emph{fixed point}. Tous les calculs ne sont pas fait en algorithmique entière : la fonction fait les mêmes calculs que la fonction de référence en algorithmique flottante (uniquement en \emph{double} cette fois pour garder le plus de précision possible) et transtype le résultat final dans un integer de 32 bits qui correspond à une notation Qx.15 signée.
+    La première implémentation de l'équation de la MDCT est présentée dans l'\textbf{annexe C.1}. La fonction développée permet de faire ses calculs et d'obtenir un résultat aussi bien en \emph{float} (32 bits) qu'en \emph{double} (64 bits) grâce à l'utilisation d'un \emph{template}. Le signal temporel a la même précision (\emph{float} ou \emph{double}) que le spectre généré.
+
+    \paragraph{}
+    La seconde fonction de référence est présentée dans l'\textbf{annexe C.2}. Elle permettra de vérifier les résultats des implémentations optimisées en \emph{fixed point}. Tous les calculs ne sont pas fait en algorithmique entière : la fonction fait les mêmes calculs que la fonction de référence en algorithmique flottante (uniquement en \emph{double} cette fois pour garder le plus de précision possible) et transtype le résultat final dans un \emph{integer} de 32 bits qui correspond à une notation Qx.15 signée.
 
     \subsection{Validation des algorithmes de référence}
 
@@ -514,6 +519,8 @@
     FFT FFTW3 f32 plain C
     average run time:   4641.64 ns
     standard deviation: 2.69836e-07 ns
+
+
 
     \section{Algorithme MDCT en arithmétique fixed point}
     \label{sec:fixed_point}
