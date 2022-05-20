@@ -525,14 +525,34 @@
     \section{Algorithme MDCT en arithmétique fixed point}
     \label{sec:fixed_point}
     \paragraph{}
-    Le passage d'une algorithmique flottante à une algorithmique entière est une des optimisations envisagées par l'analyse préalable à ce travail. Le bénéfice attendu est double : l'agorithmique entière est généralement plus rapide et un bloc MDCT en algorithmique entière permettrait d'économiser des opérations de transtypage des données entières en \emph{float} à l'entrée de la MDCT et inversement en sortie.
+    Le passage d'une arithmétique flottante à une arithmétique entière est une des optimisations envisagées par l'analyse préalable à ce travail. Le bénéfice attendu est double : l'arithmétique entière est généralement plus rapide et un bloc MDCT en arithmétique entière permettrait de mieux intégrer le bloc MDCT à l'ensemble de l'encodeur.
 
     \paragraph{}
+    La première de ces attentes n'a pas pu être rencontrée dans ce travail. En effet, l'architecture ARMv7 du Raspberry supporte de nombreuses instructions en \emph{floating point} sur 32 bits\cite{DOC-ARM}. Or, plusieurs instructions \emph{fixed point} sont souvent nécessaires pour remplacer une seule instruction en \emph{floating point}, e.g. une multiplication en float est remplacée par une multiplication et une ou plusieurs rotations de bits. Plutôt que de gagner en temps d'exécution, le passage en \emph{fixed point} a ralenti la MDCT.
 
+    \paragraph{}
+    Cependant, le passage en \emph{fixed point} permet d'économiser un transtypage du \emph{integer} vers le \emph{float} en entrée de la MDCT et inversement en sortie. Avec un temps d'exécution au moins équivalent en \emph{fixed point} qu'en \emph{floating point}, le passage en \emph{fixed point} permettrait donc tout de même d'améliorer les performances de l'ensemble de l'encodeur AAC.
 
+    \paragraph{}
+    Enfin, les données reçues à l'entrée de la MDCT sont codées en \emph{integer} sur 16 bits alors que les \emph{float} sont codés au minimum sur 32 bits. Garder le maximum de données et d'opérations en 16 bits permettrait de gagner en performance au moment de l'utilisation des opérations SIMD.
 
     \subsection{Arithmétique fixed point}
-    donner quelques exemple de remplacement d'une opération floating point en fixed point
+    
+    \paragraph{}
+    Ce travail utilise deux représentations des nombres \emph{fixed point}\cite{2007-Oberstar} :
+    \begin{itemize}
+        \item $Qm$ où $m$ est le nombre de bits réservé aux décimales, e.g. une notation Q15 sur 16 bits permet de représenter un nombre signé ne contenant que des décimales et pas de partie entière (1 bit est réservé pour le signe);
+        \item $Qx.y$ où $x$ est le nombre de bits réservé à la partie entière et $y$ le nombre de bits réservés à la partie décimale, e.g. une notation Q1.15 équivaut à une notation Q15 sur 16 bits.
+    \end{itemize}
+
+    \paragraph{}
+    Pour passer la MDCT en algorithmique \emph{fixed point}, il faut tout d'abord prêter attention à choisir la représentation adéquate. Par exemple, les données d'entrée de la MDCT sont comprises entre $0.9$ et $-0.9$. Elles peuvent donc être représentées en Q15. Si elles avaient été comprises ente $1$ et $-1$, une représentation Q15 aurait produit un dépassement sur l'une des valeurs limites et par conséquent une perte d'information.
+
+    \paragraph{}
+    Des dépassements peuvent également se produire lors des opérations d'addition et de multiplication :
+    \begin{itemize}
+        \item une addition peut nécessiter un bit supplémentaire pour représenter le somme 
+    \end{itemize}
 
 
     trivial en float (reprendre le code de dsp) mais pour l'implémentation en arithmétique entière, attention à mettre dans les bonnes ranges
@@ -564,6 +584,7 @@
 
 
     \subsection{Implémentation de la MDCT basée sur la FFT Ne10 en arithmétique \emph{fixed point}}
+    \label{sec:ne10_mdct_i32_c}
     \paragraph{}
     L'annexe \ref{an:mdct_ne10_i32_c} présente l'implémentation de la MDCT \emph{Ne10 fixed point} en \emph{plain C}. La classe \texttt{mdct\_ne10\_i32\_c} a la même structure que l'itération précédente de la MDCT. Le header présenté dans l'annexe \ref{an:mdct_ne10_i32_c_header} montre que seul le type de certaines données a changé :
     \begin{itemize}
@@ -580,8 +601,10 @@
 
     \subsection{Performances}
     \paragraph{}
+    Les performance de la MDCT \emph{fixed} point en \emph{plain C} sont moins bonnes que celles 
     Explication du code en annexe qui permet de mesurer les performances (avec code Timer)
-    performances de la FFT FFTW3 en f32 pour comparaison :average run time:   4259.95 ns
+    performances de la FFT FFTW3 en f32 pour comparaison :
+    average run time:   4259.95 ns
     standard deviation: 2.07873e-06 ns
 
 
@@ -602,10 +625,8 @@
 
 
 
-    \subsection{Arithmétique fixed point}
- 
 
-    % Pas trop de C++ parce que faire un objet avec plein d'accessors, ce n'est pas très optimisé (on se retrouve avec un gros objet avec plein de variables). Derrière on fait de l'assembleur => il y a un trop grand écart. D'habitude les codesc audio sotn codés en C mais c'est aussi peut-être juste pour une raison historique.
+
 
 
 
@@ -658,6 +679,7 @@
 
 
     \subsection{Gain en performance}
+    \label{sec:perfs}
     \paragraph{}
     La mesure des performances a pour but de valider le bloc MDCT avant de l'intégrer au codec AAC. Le cahier des charges du stage ne contenait pas d'objectif à atteindre en terme de performance, ni absolu (e.g. un temps d'exécution maximal à respecter dans des conditions données), ni relatif (e.g. gagner un certain pourcentage de performances par rapport à une MDCT de référence).
 
@@ -698,6 +720,7 @@
         \item tests de performances plus poussés avec comparaison avec un algo existant
     \end{itemize}
     % Améliorations encore possible : faire les premières opérations de prétwiddling en Q15 8 par 8 avant de splitter, mêler les facteurs de la fenêtre aux facteurs de twiddling
+    % Pas trop de C++ parce que faire un objet avec plein d'accessors, ce n'est pas très optimisé (on se retrouve avec un gros objet avec plein de variables). Derrière on fait de l'assembleur => il y a un trop grand écart. D'habitude les codesc audio sotn codés en C mais c'est aussi peut-être juste pour une raison historique.
 
 
     % DIFFICULTES
