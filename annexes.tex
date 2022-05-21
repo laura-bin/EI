@@ -916,7 +916,7 @@ class ne10_mdct_i32_c
 Initialisation de la MDCT dans le constructeur de la classe \texttt{mdct\_ne10\_i32\_c} :
 \begin{itemize}
     \item Le tableau de \texttt{twiddle} est initialisé en \emph{double} puis converti en \emph{integer} (représentation Q15);
-    \item La configuration de la FFT de \emph{Ne10} est initialisée an \emph{complex to complex} en \emph{integer 32} avec en paramètre la taille de la fenêtre de la FFT réduite à un quart de la taille de la fenêtre d'entrée.
+    \item La configuration de la FFT de \emph{Ne10} est initialisée en \emph{complex to complex} en \emph{integer 32} avec en paramètre la taille de la fenêtre de la FFT réduite à un quart de la taille de la fenêtre d'entrée.
 \end{itemize}
 \lstset{language=C++}
 \begin{lstlisting}
@@ -1032,7 +1032,7 @@ void ne10_mdct_i32_c::mdct(int16_t *time_signal, int32_t *spectrum)
 \section{Implémentation de la MDCT basée sur la FFT de \emph{Ne10} en \emph{fixed point} avec optimisations \emph{Neon}}\label{app:mdct_ne10_i32_neon}
 \subsection{Header}\label{app:mdct_ne10_i32_neon_header}
 \paragraph{}
-Header de la classe \texttt{mdct\_ne10\_i32\_neaon} : MDCT basée sur la FFT de la librairie \emph{Ne10} en \emph{integer} (32 bits) optimisée par l'utilisation des opérations SIMD Neon. La classe contient les structures de données \texttt{fft\_in} en représentation Q1.15 et \texttt{fft\_out} en Q9.15, les tableaux de facteurs de \texttt{twiddle} utilisé pour le pre- et le post-processing et la configuration de la FFT (\texttt{cfg}). Contrairement aux autres implémentations, les facteurs de twiddle non sont pas rassemblés dans un seul tableau. Les tableaux de facteurs de \emph{pre-twiddling} et de \emph{post-twiddling} sont séparés car ils sont utilisés en 16 bits pour le \emph{pre-twiddling} et en 32 bits pour le \emph{post-twiddling}. Chacun de ses tableaux est séparé en deux car pour que chaque moitié puisse être initialisée dans un ordre qui facilite l'utilisation des opérations SIMD. L'implémentation des fonctions de ce header est présentée dans les annexes suivantes.
+Header de la classe \texttt{mdct\_ne10\_i32\_neon} : MDCT basée sur la FFT de la librairie \emph{Ne10} en \emph{integer} (32 bits) optimisée par l'utilisation des opérations SIMD Neon. La classe contient les structures de données \texttt{fft\_in} en représentation Q1.15 et \texttt{fft\_out} en Q9.15, les tableaux de facteurs de \texttt{twiddle} utilisé pour le pre- et le post-processing et la configuration de la FFT (\texttt{cfg}). Contrairement aux autres implémentations, les facteurs de twiddle non sont pas rassemblés dans un seul tableau. Les tableaux de facteurs de \emph{pre-twiddling} et de \emph{post-twiddling} sont séparés car ils sont utilisés en 16 bits pour le \emph{pre-twiddling} et en 32 bits pour le \emph{post-twiddling}. Chacun de ses tableaux est séparé en deux car pour que chaque moitié puisse être initialisée dans un ordre qui facilite l'utilisation des opérations SIMD. L'implémentation des fonctions de ce header est présentée dans les annexes suivantes.
 \lstset{language=C++}
 \begin{lstlisting}
 #pragma once
@@ -1292,6 +1292,34 @@ void ne10_mdct_i32_neon::mdct(int16_t *time_signal, int32_t *spectrum)
     }
 }
 \end{lstlisting}
+
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % 11 Analyse des résultats
+    %   11.1 Validation des données
+    %           - app:spectrum_comparison
+    %               - app:spectrum_comparison_code
+    %               - app:cmake_comp_mdct_float
+    %               - app:cmake_comp_mdct_float_int
+    %               - app:cmake_comp_mdct_i32_c
+    %               - app:cmake_comp_mdct_i32_neon
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+\section{}\label{app:spectrum_comparison}
+\subsection{Code source}\label{app:spectrum_comparison_code}
+\paragraph{}
+\lstset{language=C++}
+\begin{lstlisting}
+\end{lstlisting}
+
+\subsection{Code source}\label{app:spectrum_comparison_cmake}
+\paragraph{}
+\lstset{language=C++}
+\begin{lstlisting}
+\end{lstlisting}
+
 
 
 

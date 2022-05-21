@@ -571,10 +571,40 @@
         \item La fonction MDCT prend en paramètres un signal temporel en \texttt{int16\_t} et renvoie un spectre en \texttt{int32\_t} au lieu des tableaux de \texttt{float}.
     \end{itemize}
 
+    \subsubsection{Utilisation de la FFT \emph{Ne10} en \emph{float 32}}
+    \paragraph{}
+    L'utilisation de la librairie \emph{Ne10} en \emph{integer} est très peu différente de son utilisation en \emph{float} :
+    \begin{itemize}
+        \item La configuration est initialisée dans le constructeur de la classe \texttt{mdct\_ne10\_i32\_c} (\textbf{annexe J.2}) en \emph{complex to complex} en \emph{integer 32} avec en paramètre la taille de la fenêtre de la FFT réduite à un quart de la taille de la fenêtre d'entrée.
+        \item L'espace alloué à la configuration est libéré dans le destructeur de la classe \texttt{mdct\_ne10\_i32\_c} (\textbf{annexe J.3}) avec la fonction appropriée de la librairie \emph{Ne10};
+        \item La fonction de FFT est appelée avec en paramètres le tableau contenant les données d'entrée, le tableau dans lequel sera calculé le résultat de la FFT, la configuration préalablement initialisée, un \emph{integer} qui permet de réaliser la FFT ou son opération inverse et, en plus de la FFT en \emph{float}, un facteur de mise à échelle mis ici à $0$.
+    \end{itemize}
+
+    \paragraph{}
+    Il est à noter que la valeur à attribuer au facteur de mise à échelle de la fonction de FFT n'est pas documenté dans la librairie \emph{Ne10}. Je l'ai mis à 0 en testant la FFT de \emph{Ne10} dans le but d'obtenir les mêmes valeurs qu'en \emph{float} mises à une échelle Q15.
+
+    \paragraph{}
+    La documentation incomplète de la librairie a été une des difficultés de ce travail. En dehors des quelques codes d'exemples disponibles, il est très compliqué de savoir quelles données sont attendues et sont produites par les fonctions de \emph{Ne10}. Il est également très difficile de trouver des ressources externes sur l'utilisation de \emph{Ne10}.
+
+    \paragraph{}
+    Le manque de documentation est également ce qui a empêché l'utilisation de la FFT en \emph{int16} plutôt qu'en \emph{int32}. Des opérations en 16 bits pour tout le bloc MDCT auraient été plus performantes. Malheureusement, si la documentation de \emph{Ne10} dit bien travailler en Q15 pour du 16 bits et en Q31 pour du 32 bits, elle ne dit pas quelle \emph{headroom} prévoir, quelles \emph{ranges} de valeurs sont acceptées, si les opérations saturent ou non, etc. En testant la FFT 16 bits avec des données codées en Q15, trop de valeurs étaient fausses. Je n'ai pas non plus réussi à obtenir de résultat satisfaisant en essayant de jouer avec le facteur de mise à échelle.
+
+    \paragraph{}
+    Pour ne pas produire de dépassement dans la fonction de FFT, il a fallu prévoir 8 bits de \emph{headroom} pour la FFT. Sur des données codées sur 16 bits, cela signifie qu'il ne resterait plus que 8 bits de données utiles pour le signal, dont 1 bit pour le signe. Cette perte de précision trop importante a forcé l'utilisation de la FFT en 32 bits.
+
+
+    \subsubsection{Initialisation des \emph{twiddle factors}}
+    \paragraph{}
+    L'initialisation de la MDCT se fait dans le constructeur de la classe \texttt{mdct\_ne10\_i32\_c} présentée à l'\textbf{annexe J.2} :
+    \begin{itemize}
+        \item Le tableau de facteurs de \texttt{twiddle} est initialisé en \emph{double} puis converti en \emph{integer} (représentation Q15) : l'initialisation n'est pas faite en \emph{fixed point} car le \emph{double} permet de conserver une plus grande précision et que l'initialisation n'a pas besoin d'être optimisée;
+        \item La FFT est initialisée de la même manière que la FFT en \emph{floating point} : elle est initialisée a
+    \end{itemize}
+
     \paragraph{}
     Le passage de la FFT en \emph{}
 
-
+    \subsubsection{Opérations de \emph{pre-twiddling} et de \emph{post-twiddling}}
     \paragraph{}
     Explication du code en annexe en accord avec les explications de la première subsection sur le fixed point
 
