@@ -304,7 +304,7 @@ Implémentation de l'algorithme de MDCT basé sur la FFT de la librairie \emph{F
 \begin{itemize}
     \item Initialisation du tableau d'entrée de la FFT : les opérations de \emph{pre-twiddling} permettent de réduire la fenêtre d'entrée de la FFT;
     \item Appel de la fonction FFT de \emph{FFTW3};
-    \item Calcul du spectre de fréquence : les opérations de \emph{post-twiddling} permettent de calculer le spectre à partir des données de sortie de la FFT et des facteurs de \emph{twiddle}.
+    \item Calcul du spectre de fréquences : les opérations de \emph{post-twiddling} permettent de calculer le spectre à partir des données de sortie de la FFT et des facteurs de \emph{twiddle}.
 \end{itemize}
 \lstset{language=C++}
 \begin{lstlisting}
@@ -485,7 +485,7 @@ class ne10_mdct_f32_c
 Initialisation de la MDCT dans le constructeur de la classe \texttt{mdct\_ne10\_f32\_c} :
 \begin{itemize}
     \item Le tableau de \texttt{twiddle} est initialisé en \emph{float} sur 32 bits;
-    \item La configuration de la FFT de \emph{Ne10} est initialisée an \emph{complex to complex} en \emph{float 32} avec en paramètre la taille de la fenêtre de la FFT réduite à un quart de la taille de la fenêtre d'entrée.
+    \item La configuration de la FFT de \emph{Ne10} est initialisée en \emph{complex to complex} en \emph{float 32} avec en paramètre la taille de la fenêtre de la FFT réduite à un quart de la taille de la fenêtre d'entrée.
 \end{itemize}
 \lstset{language=C++}
 \begin{lstlisting}
@@ -522,7 +522,7 @@ Implémentation de l'algorithme de MDCT basé sur la FFT de la librairie \emph{N
 \begin{itemize}
     \item Initialisation du tableau d'entrée de la FFT : les opérations de \emph{pre-twiddling} permettent de réduire la fenêtre d'entrée de la FFT;
     \item Appel de la fonction FFT de \emph{Ne10};
-    \item Calcul du spectre de fréquence : les opérations de \emph{post-twiddling} permettent de calculer le spectre à partir des données de sortie de la FFT et des facteurs de \emph{twiddle}.
+    \item Calcul du spectre de fréquences : les opérations de \emph{post-twiddling} permettent de calculer le spectre à partir des données de sortie de la FFT et des facteurs de \emph{twiddle}.
 \end{itemize}
 \lstset{language=C++}
 \begin{lstlisting}
@@ -589,7 +589,7 @@ void ne10_mdct_f32_c::mdct(float *time_signal, float *spectrum)
 \section{Mesure des performances des FFT de \emph{Ne10}}\label{app:perf_fft_ne10}
 \subsection{Code source}\label{app:perf_fft_ne10_code}
 \paragraph{}
-Code permettant de tester la vitesse d'exécution moyenne de différentes FFT proposées par la librairie \emph{Ne10}. La moyenne est calculée sur 10.000.000 exécutions avec des données aléatoires en entrée de la FFT différentes pour chaque exécution. Les variables de préprocesseur définies à la compilation permettent sur base du même code de mesurer le temps d'exécution moyen avec écart type :
+Code permettant de tester la vitesse d'exécution moyenne de différentes FFT proposées par la librairie \emph{Ne10}. La moyenne est calculée sur 10.000.000 exécutions. Les données d'entrée de la FFT sont générées aléatoirement et sont différentes pour chaque exécution. Les variables de préprocesseur définies à la compilation permettent sur base du même code de mesurer le temps d'exécution moyen avec écart type :
 \begin{itemize}
     \item de la FFT \emph{complex to complex} en \emph{float 32} en \emph{plain C} ou avec les optimisations Neon;
     \item de la FFT \emph{complex to complex} en \emph{integer 32} en \emph{plain C} ou avec les optimisations Neon;
@@ -684,10 +684,10 @@ int main()
 #endif
 #endif
 
-    // feed the random
+    // seed the random
     srand(static_cast<unsigned>(time(0)));
 
-    // initilalize the configuration
+    // initialize the configuration
     FFT_CONFIG cfg = ALLOC_CONFIG(MDCT_M2);
 
     // start the loop executing the FFTs
@@ -788,7 +788,7 @@ target_link_libraries(run_ne10_fft_i16_neon NE10)
 \section{Mesure des performances des FFT de \emph{FFTW3}}\label{app:perf_fft_fftw3}
 \subsection{Code source}\label{app:perf_fft_fftw3_code}
 \paragraph{}
-Code permettant de tester la vitesse d'exécution moyenne de la FFT en \emph{float 32} de la librairie \emph{FFTW3}. La moyenne est calculée sur 10.000.000 exécutions avec des données aléatoires en entrée de la FFT différentes pour chaque exécution.
+Code permettant de tester la vitesse d'exécution moyenne de la FFT en \emph{float 32} de la librairie \emph{FFTW3}. La moyenne est calculée sur 10.000.000 exécutions. Les données d'entrée de la FFT sont générées aléatoirement et sont différentes pour chaque exécution.
 \lstset{language=C++}
 \begin{lstlisting}
 #include <iomanip>
@@ -808,7 +808,7 @@ int main()
     // print which FFT will be tested
     std::cout << "FFT FFTW3 f32 plain C" << std::endl;
 
-    // feed the random
+    // seed the random
     srand(static_cast<unsigned>(time(0)));
 
     // start the loop executing the FFTs
@@ -826,7 +826,7 @@ int main()
             x[i] = 1.8f * rand() / RAND_MAX - 1.8f / 2.0f;
         }
 
-        // initilalize the configuration
+        // initialize the configuration
         fftwf_plan fft_plan = fftwf_plan_dft_1d(MDCT_M2, fft_in, fft_out,
             FFTW_FORWARD, FFTW_MEASURE);
 
@@ -955,7 +955,7 @@ Implémentation de l'algorithme de MDCT basé sur la FFT de la librairie \emph{N
 \begin{itemize}
     \item Initialisation du tableau d'entrée de la FFT : les opérations de \emph{pre-twiddling} permettant de réduire la fenêtre d'entrée de la FFT sont faites en algorithmique \emph{fixed point};
     \item Appel de la fonction FFT de \emph{Ne10};
-    \item Calcul du spectre de fréquence : les opérations de \emph{post-twiddling} permettant de calculer le spectre à partir des données de sortie de la FFT et des facteurs de \emph{twiddle} sont faites en algorithmique \emph{fixed point}.
+    \item Calcul du spectre de fréquences : les opérations de \emph{post-twiddling} permettant de calculer le spectre à partir des données de sortie de la FFT et des facteurs de \emph{twiddle} sont faites en algorithmique \emph{fixed point}.
 \end{itemize}
 \lstset{language=C++}
 \begin{lstlisting}
@@ -1032,7 +1032,7 @@ void ne10_mdct_i32_c::mdct(int16_t *time_signal, int32_t *spectrum)
 \section{Implémentation de la MDCT basée sur la FFT de \emph{Ne10} en \emph{fixed point} avec optimisations \emph{Neon}}\label{app:mdct_ne10_i32_neon}
 \subsection{Header}\label{app:mdct_ne10_i32_neon_header}
 \paragraph{}
-Header de la classe \texttt{mdct\_ne10\_i32\_neon} : MDCT basée sur la FFT de la librairie \emph{Ne10} en \emph{integer} (32 bits) optimisée par l'utilisation des opérations SIMD Neon. La classe contient les structures de données \texttt{fft\_in} en représentation Q1.15 et \texttt{fft\_out} en Q9.15, les tableaux de facteurs de \texttt{twiddle} utilisé pour le pre- et le post-processing et la configuration de la FFT (\texttt{cfg}). Contrairement aux autres implémentations, les facteurs de twiddle non sont pas rassemblés dans un seul tableau. Les tableaux de facteurs de \emph{pre-twiddling} et de \emph{post-twiddling} sont séparés car ils sont utilisés en 16 bits pour le \emph{pre-twiddling} et en 32 bits pour le \emph{post-twiddling}. Chacun de ses tableaux est séparé en deux car pour que chaque moitié puisse être initialisée dans un ordre qui facilite l'utilisation des opérations SIMD. L'implémentation des fonctions de ce header est présentée dans les annexes suivantes.
+Header de la classe \texttt{mdct\_ne10\_i32\_neon} : MDCT basée sur la FFT de la librairie \emph{Ne10} en \emph{integer} (32 bits) optimisée par l'utilisation des opérations SIMD Neon. La classe contient les structures de données \texttt{fft\_in} en représentation Q1.15 et \texttt{fft\_out} en Q9.15, les tableaux de facteurs de \texttt{twiddle} utilisé pour le pre- et le post-processing et la configuration de la FFT (\texttt{cfg}). Contrairement aux autres implémentations, les facteurs de twiddle ne sont pas rassemblés dans un seul tableau. Les tableaux de facteurs de \emph{pre-twiddling} et de \emph{post-twiddling} sont séparés car ils sont utilisés en 16 bits pour le \emph{pre-twiddling} et en 32 bits pour le \emph{post-twiddling}. Chacun de ses tableaux est séparé en deux car pour que chaque moitié puisse être initialisée dans un ordre qui facilite l'utilisation des opérations SIMD. L'implémentation des fonctions de ce header est présentée dans les annexes suivantes.
 \lstset{language=C++}
 \begin{lstlisting}
 #pragma once
@@ -1066,7 +1066,7 @@ public:
 Initialisation de la MDCT dans le constructeur de la classe \texttt{mdct\_ne10\_i32\_neon} :
 \begin{itemize}
     \item Le tableau de \texttt{twiddle} est initialisé en \emph{double} puis converti en \emph{integer} (représentation Q15 en 16 bits pour le \emph{pre-twiddling} et en 32 bits pour le \emph{post-twiddling}) : la première moitié des tableaux est rangée à l'endroit dans les tableaux \texttt{pretwiddle\_start} et \texttt{posttwiddle\_start} tandis que la seconde est rangée à l'envers dans les tableaux \texttt{pretwiddle\_end} et \texttt{posttwiddle\_end};
-    \item La configuration de la FFT de \emph{Ne10} est initialisée an \emph{complex to complex} en \emph{integer 32} avec en paramètre la taille de la fenêtre de la FFT réduite à un quart de la taille de la fenêtre d'entrée avec la fonction adaptée pour l'exécution d'une FFT optimisée avec les instructions SIMD Neon.
+    \item La configuration de la FFT de \emph{Ne10} est initialisée en \emph{complex to complex} en \emph{integer 32} avec en paramètre la taille de la fenêtre de la FFT réduite à un quart de la taille de la fenêtre d'entrée avec la fonction adaptée pour l'exécution d'une FFT optimisée avec les instructions SIMD Neon.
 \end{itemize}
 \newpage
 \lstset{language=C++}
@@ -1115,7 +1115,7 @@ Implémentation de l'algorithme de MDCT basé sur la FFT de la librairie \emph{N
 \begin{itemize}
     \item Initialisation du tableau d'entrée de la FFT : les opérations de \emph{pre-twiddling} permettant de réduire la fenêtre d'entrée de la FFT sont faites en algorithmique \emph{fixed point}. L'utilisation des fonctions SIMD permet d'effectuer quatre opérations en parallèle afin de réduire le temps d'exécution. Les facteurs de \emph{pre-twiddling} en 16 bits transforment le signal d'entrée en \emph{16 bits} en un tableau d'entrée de la FFT en 32 bits;
     \item Appel de la fonction FFT de \emph{Ne10} optimisée par l'utilisation des instructions SIMD Neon;
-    \item Calcul du spectre de fréquence : les opérations de \emph{post-twiddling} permettant de calculer le spectre à partir des données de sortie de la FFT et des facteurs de \emph{twiddle} sont faites en algorithmique \emph{fixed point}. Les fonctions SIMD permettent d'effectuer deux ou quatre opérations en parallèle afin de réduire le temps d'exécution.
+    \item Calcul du spectre de fréquences : les opérations de \emph{post-twiddling} permettant de calculer le spectre à partir des données de sortie de la FFT et des facteurs de \emph{twiddle} sont faites en algorithmique \emph{fixed point}. Les fonctions SIMD permettent d'effectuer deux ou quatre opérations en parallèle afin de réduire le temps d'exécution.
 \end{itemize}
 \lstset{language=C++}
 \newpage
