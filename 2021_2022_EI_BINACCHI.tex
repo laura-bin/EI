@@ -537,57 +537,36 @@
     Enfin, les données reçues à l'entrée de la MDCT sont codées en \emph{integer} sur 16 bits alors que les \emph{float} sont codés au minimum sur 32 bits. Garder le maximum de données et d'opérations en 16 bits permettrait de gagner en performance au moment de l'utilisation des opérations SIMD.
 
     \subsection{Arithmétique fixed point}
-    
+
     \paragraph{}
-    Ce travail utilise deux représentations des nombres \emph{fixed point}\cite{2007-Oberstar} :
+    La représentation \emph{fixed point} est une alternative au \emph{float} pour le codage des nombres décimaux\cite{2007-Oberstar}. Le principe est de réserver un certain nombres de bits pour coder la partie entière et un autre nombre de bits pour coder la partie décimale du nombre. Ce travail utilise deux notations pour la représentation en \emph{fixed point}, toujours signées :
     \begin{itemize}
         \item $Qm$ où $m$ est le nombre de bits réservé aux décimales, e.g. une notation Q15 sur 16 bits permet de représenter un nombre signé ne contenant que des décimales et pas de partie entière (1 bit est réservé pour le signe);
-        \item $Qx.y$ où $x$ est le nombre de bits réservé à la partie entière et $y$ le nombre de bits réservés à la partie décimale, e.g. une notation Q1.15 équivaut à une notation Q15 sur 16 bits.
+        \item $Qx.y$ où $x$ est le nombre de bits réservés à la partie entière et $y$ le nombre de bits réservés à la partie décimale, e.g. une notation Q1.15 équivaut à une notation Q15 sur 16 bits.
     \end{itemize}
 
     \paragraph{}
-    Pour passer la MDCT en algorithmique \emph{fixed point}, il faut tout d'abord prêter attention à choisir la représentation adéquate. Par exemple, les données d'entrée de la MDCT sont comprises entre $0.9$ et $-0.9$. Elles peuvent donc être représentées en Q15. Si elles avaient été comprises ente $1$ et $-1$, une représentation Q15 aurait produit un dépassement sur l'une des valeurs limites et par conséquent une perte d'information.
+    Pour passer la MDCT en algorithmique \emph{fixed point}, il faut tout d'abord prêter attention à choisir la représentation adéquate. Par exemple, les données d'entrée de la MDCT sont comprises entre $0.9$ et $-0.9$. Elles peuvent donc être représentées en Q15. Si elles avaient été comprises ente $1$ et $-1$, le conversion à une représentation Q15 aurait produit un dépassement sur l'une des valeurs limites et par conséquent une perte d'information.
 
     \paragraph{}
-    Des dépassements peuvent également se produire lors des opérations d'addition et de multiplication :
+    Des dépassements peuvent également se produire lors des opérations arithmétiques :
     \begin{itemize}
-        \item une addition peut nécessiter un bit supplémentaire pour représenter le somme 
+        \item une \textbf{addition} ou une \textbf{soustraction} peut causer un dépassement d'1 bit, e.g. la somme d'un nombre sur 32 bits et d'un nombre sur 16 bits nécessite potentiellement 33 bits pour être codée;
+        \item le résultat d'une \textbf{multiplication} ou d'une \textbf{division} peut devoir être codé sur un nombre de bits équivalent à la somme des nombres de bits composants les deux nombres multipliés ou divisés, e.g. le produit d'un nombre de 16 bits multiplié par un nombre de 32 bits nécessite potentiellement 48 bits pour être codé.
     \end{itemize}
 
-
-    trivial en float (reprendre le code de dsp) mais pour l'implémentation en arithmétique entière, attention à mettre dans les bonnes ranges
-
-    La notation \emph{fixed point} peut se faire 
-
-    % \paragraph{Points d'attention}
-    % \begin{itemize}
-    %     \item les dépassements : 16 bits + 32 bits -> potentiellement 33 bits, 16*16 -> 32, etc. à voir en fonction des valeurs réelles
-    %     \item alignement des tableaux (souvent c'est une contrainte imposée car permet facilement d'optimiser du code) : résolutions possibles en allouant dynamiquement les tableaux et en jouant avec une arithmétique de pointeur OU utilisation de posix mem align...
-    % \end{itemize}
-
-    % Attention à la manière d'écrire le code. Ici on n'a pas besoin de faire attention à ce que le compilateur puisse faire du inline (ex remplacer l'appel à z = add(a, d) par z = a+d pour économiser le call) car l'algo est déjà très optimisé -> pas d'optimisations de compilateur possible et en plus on a une grosse routine -> économiser un call n'est pas forcément intéressant.
-
-    \subsection{Améliorations attendues}
     \paragraph{}
+    Ces dépassements sont théoriques. En fonction des données réelles à traiter, il est possible de ne pas respecter à la lettre les règles énoncées plus haut. C'est le cas par exemple avec les facteurs de \emph{twiddling} dont on sait qu'il valent au maximum un quart de la valeur d'un sinus ou d'un cosinus et qui sont codés en Q15 : il est alors certain que l'addition de deux de ces nombres ne causera pas de dépassement.
 
     \paragraph{}
-    Le code de DSP related est en floating point -> passage en fixed point : opérations sur des entiers plus performantes + meilleure intégration (éviter le passage artificiel de l'entier au flottant et inversement)
-    % Sur le format Qx.y :
-    % https://www.pathpartnertech.com/representing-decimal-data-in-q-format/
-    % https://www.allaboutcircuits.com/technical-articles/fixed-point-representation-the-q-format-and-addition-examples/
-    % https://en.wikipedia.org/wiki/Q_(number_format)
-    % et surtout https://web.archive.org/web/20171104111827/http://www.superkits.net/whitepapers/Fixed%20Point%20Representation%20%26%20Fractional%20Math.pdf
-
-    % Intérêt de passer un integer: même si on ne gagne que 5\% de performance, on gagne du temps avant (les données qu'on reçoit sont en int16 -> pas de conversion vers le float après) et après (la quantification notament sera probablement plus rapide en integer)
-
-    % Test de performance : il faut qu'à la fin l'implementation fixed point soit au moins aussi rapide que floating point
-
+    Là ou l'implémentation en \emph{floating point} était triviale, puisqu'elle demandait simplement de reprendre le code d'exemple fourni et de l'adapter à l'utilisation de la librairie \emph{Ne10}, l'implémentation en \emph{fixed point} devient plus complexe : il faut prêter attention à coder les nombres dans les bonnes ranges et implémenter les différentes opérations arithmétiques de sorte à ne pas causer de dépassements.
 
     \subsection{Implémentation de la MDCT basée sur la FFT Ne10 en arithmétique \emph{fixed point}}
     \label{sec:ne10_mdct_i32_c}
     \paragraph{}
-    L'annexe \ref{an:mdct_ne10_i32_c} présente l'implémentation de la MDCT \emph{Ne10 fixed point} en \emph{plain C}. La classe \texttt{mdct\_ne10\_i32\_c} a la même structure que l'itération précédente de la MDCT. Le header présenté dans l'annexe \ref{an:mdct_ne10_i32_c_header} montre que seul le type de certaines données a changé :
+    L'\textbf{annexe J} présente l'implémentation de la MDCT \emph{Ne10 fixed point} en \emph{plain C}. La classe \texttt{mdct\_ne10\_i32\_c} a la même structure que l'implémentation en \emph{floating point}. Le header présenté dans l'\textbf{annexe J.1} montre que seul le type des données a changé :
     \begin{itemize}
+        \item La configuration et les tableaux d'entrée et de sortie de la FFT sont définies avec les types \emph{int32} et plus \emph{float32} de la librairie \emph{Ne10};
         \item Le tableau de facteurs de \emph{twiddling} passe du \texttt{float} au \texttt{int16\_t};
         \item La fonction MDCT prend en paramètres un signal temporel en \texttt{int16\_t} et renvoie un spectre en \texttt{int32\_t} au lieu des tableaux de \texttt{float}.
     \end{itemize}
@@ -624,6 +603,13 @@
 
 
 
+
+    % \paragraph{Points d'attention}
+    % \begin{itemize}
+    %     \item alignement des tableaux (souvent c'est une contrainte imposée car permet facilement d'optimiser du code) : résolutions possibles en allouant dynamiquement les tableaux et en jouant avec une arithmétique de pointeur OU utilisation de posix mem align...
+    % \end{itemize}
+
+    % Attention à la manière d'écrire le code. Ici on n'a pas besoin de faire attention à ce que le compilateur puisse faire du inline (ex remplacer l'appel à z = add(a, d) par z = a+d pour économiser le call) car l'algo est déjà très optimisé -> pas d'optimisations de compilateur possible et en plus on a une grosse routine -> économiser un call n'est pas forcément intéressant.
 
 
 
