@@ -471,7 +471,7 @@
 
     \subsection{Validation}
     \paragraph{}
-    L'utilisation de la librairie \emph{Ne10} est validée par comparaison du spectre de fréquence qu'elle génère avec les spectres générés par la MDCT de référence en \emph{double} et par la MDCT basée sur \emph{FFTW3} également en \emph{double}. Les MDCT sont appelée en \emph{double} pour plus de précision. La comparaison aurait pu se faire sur base de tous les algorithmes de MDCT en \emph{float} sur 32 bits mais le choix qui a été fait ici permet en plus de vérifier que la perte de précision entre le \emph{float} et le \emph{double} soit acceptable.
+    L'utilisation de la librairie \emph{Ne10} est validée par comparaison du spectre de fréquences qu'elle génère avec les spectres générés par la MDCT de référence en \emph{double} et par la MDCT basée sur \emph{FFTW3} également en \emph{double}. Les MDCT sont appelée en \emph{double} pour plus de précision. La comparaison aurait pu se faire sur base de tous les algorithmes de MDCT en \emph{float} sur 32 bits mais le choix qui a été fait ici permet en plus de vérifier que la perte de précision entre le \emph{float} et le \emph{double} soit acceptable.
 
     \paragraph{}
     Le code source permettant de comparer les trois MDCT en \emph{floating point} est présenté à l'annexe \ref{an:valid_comp_source}. Il sera expliqué en détail dans la section \ref{sec:validation} consacrée à la validation des données des MDCT. Compilé avec les commandes CMake de l'annexe \ref{an:valid_comp_float}, le code produit un exécutable permettant de comparer les spectres de fréquence produits par les trois MDCT \emph{floating point} en les affichant en console.
@@ -541,12 +541,12 @@
     \paragraph{}
     La représentation \emph{fixed point} est une alternative au \emph{float} pour le codage des nombres décimaux\cite{2007-Oberstar}. Le principe est de réserver un certain nombres de bits pour coder la partie entière et un autre nombre de bits pour coder la partie décimale du nombre. Ce travail utilise deux notations pour la représentation en \emph{fixed point}, toujours signées :
     \begin{itemize}
-        \item $Qm$ où $m$ est le nombre de bits réservé aux décimales, e.g. une notation Q15 sur 16 bits permet de représenter un nombre signé ne contenant que des décimales et pas de partie entière (1 bit est réservé pour le signe);
+        \item $Qm$ où $m$ est le nombre de bits réservés aux décimales, e.g. une notation Q15 sur 16 bits permet de représenter un nombre signé ne contenant que des décimales et pas de partie entière (1 bit est réservé pour le signe);
         \item $Qx.y$ où $x$ est le nombre de bits réservés à la partie entière et $y$ le nombre de bits réservés à la partie décimale, e.g. une notation Q1.15 équivaut à une notation Q15 sur 16 bits.
     \end{itemize}
 
     \paragraph{}
-    Pour passer la MDCT en algorithmique \emph{fixed point}, il faut tout d'abord prêter attention à choisir la représentation adéquate. Par exemple, les données d'entrée de la MDCT sont comprises entre $0.9$ et $-0.9$. Elles peuvent donc être représentées en Q15. Si elles avaient été comprises ente $1$ et $-1$, le conversion à une représentation Q15 aurait produit un dépassement sur l'une des valeurs limites et par conséquent une perte d'information.
+    Pour passer la MDCT en algorithmique \emph{fixed point}, il faut tout d'abord prêter attention à choisir la représentation adéquate. Par exemple, les données d'entrée de la MDCT sont comprises entre $0.9$ et $-0.9$. Elles peuvent donc être représentées en Q15. Si elles avaient été comprises ente $1$ et $-1$, la conversion à une représentation Q15 aurait produit un dépassement sur l'une des valeurs limites et par conséquent une perte d'information.
 
     \paragraph{}
     Des dépassements peuvent également se produire lors des opérations arithmétiques :
@@ -559,29 +559,29 @@
     Ces dépassements sont théoriques. En fonction des données réelles à traiter, il est possible de ne pas respecter à la lettre les règles énoncées plus haut. C'est le cas par exemple avec les facteurs de \emph{twiddling} dont on sait qu'il valent au maximum un quart de la valeur d'un sinus ou d'un cosinus et qui sont codés en Q15 : il est alors certain que l'addition de deux de ces nombres ne causera pas de dépassement.
 
     \paragraph{}
-    Là ou l'implémentation en \emph{floating point} était triviale, puisqu'elle demandait simplement de reprendre le code d'exemple fourni et de l'adapter à l'utilisation de la librairie \emph{Ne10}, l'implémentation en \emph{fixed point} devient plus complexe : il faut prêter attention à coder les nombres dans les bonnes ranges et implémenter les différentes opérations arithmétiques de sorte à ne pas causer de dépassements.
+    Là où l'implémentation en \emph{floating point} était triviale, puisqu'elle demandait simplement de reprendre le code d'exemple fourni et de l'adapter à l'utilisation de la librairie \emph{Ne10}, l'implémentation en \emph{fixed point} devient plus complexe : il faut prêter attention à coder les nombres dans les bonnes ranges et implémenter les différentes opérations arithmétiques de sorte à ne pas causer de dépassements.
 
     \subsection{Implémentation de la MDCT basée sur la FFT Ne10 en arithmétique \emph{fixed point}}
     \label{sec:ne10_mdct_i32_c}
     \paragraph{}
     L'\textbf{annexe J} présente l'implémentation de la MDCT \emph{Ne10 fixed point} en \emph{plain C}. La classe \texttt{mdct\_ne10\_i32\_c} a la même structure que l'implémentation en \emph{floating point}. Le header présenté dans l'\textbf{annexe J.1} montre que seul le type des données a changé :
     \begin{itemize}
-        \item La configuration et les tableaux d'entrée et de sortie de la FFT sont définies avec les types \emph{int32} et plus \emph{float32} de la librairie \emph{Ne10};
+        \item La configuration et les tableaux d'entrée et de sortie de la FFT sont définis avec les types \emph{int32}, et non plus \emph{float32}, de la librairie \emph{Ne10};
         \item Le tableau de facteurs de \emph{twiddling} passe du \texttt{float} au \texttt{int16\_t};
         \item La fonction MDCT prend en paramètres un signal temporel en \texttt{int16\_t} et renvoie un spectre en \texttt{int32\_t} au lieu des tableaux de \texttt{float}.
     \end{itemize}
 
-    \subsubsection{Utilisation de la FFT \emph{Ne10} en \emph{float 32}}
+    \subsubsection{Utilisation de la FFT \emph{Ne10} en \emph{int 32}}
     \paragraph{}
     L'utilisation de la librairie \emph{Ne10} en \emph{integer} est très peu différente de son utilisation en \emph{float} :
     \begin{itemize}
         \item La configuration est initialisée dans le constructeur de la classe \texttt{mdct\_ne10\_i32\_c} (\textbf{annexe J.2}) en \emph{complex to complex} en \emph{integer 32} avec en paramètre la taille de la fenêtre de la FFT réduite à un quart de la taille de la fenêtre d'entrée.
         \item L'espace alloué à la configuration est libéré dans le destructeur de la classe \texttt{mdct\_ne10\_i32\_c} (\textbf{annexe J.3}) avec la fonction appropriée de la librairie \emph{Ne10};
-        \item La fonction de FFT est appelée avec en paramètres le tableau contenant les données d'entrée, le tableau dans lequel sera calculé le résultat de la FFT, la configuration préalablement initialisée, un \emph{integer} qui permet de réaliser la FFT ou son opération inverse et, en plus de la FFT en \emph{float}, un facteur de mise à échelle mis ici à $0$.
+        \item La fonction de FFT est appelée avec en paramètres le tableau contenant les données d'entrée, le tableau dans lequel sera calculé le résultat de la FFT, la configuration préalablement initialisée, un \emph{integer} qui indique à la fonction de réaliser la FFT et non son opération inverse et, en plus de la FFT en \emph{float}, un facteur de mise à échelle mis ici à $0$.
     \end{itemize}
 
     \paragraph{}
-    Il est à noter que la valeur à attribuer au facteur de mise à échelle de la fonction de FFT n'est pas documenté dans la librairie \emph{Ne10}. Je l'ai mis à 0 en testant la FFT de \emph{Ne10} dans le but d'obtenir les mêmes valeurs qu'en \emph{float} mises à une échelle Q15.
+    Il est à noter que l'initialisation du facteur de mise à échelle de la fonction de FFT n'est pas documentée dans la librairie \emph{Ne10}. L'effet de ce facteur sur la FFT n'est pas non plus indiqué. J'ai initialisé ce facteur à 0 après avoir testé la FFT de \emph{Ne10} dans le but d'obtenir les mêmes valeurs qu'en \emph{float} mises à une échelle Q15.
 
     \paragraph{}
     La documentation incomplète de la librairie a été une des difficultés de ce travail. En dehors des quelques codes d'exemples disponibles, il est très compliqué de savoir quelles données sont attendues et sont produites par les fonctions de \emph{Ne10}. Il est également très difficile de trouver des ressources externes sur l'utilisation de \emph{Ne10}.
@@ -595,14 +595,10 @@
 
     \subsubsection{Initialisation des \emph{twiddle factors}}
     \paragraph{}
-    L'initialisation de la MDCT se fait dans le constructeur de la classe \texttt{mdct\_ne10\_i32\_c} présentée à l'\textbf{annexe J.2} :
-    \begin{itemize}
-        \item Le tableau de facteurs de \texttt{twiddle} est initialisé en \emph{double} puis converti en \emph{integer} (représentation Q15) : l'initialisation n'est pas faite en \emph{fixed point} car le \emph{double} permet de conserver une plus grande précision et que l'initialisation n'a pas besoin d'être optimisée;
-        \item La FFT est initialisée de la même manière que la FFT en \emph{floating point} : elle est initialisée a
-    \end{itemize}
-
+    Le tableau de facteurs de \texttt{twiddle} est initialisé dans le constructeur de la classe \texttt{mdct\_ne10\_i32\_c} (\textbf{annexe J.2}). Ses valeurs sont calculées en \emph{double} puis converties en \emph{integer} (représentation Q15).
+    
     \paragraph{}
-    Le passage de la FFT en \emph{}
+    Il aurait été posible de convertir les opérations d'initialisation en \emph{fixed point} mais l'optimisation du constructeur n'est pas nécessaire. En effet, puisque la taille de fenêtre d'entrée ne varie pas, l'appel de l'initialisation ne sera fait qu'une fois.
 
     \subsubsection{Opérations de \emph{pre-twiddling} et de \emph{post-twiddling}}
     \paragraph{}
