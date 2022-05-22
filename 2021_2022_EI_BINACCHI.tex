@@ -341,7 +341,7 @@
     La MDCT a été implémentée avec une fenêtre d'entrée de $2N = 1024$ échantillons. Le bloc de sortie, i.e. le spectre de fréquences de la fenêtre d'entrée, aura donc une taille de 512. Ces valeurs, utilisées à de très nombreux endroits du code, sont rassemblées dans le header \texttt{mdct\_constants.h} présenté dans l'\textbf{annexe B}. Ce fichier contient également d'autres valeurs précalculées sur base de la taille de la fenêtre d'entrée.
 
     \paragraph{}
-    La section suivante présente deux implémentations simples de cette formule. Ces implémentations ne pourraient pas être utilisées sans avoir été optimisées car elles seraient beaucoup trop lentes pour un codec qui doit tenir le temps réel sur plusieurs canaux. La complexité de implémentation de cette formule est de $O(N^2)$ opérations (où N est la taille de la fenêtre d'entrée). Cette complexité peut être ramenée à $O(N \log N)$ opérations par une factorisation récursive. La complexité peut également être diminuée en se basant sur une autre transformation, e.g. une DFT (\emph{Discrete Fourier Transorm}) ou une autre DCT (\emph{Discrete Cosine Transform}) : la complexité sera alors de $O(N)$ opérations de pre- et post-processing en plus de la complexité de la DFT ou de la DCT choisie\cite{wiki:MDCT}. C'est cette dernière option qui a été retenue pour ce travail.
+    La section suivante présente deux implémentations simples de cette formule. Ces implémentations ne pourraient pas être utilisées sans avoir été optimisées car elles seraient beaucoup trop lentes pour un codec qui doit tenir le temps réel sur plusieurs canaux. La complexité de implémentation de cette formule est de $O(N^2)$ opérations (où N est la taille de la fenêtre d'entrée). Cette complexité peut être ramenée à $O(N \log N)$ opérations par une factorisation récursive. La complexité peut également être diminuée en se basant sur une autre transformation, e.g. une DFT (\emph{Discrete Fourier Transorm}) ou une autre DCT (\emph{Discrete Cosine Transform}) : la complexité sera alors de $O(N)$ opérations de \emph{pre-} et \emph{post-processing} en plus de la complexité de la DFT ou de la DCT choisie\cite{wiki:MDCT}. C'est cette dernière option qui a été retenue pour ce travail.
 
     \subsection{Implémentations des MDCT de référence en \emph{floating point} et \emph{fixed point}}
 
@@ -461,9 +461,9 @@
     \paragraph{}
     La fonction MDCT présentée dans l'annexe \ref{an:mdct_ne10_f32_func}, comme pour l'algorithme précédent :
     \begin{itemize}
-        \item effectue les opérations de pre-processing ou pre-twiddling : ce sont les mêmes que celle de la MDCT \emph{FFTW3} en arithmétique \emph{floating point} sur 32 bits;
+        \item effectue les opérations de \emph{pre-processing} ou \emph{pre-twiddling} : ce sont les mêmes que celle de la MDCT \emph{FFTW3} en arithmétique \emph{floating point} sur 32 bits;
         \item appelle l'algorithme de FFT : la FFT de \emph{Ne10} prend en paramètres les tableaux contenant les données d'entrée et de sortie, la configuration de la FFT et un \emph{integer} à \texttt{0} pour réaliser la FFT ou à \texttt{1} pour réaliser l'opération inverse;
-        \item effectue les opérations de post-processing ou post-twiddling : ici aussi les mêmes que celles de la MDCT \emph{FFTW3} en arithmétique \emph{floating point} sur 32 bits.
+        \item effectue les opérations de \emph{post-processing} ou \emph{post-twiddling} : ici aussi les mêmes que celles de la MDCT \emph{FFTW3} en arithmétique \emph{floating point} sur 32 bits.
     \end{itemize}
 
     \paragraph{}
@@ -602,11 +602,52 @@
 
     \subsubsection{Opérations de \emph{pre-twiddling} et de \emph{post-twiddling}}
     \paragraph{}
-    Explication du code en annexe en accord avec les explications de la première subsection sur le fixed point
+    L'essentiel du tavail pour cette implémentation a été le passage des opérations de \emph{pre-} et de \emph{post-processing} en arithmétique \emph{fixed point}. Le résultat de ce travail est présenté dans l'\textbf{annexe J.3} qui présente la fonction MDCT basée sur la FFT de \emph{Ne10} en \emph{plain C}.
+
+    \paragraph{}
+    Les opérations de \emph{pre-twiddling} transforment le signal temporel et les facteurs de \emph{twiddling}, tous deux en représentation Q15, en un nombre en représentation Q1.23 sur 32 bits à donner en entrée de la FFT de \emph{Ne10} en \emph{int32}. La représentation Q1.23 est celle qui permet de garder le maximum de précision tout en s'assurant de ne pas produire de dépassement dans la FFT en gardant 8 bits de \emph{headroom}.
+
+    \paragraph{}
+    Le \emph{post-twiddling} récupère les données en Q9.23 produites par la FFT de \emph{Ne10} : la précision de 23 décimales donnée en entrée, le bit de signe et les 8 bits de \emph{headroom}. En combinaison avec les facteurs de \emph{twiddling} codés en Q15, elles sont transformées en un spectre de fréquence codé en Q9.15 sur 32 bits.
+
+    \paragraph{}
+    Les opérations de \emph{pre-processing} suivent toujours le même schéma : les parties réelles ou imaginaires des données d'entrée de la FFT sont la somme de deux produits d'un facteur de \emph{twiddling} et de la somme de deux échantillons du signal temporel. Voici en exemple la transformation de la première opération de l'arithmétique \emph{floating point} vers l'arithmétique \emph{fixed point} :
+    $$fft\_in[i/2].r = r0*c + i0*s;$$
+    $$\text{devient}$$
+    $$fft\_in[i/2].r = (((r0*c)+64)>>7) + (((i0*s)+64)>>7);$$
+    $$\text{où } r0 = time\_signal[MDCT_M32-1-i] + time\_signal[MDCT_M32+i];$$
+    $$\text{et } i0 = time\_signal[MDCT_M2+i] - time\_signal[MDCT_M2-1-i];$$
+
+    \begin{description}
+        \item[r0] est la somme de deux échantillons du signal temporel codés en Q1.15 : il correspond donc à une notation \textbf{Q2.15} ici codée sur 32 bits plutôt que de perdre un bit de précision pour garder la valeur sur 16 bits;
+        \item[c] \emph{twiddle factor}, est codé en Q1.15, mais on sait que le facteur de mise à échelle pour une fenêtre de 1024 échantillons temporels l'a réduit à $\frac{1}{4}$ de la range possible du Q1.15, noté \textbf{Q1.15/4};
+        \item[r0*c] le produit d'un nombre en Q2.15 avec un nombre Q1.15 est théoriquement un Q2.30 mais tient en pratique sur du \textbf{Q1.30/2} puisque le \emph{twiddle factor} est en Q1.15/4;
+        \item[((r0*c)+64)>>7] le résultat en Q1.30/2 est ramené à du \textbf{Q1.23/2} par une opération de shift avec arrondi ($64 = 2^6$, ajouter un bit en $7^{\text{ème}}$ position en partant du LSB permet d'arrondir la valeur du $8^{\text{ème}}$ bit);
+        \item[((i0*s)+64)>>7] l'opération est équivalente à la précédente et est donc également codée en \textbf{Q1.23/2};
+        \item[(((r0*c)+64)>>7) + (((i0*s)+64)>>7)] l'addition de deux Q1.23/2 donne un \textbf{Q1.23}, codé sur 32 bits, il permet de conserver les 8 bits de \emph{headroom} nécessaire à la FFT.
+    \end{description}
+
+    \paragraph{}
+    Les opérations de \emph{post-processing} suivent elles aussi toujours le même schéma : les valeurs du spectre de fréquences sont calculées en additionnant deux produits d'un facteur de \emph{twiddling} et d'une donnée de sortie de la FFT. Voici en exemple la conversion de la première opération de \emph{post-twiddling} en \emph{fixed point} :
+    $$spectrum[i] = -r0*c - i0*s;$$
+    $$\text{devient}$$
+    $$spectrum[i] = ((((-r0+128)>>8)*c+16384)>>15) - ((((i0+128)>>8)*s+16384)>>15);$$
+    $$\text{où } r0 \text{ et } i0 \text{ sont les parties réelle et imaginaire des données de sortie de la FFT}$$
+
+    \begin{description}
+        \item[r0] donnée de sortie de la FFT, est codé en \textbf{Q9.23};
+        \item[(-r0+128)>>8] $r0$ est ramené en \textbf{Q9.15} par un \emph{shift} de 8 avec arrondi;
+        \item[c] \emph{twiddle factor}, est codé en Q1.15, mais on sait que le facteur de mise à échelle pour une fenêtre de 1024 échantillons temporels l'a réduit à $\frac{1}{4}$ de la range possible du Q1.15, noté \textbf{Q1.15/4};
+        \item[((-r0+128)>>8)*c] la multiplication d'un Q9.15 par un Q1.15/4 donne un Q10.30/4 ou \textbf{Q9.30/2};
+        \item[(((-r0+128)>>8)*c+16384)>>15] le résultat en Q9.30/2 est ramené à du \textbf{Q9.15/2} par un \emph{shift} de 15 avec arrondi;
+        \item[(((i0+128)>>8)*s+16384)>>15] le second terme effectue les mêmes opérations pour un résultat en \textbf{Q9.15/2};
+        \item[((((-r0+128)>>8)*c+16384)>>15) - ((((i0+128)>>8)*s+16384)>>15)] le différence de deux Q9.15/2 est un Q10.15/2 ou \textbf{Q9.15}.
+    \end{description}
+
 
     \subsection{Performances}
     \paragraph{}
-    Les performance de la MDCT \emph{fixed} point en \emph{plain C} sont moins bonnes que celles 
+    Les performance de la MDCT \emph{fixed point} en \emph{plain C} sont moins bonnes que celles 
     Explication du code en annexe qui permet de mesurer les performances (avec code Timer)
     performances de la FFT FFTW3 en f32 pour comparaison :
     average run time:   4259.95 ns
@@ -625,7 +666,6 @@
 
     Pour comparaison, le temps d'exécution de la FFT de la librairie \emph{FFTW3} a également été mesuré, en \emph{float 32} puisque la FFT de \emph{Ne10} est en \emph{float 32}. Le code de la 
 
-    Pendant mon stage, j'ai aussi essayé l'algo en Q15 mais échec à cause du manque de documentation des fonctions (quelle headroom prévoir ?) -> on n'avait pas seulement une perte de précision mais des dépassements -> pas admissible d'avoir des données fausses
 
 
 
