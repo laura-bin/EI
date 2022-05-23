@@ -43,6 +43,7 @@
 
 \usepackage{booktabs}
 \usepackage{dcolumn}
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
 
 
 \title{Développement d'un codec audio AAC : optimisation de l'algorithme MDCT pour une architecture ARM}
@@ -730,35 +731,30 @@
     \subsection{Performances}
     \label{sec:fixed_point_perfs}
     \paragraph{}
-    Les performance de la MDCT \emph{fixed point} en \emph{plain C} sont moins bonnes que celles 
-    Explication du code en annexe qui permet de mesurer les performances (avec code Timer)
-    performances de la FFT FFTW3 en f32 pour comparaison :
-    average run time:   4259.95 ns
-    standard deviation: 2.07873e-06 ns
-
-
-    \paragraph{}
-    Démonstration des résultats
+    Les performances de la MDCT \emph{fixed point} en \emph{plain C} sont moins bonnes que celles de l'implémentation en \emph{floating point} :
+    \begin{itemize}
+        \item La MDCT \emph{Neon float 32 plain C} a un temps d'exécution moyen de \SI{9}{\micro\second};
+        \item La MDCT \emph{Neon integer 32 plain C} a un temps d'exécution moyen de \SI{15}{\micro\second}.
+    \end{itemize}
 
     \paragraph{}
-    Explication des résultats pas attendus : à ce niveau, résultats pas intéressants car + d'opérations qu'en flottant et ARM a des fonctions d'algo flottante
+    Les détails de la mesure des performances sont exposés dans la section \ref{sec:medc_perfs}.
 
     \paragraph{}
-    Pour soutenir cette hypothèse :  Test de la librairie et des performances des différentes FFT : performances équivalentes en 32 bits (floating ou fixed) et deux fois plus rapides en 16 bits
+    Le temps d'exécution notablement plus conséquent s'explique par le fait que l'architecture ARMv7 supporte de nombreuses opérations \emph{floating point} sur 32 bits. Contrairement à des processeurs plus anciens, l'arithmétique \emph{fixed point} n'est donc pas plus rapide sur l'ARMv7.
+
+    \paragraph{}
+    De plus, la section \ref{sec:ne10_mdct_i32_c} a montré qu'une seule instruction en \emph{floating point} était remplacée par plusieurs opérations \emph{fixed point}. Une multiplication est, par exemple, remplacée par une multiplication, une rotation et une addition pour l'arrondi. Puisque les opérations sur des \emph{integer} ne sont pas plus rapides que sur des \emph{float}, il n'est donc pas étonnant que la MDCT \emph{fixed point} soit plus lente que la MDCT \emph{floating point}.
+
+    \paragraph{}
+    Cette explication est cohérente avec les mesures des performances des différentes FFT (section \ref{sec:fft_perfs}) : la FFT de \emph{Ne10} en \emph{int 32 plain C} a un temps d'exécution moyen de \SI{11}{\micro\second} contre \SI{6}{\micro\second} pour la FFT \emph{Neon float 32 plain C} et \SI{5}{\micro\second} pour la FFT \emph{FFTW3 float 32}.
 
 
-    Pour comparaison, le temps d'exécution de la FFT de la librairie \emph{FFTW3} a également été mesuré, en \emph{float 32} puisque la FFT de \emph{Ne10} est en \emph{float 32}. Le code de la 
 
 
 
 
 
-    % \paragraph{Points d'attention}
-    % \begin{itemize}
-    %     \item alignement des tableaux (souvent c'est une contrainte imposée car permet facilement d'optimiser du code) : résolutions possibles en allouant dynamiquement les tableaux et en jouant avec une arithmétique de pointeur OU utilisation de posix mem align...
-    % \end{itemize}
-
-    % Attention à la manière d'écrire le code. Ici on n'a pas besoin de faire attention à ce que le compilateur puisse faire du inline (ex remplacer l'appel à z = add(a, d) par z = a+d pour économiser le call) car l'algo est déjà très optimisé -> pas d'optimisations de compilateur possible et en plus on a une grosse routine -> économiser un call n'est pas forcément intéressant.
 
 
 
@@ -766,7 +762,7 @@
 
 
     \section{Optimisations à l'architecture ARM}
-    \subsection{Spécificités de l'architecture ARMv8}
+    \subsection{Spécificités de l'architecture ARMv7}
     \paragraph{}
     Globalement reprend les tutos ARM
     % FFT déjà optimisées pour Neon mais limitations sur ce qui entre et ce qui sort
@@ -814,7 +810,7 @@
 
 
     \subsection{Gain en performance}
-    \label{sec:perfs}
+    \label{sec:medc_perfs}
     \paragraph{}
     La mesure des performances a pour but de valider le bloc MDCT avant de l'intégrer au codec AAC. Le cahier des charges du stage ne contenait pas d'objectif à atteindre en terme de performances, ni absolu (e.g. un temps d'exécution maximal à respecter dans des conditions données), ni relatif (e.g. gagner un certain pourcentage de performances par rapport à une MDCT de référence).
 
@@ -841,15 +837,14 @@
 
     \begin{table}[H]
         \centering
-        \begin{tabular}{ l | D{.}{.}{-1} | D{.}{.}{-1} }
-            \multicolumn{1}{c|}{\textbf{MDCT testée}} & \multicolumn{1}{c|}{\textbf{Temps d'exécution}} &\multicolumn{1}{c}{\textbf{Écart type (ns)}} \\
-            \multicolumn{1}{c|}{} & \multicolumn{1}{c|}{\textbf{moyen (ns)}} & \multicolumn{1}{c}{}\\
+        \begin{tabular}{ l | D{.}{.}{-1} | D{x}{\times}{-1} }
+            \multicolumn{1}{c|}{\textbf{MDCT}} & \multicolumn{1}{M{3cm}|}{\textbf{Temps d'exécution moyen (ns)}} &\multicolumn{1}{c}{\textbf{Écart type (ns)}} \\
             \hline
-            \emph{MDCT Ne10 i32 Neon}   &  5796.35              & 0.02259 \times 10^{-6} \\
-            \emph{MDCT Ne10 i32 C}      & 14939.7               & 0.93554 \times 10^{-6} \\
-            \emph{MDCT Ne10 f32}        &  9020.1               & 0.02251 \times 10^{-6} \\
-            \emph{MDCT FFTW3 f32}       &  7446.84              & 1.29403 \times 10^{-6} \\
-            \emph{MDCT reference f32}   & 29212.6 \times 10^3   & 0.77552 \times 10^{-6} \\
+            \emph{Ne10 i32 Neon}   &  5796.35              & 0.02259 x 10^{-6} \\
+            \emph{Ne10 i32 C}      & 14939.7               & 0.93554 x 10^{-6} \\
+            \emph{Ne10 f32}        &  9020.1               & 0.02251 x 10^{-6} \\
+            \emph{FFTW3 f32}       &  7446.84              & 1.29403 x 10^{-6} \\
+            \emph{Reference f32}   & 29212.6 \times 10^3   & 0.77552 x 10^{-6} \\
         \end{tabular}
         \caption{Test de performance des algorithmes MDCT}
         \label{tab:perf_mdct}
@@ -900,9 +895,12 @@
     % Pas trop de C++ parce que faire un objet avec plein d'accessors, ce n'est pas très optimisé (on se retrouve avec un gros objet avec plein de variables). Derrière on fait de l'assembleur => il y a un trop grand écart. D'habitude les codesc audio sotn codés en C mais c'est aussi peut-être juste pour une raison historique.
 
 
-    % DIFFICULTES
-    % - calculs en Qx.x
-    % - implémentation avec Ne10 car format de sortie, headroom et autres infos utiles pas documentées
+    % \paragraph{Points d'attention}
+    % \begin{itemize}
+    %     \item alignement des tableaux (souvent c'est une contrainte imposée car permet facilement d'optimiser du code) : résolutions possibles en allouant dynamiquement les tableaux et en jouant avec une arithmétique de pointeur OU utilisation de posix mem align...
+    % \end{itemize}
+
+    % Attention à la manière d'écrire le code. Ici on n'a pas besoin de faire attention à ce que le compilateur puisse faire du inline (ex remplacer l'appel à z = add(a, d) par z = a+d pour économiser le call) car l'algo est déjà très optimisé -> pas d'optimisations de compilateur possible et en plus on a une grosse routine -> économiser un call n'est pas forcément intéressant.
 
     \newpage
     \section*{Conclusion}
