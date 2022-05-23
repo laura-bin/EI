@@ -58,7 +58,12 @@
 Fichier CMake principal placé à la racine du projet. Il permet de compiler :
 \begin{itemize}
     \item le projet \emph{audio\_encoding} contenant les différentes MDCT et leurs tests : les commandes CMake de ce sous projet sont présentées dans les annexes suivantes sous le code qu'elles permettent de compiler;
-    \item la librairie \emph{Ne10} : les variables \texttt{NE10\_LINUX\_TARGET\_ARCH} et \texttt{GNULINUX\_PLATFORM} sont initialisées conformément aux recommendations de la documentation pour la compilation de la librairie.
+    \item la librairie \emph{Ne10} : les variables suivantes sont initialisées conformément aux recommendations de la documentation pour la compilation de la librairie:
+    \begin{itemize}
+        \item \texttt{NE10\_LINUX\_TARGET\_ARCH} est initialisée à \texttt{armv7} (l'architecture du Raspberry Pi 4);
+        \item \texttt{GNULINUX\_PLATFORM} est initialisée à \texttt{ON};
+        \item \texttt{BUILD\_DEBUG} est initialisée à \texttt{ON} si le projet est compilé en mode \emph{debug}.
+    \end{itemize}
 \end{itemize}
 \lstset{language=make}
 \begin{lstlisting}
@@ -589,7 +594,7 @@ void ne10_mdct_f32_c::mdct(float *time_signal, float *spectrum)
 \section{Mesure des performances des FFT de \emph{Ne10}}\label{app:perf_fft_ne10}
 \subsection{Code source}\label{app:perf_fft_ne10_code}
 \paragraph{}
-Code permettant de tester la vitesse d'exécution moyenne de différentes FFT proposées par la librairie \emph{Ne10}. La moyenne est calculée sur 10.000.000 exécutions. Les données d'entrée de la FFT sont générées aléatoirement et sont différentes pour chaque exécution. Les variables de préprocesseur définies à la compilation permettent sur base du même code de mesurer le temps d'exécution moyen avec écart type :
+Code permettant de tester la vitesse d'exécution moyenne de différentes FFT proposées par la librairie \emph{Ne10}. La moyenne est calculée sur \SI{10000000}{} exécutions. Les données d'entrée de la FFT sont générées aléatoirement et sont différentes pour chaque exécution. Les variables de préprocesseur définies à la compilation permettent sur base du même code de mesurer le temps d'exécution moyen avec écart type :
 \begin{itemize}
     \item de la FFT \emph{complex to complex} en \emph{float 32} en \emph{plain C} ou avec les optimisations Neon;
     \item de la FFT \emph{complex to complex} en \emph{integer 32} en \emph{plain C} ou avec les optimisations Neon;
@@ -788,7 +793,7 @@ target_link_libraries(run_ne10_fft_i16_neon NE10)
 \section{Mesure des performances des FFT de \emph{FFTW3}}\label{app:perf_fft_fftw3}
 \subsection{Code source}\label{app:perf_fft_fftw3_code}
 \paragraph{}
-Code permettant de tester la vitesse d'exécution moyenne de la FFT en \emph{float 32} de la librairie \emph{FFTW3}. La moyenne est calculée sur 10.000.000 exécutions. Les données d'entrée de la FFT sont générées aléatoirement et sont différentes pour chaque exécution.
+Code permettant de tester la vitesse d'exécution moyenne de la FFT en \emph{float 32} de la librairie \emph{FFTW3}. La moyenne est calculée sur \SI{10000000}{} exécutions. Les données d'entrée de la FFT sont générées aléatoirement et sont différentes pour chaque exécution.
 \lstset{language=C++}
 \begin{lstlisting}
 #include <iomanip>
@@ -1319,6 +1324,281 @@ void ne10_mdct_i32_neon::mdct(int16_t *time_signal, int32_t *spectrum)
 \lstset{language=C++}
 \begin{lstlisting}
 \end{lstlisting}
+
+
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %   11.2 Gain en performance
+    %       - app:perf_mdct_ne10
+    %           - app:perf_mdct_ne10_code
+    %           - app:perf_mdct_ne10_cmake
+    %       - app:perf_mdct_fftw3
+    %           - app:perf_mdct_fftw3_code
+    %           - app:perf_mdct_fftw3_cmake
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newpage
+\section{Mesure des performances des MDCT \emph{Ne10} et MDCT de référence}\label{app:perf_mdct_ne10}
+\subsection{Code source}\label{app:perf_mdct_ne10_code}
+\paragraph{}
+Code permettant de mesurer les performances des MDCT de \emph{Ne10} en \emph{float 32 plain C}, \emph{integer 32 plain C}, \emph{integer 32} avec optimisation Neon et de la MDCT de référence en \emph{double} (en fonction de la variable de préprocesseur définie à la compilation). Le code mesure et affiche le temps d'exécution moyen et l'écart type. Ces informations sont calculées sur un nombre d'exécution donné en paramètre à l'exécutable. Les MDCT sont testées avec le même signal sinusoïdal en entrée dont la valeur par défaut est de 200Hz.
+\lstset{language=C++}
+\begin{lstlisting}
+#include <iostream>
+#include <cstring>
+
+#include "args_parser.h"
+#include "mdct_constants.h"
+#include "sin_wave.h"
+#include "Timers.h"
+
+
+#ifdef FIXED_POINT_C    // fixed point arithmetic
+
+#include "ne10_mdct_i32_c.h"
+
+#define INPUT_DATA              int16_t
+#define OUTPUT_DATA             int32_t
+#define GENERATE_SIN            sin_int
+#define MDCT                    ne10_mdct_i32_c
+
+#elif FIXED_POINT_NEON  // fixed point arithmetic
+
+#include "ne10_mdct_i32_neon.h"
+
+#define INPUT_DATA              int16_t
+#define OUTPUT_DATA             int32_t
+#define GENERATE_SIN            sin_int
+#define MDCT                    ne10_mdct_i32_neon
+
+#elif FLOATING_POINT    // floating point arithmetic
+
+#include "ne10_mdct_f32_c.h"
+
+#define INPUT_DATA              float
+#define OUTPUT_DATA             float
+#define GENERATE_SIN            sin_float
+#define MDCT                    ne10_mdct_f32_c
+
+#else                   // reference algorithm in floating point arithmetic
+
+#include "ref_mdct.h"
+
+#define INPUT_DATA              double
+#define OUTPUT_DATA             double
+#define GENERATE_SIN            sin_float
+
+#endif
+
+
+/**
+ * @brief Run the MDCT on a single frame x times
+ * the signal is a single tone configurable via the --sin parameter (200Hz by default)
+ * the number of runs is setted by the --run parameter (1 by default)
+ */
+int main(int argc, char **argv)
+{
+    // initialize the parameters
+    params p;
+    try
+    {
+        p = parse_args(argc, argv);
+    }
+    catch(const std::runtime_error &err)
+    {
+        std::cerr << err.what() << std::endl;
+        usage();
+        return 1;
+    }
+
+    // print which MDCT will be tested
+#ifdef FIXED_POINT_C
+    std::cout << "MDCT Ne10 i32 plain C: "
+        << p.runs << " runs with a single tone signal (" << p.frequency << "Hz)" << std::endl;
+#elif FIXED_POINT_NEON
+    std::cout << "MDCT Ne10 i32 Neon: "
+        << p.runs << " runs with a single tone signal (" << p.frequency << "Hz)" << std::endl;
+#elif FLOATING_POINT
+    std::cout << "MDCT Ne10 f32 plain C: "
+        << p.runs << " runs with a single tone signal (" << p.frequency << "Hz)" << std::endl;
+#else
+    std::cout << "Reference MDCT: "
+        << p.runs << " runs with a single tone signal (" << p.frequency << "Hz)" << std::endl;
+#endif
+
+    // generate the time signal
+    INPUT_DATA time_signal[MDCT_WINDON_LEN]__attribute__((aligned(16)));
+    memset(&time_signal, 0, MDCT_WINDON_LEN*sizeof(INPUT_DATA));
+    GENERATE_SIN(time_signal, MDCT_WINDON_LEN, 0.9, p.frequency, 0.0, FS);
+
+    // initialize an empty spectrum
+    OUTPUT_DATA mdct_spectrum[MDCT_M]__attribute__((aligned(16)));
+    memset(&mdct_spectrum, 0, MDCT_M*sizeof(OUTPUT_DATA));
+
+    // perform the MDCT x times
+    EvsHwLGPL::CTimers timer;
+    int64_t *runtimes = static_cast<int64_t *>(malloc(p.runs * sizeof(int64_t)));
+
+#ifdef REF
+    for (unsigned i = 0; i < p.runs; ++i) {
+        timer.Start();
+        ref_float_mdct<INPUT_DATA>(time_signal, mdct_spectrum);
+        timer.Stop();
+        runtimes[i] = timer.GetTimeElapsed();
+    }
+\end{lstlisting}
+\newpage
+\begin{lstlisting}
+#else
+    MDCT ne10_mdct;
+    for (unsigned i = 0; i < p.runs; ++i) {
+        timer.Start();
+        ne10_mdct.mdct(time_signal, mdct_spectrum);
+        timer.Stop();
+        runtimes[i] = timer.GetTimeElapsed();
+    }
+#endif
+
+    // compute the average run time
+    double avg = 0.0;
+    for (unsigned i = 0; i < p.runs; ++i) avg += static_cast<double>(runtimes[i]);
+    avg = avg / static_cast<double>(p.runs);
+    std::cout << "average run time: " << avg << " ns" << std::endl;
+
+    // compute the standard deviation
+    double dev = 0.0;
+    for (unsigned i = 0; i < p.runs; ++i) dev += static_cast<double>(runtimes[i]) - avg;
+    dev = dev * dev / static_cast<double>(p.runs);
+    dev = sqrt(dev);
+    std::cout << "standard deviation: " << dev << std::endl;
+
+    // clean
+    free(runtimes);
+
+    return 0;
+}
+\end{lstlisting}
+
+\subsection{Compilation}\label{app:perf_mdct_ne10_cmake}
+\paragraph{}
+Commandes CMake pour la compilation des différents exécutables de tests de performance des MDCT :
+\begin{itemize}
+    \item la variable \texttt{FLOATING\_POINT} permet de compiler l'exécutable \texttt{run\_mdct\_f32\_c} pour tester la MDCT basée sur la FFT de \emph{Ne10} en \emph{float 32 plain C};
+    \item la variable \texttt{FIXED\_POINT\_C} permet de compiler l'exécutable \texttt{run\_mdct\_i32\_c} pour tester la MDCT basée sur la FFT de \emph{Ne10} en \emph{integer 32 plain C};
+    \item la variable \texttt{FIXED\_POINT\_NEON} permet de compiler l'exécutable \texttt{run\_mdct\_i32\_neon} pour tester la MDCT basée sur la FFT de \emph{Ne10} en \emph{integer 32} avec optimisations Neon;
+    \item la variable \texttt{REF} permet de compiler l'exécutable \texttt{run\_mdct\_ref} pour tester la MDCT de référence en \emph{double};
+\end{itemize}
+\lstset{language=make}
+\begin{lstlisting}
+# Ne10 f32 x times on a single frame
+add_executable(run_ne10_mdct_f32_c test/performance/run_ne10_mdct.cpp
+    src/args_parser src/sin_wave.cpp src/Timers.cpp
+    src/ne10_mdct_f32_c.cpp)
+target_compile_definitions(run_ne10_mdct_f32_c PUBLIC -DFLOATING_POINT)
+target_link_libraries(run_ne10_mdct_f32_c NE10)
+
+# Ne10 i32 plain C x times on a single frame
+add_executable(run_ne10_mdct_i32_c test/performance/run_ne10_mdct.cpp
+    src/args_parser src/sin_wave.cpp src/Timers.cpp
+    src/ne10_mdct_i32_c.cpp)
+target_compile_definitions(run_ne10_mdct_i32_c PUBLIC -DFIXED_POINT_C)
+target_link_libraries(run_ne10_mdct_i32_c NE10)
+
+# Ne10 i32 neon x times on a single frame
+add_executable(run_ne10_mdct_i32_neon test/performance/run_ne10_mdct.cpp
+    src/args_parser src/sin_wave.cpp src/Timers.cpp
+    src/ne10_mdct_i32_neon.cpp)
+target_compile_definitions(run_ne10_mdct_i32_neon PUBLIC -DFIXED_POINT_NEON)
+target_link_libraries(run_ne10_mdct_i32_neon NE10)
+
+# Ref MDCT x times on a single frame
+add_executable(run_ref_mdct test/performance/run_ne10_mdct.cpp
+    src/args_parser src/sin_wave.cpp src/Timers.cpp
+    src/ref_mdct.cpp)
+target_compile_definitions(run_ref_mdct PUBLIC -DREF)
+target_link_libraries(run_ref_mdct NE10)
+\end{lstlisting}
+
+
+
+\newpage
+\section{Mesure des performances de la MDCT \emph{FFTW3} en \emph{float 32}}\label{app:perf_mdct_fftw3}
+\subsection{Code source}\label{app:perf_mdct_fftw3_code}
+\paragraph{}
+Code permettant de mesurer les performances de la MDCT basée sur la FFT de \emph{FFTW3} en \emph{float 32}. Le code mesure et affiche le temps d'exécution moyen et l'écart type. Ces informations sont calculées sur \SI{10000000}{} exécutions. La MDCT est testée avec le même signal sinusoïdal en entrée dont la valeur est définie à 440Hz.
+\lstset{language=C++}
+\begin{lstlisting}
+#include <iostream>
+#include <cstring>
+
+#include "fftw3_mdct_f32.h"
+#include "sin_wave.h"
+#include "Timers.h"
+
+#define RUNS        10000000
+#define FREQUENCY   440.0
+
+int main()
+{
+    // print which MDCT will be tested
+    std::cout << "MDCT FFTW3 f32 plain C: "
+        << RUNS << " runs with a single tone signal (" << FREQUENCY << "Hz)" << std::endl;
+
+    // generate the time signal
+    float time_signal[MDCT_WINDON_LEN];
+    sin_float(time_signal, MDCT_WINDON_LEN, 0.9, FREQUENCY, 0.0, FS);
+
+    // initialize an empty spectrum
+    float spectrum[MDCT_M];
+    memset(spectrum, 0, MDCT_M*sizeof(float));
+
+    // initialize the configuration
+    fftw3_mdct_f32 fftw3_mdct;
+
+    // perform the MDCT
+    EvsHwLGPL::CTimers timer;
+    int64_t *runtimes = static_cast<int64_t *>(malloc(RUNS * sizeof(int64_t)));
+    for (int i = 0; i < RUNS; ++i)
+    {
+        timer.Start();
+        fftw3_mdct.mdct(time_signal, spectrum);
+        timer.Stop();
+        runtimes[i] = timer.GetTimeElapsed();
+    }
+
+    // compute the average run time
+    double avg = 0.0;
+    for (int i = 0; i < RUNS; ++i) avg += static_cast<double>(runtimes[i]);
+    avg = avg / static_cast<double>(RUNS);
+    std::cout << "average run time: " << avg << " ns" << std::endl;
+
+    // compute the standard deviation
+    double dev = 0.0;
+    for (int i = 0; i < RUNS; ++i) dev += static_cast<double>(runtimes[i]) - avg;
+    dev = dev * dev / static_cast<double>(RUNS);
+    dev = sqrt(dev);
+    std::cout << "standard deviation: " << dev << std::endl;
+
+    // clean
+    free(runtimes);
+
+    return 0;
+}
+\end{lstlisting}
+
+\subsection{Compilation}\label{app:perf_mdct_fftw3_cmake}
+\paragraph{}
+Commandes CMake pour la compilation de l'exécutable de tests de performance de la MDCT basée sur la FFT de \emph{FFTW3} en \emph{float 32}.
+\lstset{language=make}
+\begin{lstlisting}
+# FFTW3 f32
+add_executable(run_fftw3_mdct_f32 test/performance/run_fftw3_mdct_f32.cpp
+    src/fftw3_mdct_f32.cpp src/sin_wave.cpp src/Timers.cpp)
+target_link_libraries(run_fftw3_mdct_f32 fftw3f)
+\end{lstlisting}
+
+
+
 
 
 
