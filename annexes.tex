@@ -1,3 +1,89 @@
+    % 5 Environnement de développement
+    %       - app:cmake_super
+
+    % 6 Algorithmes MDCT de référence
+    %   6.2 Implémentations des MDCT de référence en algorithmiques floating point et fixed point
+    %       - app:mdct_const
+    %       - app:mdct_ref
+    %           - app:mdct_ref_float
+    %           - app:mdct_ref_int
+    %   6.3 Validation des algorithmes de référence
+    %       - app:sin_wave
+    %           - app:sin_wave_float
+    %           - app:sin_wave_int
+
+    % 7 Algorithme MDCT basé sur la FFT
+    %   7.2 Implémentation de la MDCT basée sur la FFT de la librairie FFTW3
+    %       - app:mdct_fftw3_f32
+    %           - app:mdct_fftw3_f32_header
+    %           - app:mdct_fftw3_f32_constructor
+    %           - app:mdct_fftw3_f32_destructor
+    %           - app:mdct_fftw3_f32_func
+    %   7.3 Validation
+    %       - app:fftw3_example
+    %           - app:fftw3_example_code
+    %           - app:fftw3_example_compilation
+    %       renvoi à la section qui cite
+    %           - app:spectrum_comparison
+    %           - app:cmake_comp_mdct_float
+    %   
+
+    % 8 Intégration de la librairie Ne10
+    %   8.2 Implémentation de la MDCT basée sur la FFT Ne10 en arithmétique floating point
+    %       - app:mdct_ne10_f32
+    %           - app:mdct_ne10_f32_header
+    %           - app:mdct_ne10_f32_constructor
+    %           - app:mdct_ne10_f32_destructor
+    %           - app:mdct_ne10_f32_func
+    %   8.3 Validation
+    %       renvoi à la section qui cite
+    %           - app:spectrum_comparison
+    %           - app:cmake_comp_mdct_float
+    %   8.4 Performances
+    %       - app:perf_fft_ne10
+    %           - app:perf_fft_ne10_code
+    %           - app:perf_fft_ne10_cmake
+    %       - app:perf_fft_fftw3
+    %           - app:perf_fft_fftw3_code
+    %           - app:perf_fft_fftw3_cmake
+
+    % 9 Algorithme MDCT en arithmétique fixed point
+    %   9.3 Implémentation de la MDCT basée sur la FFT Ne10 en arithmétique fixed point
+    %       - app:mdct_ne10_i32_c
+    %           - app:mdct_ne10_i32_c_header
+    %           - app:mdct_ne10_i32_c_constructor
+    %           - app:mdct_ne10_i32_c_destructor
+    %           - app:mdct_ne10_i32_c_func
+
+    % 10 Optimisations à l’architecture ARM
+    %   10.3 Implémentation de la MDCT basée sur la FFT Ne10 en arithmétique fixed point avec opérations SIMD Neon
+    %       - app:mdct_ne10_i32_neon
+    %       - app:mdct_ne10_i32_neon_header
+    %       - app:mdct_ne10_i32_neon_constructor
+    %       - app:mdct_ne10_i32_neon_destructor
+    %       - app:mdct_ne10_i32_neon_func
+
+    % 11 Analyse des résultats
+    %   11.1 Validation des données
+    %           - app:spectrum_comparison
+    %               - app:spectrum_comparison_code
+    %               - app:cmake_comp_mdct_float
+    %               - app:cmake_comp_mdct_float_int
+    %               - app:cmake_comp_mdct_i32_c
+    %               - app:cmake_comp_mdct_i32_neon
+    %   11.2 Gain en performance
+    %       - app:cmake_perf_mdct_fftw3_f32
+    %       - app:cmake_perf_mdct_ne10_f32
+    %       - app:cmake_perf_mdct_ne10_i32_c
+    %       - app:cmake_perf_mdct_ne10_i32_neon
+    %       - app:cmake_perf_mdct_ref
+    %   11.3 Perte de précision
+    %           - app:spectrum_comparison
+    %           - app:cmake_comp_mdct_float
+    %           - app:cmake_comp_mdct_float_int
+    %           - app:cmake_comp_mdct_i32_c
+    %           - app:cmake_comp_mdct_i32_neon
+
 \documentclass{article}
 
 \usepackage[french]{babel}
@@ -57,7 +143,7 @@
 \paragraph{}
 Fichier CMake principal placé à la racine du projet. Il permet de compiler :
 \begin{itemize}
-    \item le projet \emph{audio\_encoding} contenant les différentes MDCT et leurs tests : les commandes CMake de ce sous projet sont présentées dans les annexes suivantes sous le code qu'elles permettent de compiler;
+    \item le projet \emph{audio\_encoding} contenant les différentes MDCT et leurs tests : les commandes CMake de ce sous-projet sont présentées dans les annexes suivantes sous le code qu'elles permettent de compiler;
     \item la librairie \emph{Ne10} : les variables suivantes sont initialisées conformément aux recommendations de la documentation pour la compilation de la librairie:
     \begin{itemize}
         \item \texttt{NE10\_LINUX\_TARGET\_ARCH} est initialisée à \texttt{armv7} (l'architecture du Raspberry Pi 4);
@@ -226,10 +312,11 @@ void sin_int(int16_t *out, int n_samples, double amplitude,
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % 7 Algorithme MDCT basé sur la FFT
     %   7.2 Implémentation de la MDCT basée sur la FFT de la librairie FFTW3
-    %       - app:mdct_fftw3_f32_header
-    %       - app:mdct_fftw3_f32_constructeur
-    %       - app:mdct_fftw3_f32_destructeur
-    %       - app:mdct_fftw3_f32_func
+    %       - app:mdct_fftw3_f32
+    %           - app:mdct_fftw3_f32_header
+    %           - app:mdct_fftw3_f32_constructor
+    %           - app:mdct_fftw3_f32_destructor
+    %           - app:mdct_fftw3_f32_func
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
@@ -380,16 +467,20 @@ void fftw3_mdct_f32::mdct(float *time_signal, float *spectrum)
 \section{Validation de la MDCT \emph{FFTW3} en \emph{float 32}}\label{app:fftw3_example}
 \subsection{Code source}\label{app:fftw3_example_code}
 \paragraph{}
-Test de la MDCT basée sur la FFT de \emph{FFTW3} avec un signal d'entrée sinusoïdal à 200Hz :
+Test de la MDCT basée sur la FFT de \emph{FFTW3} en \emph{float 32} avec un signal d'entrée sinusoïdal à 200Hz :
 \begin{itemize}
     \item Génération et affichage d'un signal sinusoïdal à 200Hz;
     \item Calcul et affichage du spectre de fréquences de ce signal;
     \item Opération inverse de la MDCT et affichage du signal temporel calculé à partir du spectre.
 \end{itemize}
+\paragraph{}
+Les différentes données sont écrites dans un fichier CSV afin de pouvoir les exploiter sous forme graphique.
+% fichier fftw3_mdct_f32.csv
 \lstset{language=C++}
 \begin{lstlisting}
 #include <iomanip>
 #include <iostream>
+#include <fstream>
 
 #include <cstring>
 
@@ -398,38 +489,46 @@ Test de la MDCT basée sur la FFT de \emph{FFTW3} avec un signal d'entrée sinus
 #include "sin_wave.h"
 
 /**
-* @brief MDCT algorithm calling the FFT of the fftw3 library
-* Code based on https://www.dsprelated.com/showcode/196.php
-*/
+    * @brief MDCT algorithm calling the FFT of the fftw3 library
+    * Code based on https://www.dsprelated.com/showcode/196.php
+    * Change the MDCT_WINDON_LEN to test the MDCT with other spectrum sizes
+    */
 int main(void)
 {
-    float time_in[MDCT_WINDON_LEN];        // input time signal
+    // input time signal (200 Hz)
+    float time_in[MDCT_WINDON_LEN];
     sin_float(time_in, MDCT_WINDON_LEN, 0.9, 200.0, 0.0, FS);
 
-    float time_out[MDCT_WINDON_LEN];       // output time signal (generated by the IMDCT)
+    // output time signal (generated by the IMDCT)
+    float time_out[MDCT_WINDON_LEN];
     memset(time_out, 0, MDCT_WINDON_LEN*sizeof(float));
 
-    float spectrum[MDCT_M];    // frequency spectrum
+    // frequency spectrum (generated by the MDCT)
+    float spectrum[MDCT_M];
     memset(spectrum, 0, MDCT_M*sizeof(float));
 
+    // perform the MDCT and IMDCT
     fftw3_mdct_f32 fftw3_mdct;
     fftw3_mdct.mdct(time_in, spectrum);
     fftw3_mdct.imdct(spectrum, time_out);
 
-    for (int i = 0; i < MDCT_WINDON_LEN; ++i)
-    {
-        std::cout << "time_in[" << std::setw(4) << i << "]" << std::setw(12) << time_in[i]
-            << " | time_out[" << std::setw(4) << i << "]" << std::setw(12) << time_out[i]
-            << std::endl;
-    }
-    std::cout << std::endl;
+    // print the results in CSV file
+    std::ofstream csv_file;
+    csv_file.open("fftw3_mdct_f32.csv");
+    csv_file << "time (ms),signal in,signal out,frequency (Hz),spectrum" << std::endl;
 
     for (int i = 0; i < MDCT_M; ++i)
     {
-        std::cout << "spectrum[" << std::setw(4) << i << "]"
-            << std::setw(12) << spectrum[i] << std::endl;
+        csv_file << i*1000.0/FS << "," << time_in[i] << "," << time_out[i] << ","
+            << (i+1.0)*FS/MDCT_WINDON_LEN << "," << std::abs(spectrum[i]) << "," << std::endl;
     }
-    std::cout << std::endl;
+
+    for (int i = MDCT_M; i < MDCT_WINDON_LEN; ++i)
+    {
+        csv_file << i*1000.0/(FS) << "," << time_in[i] << "," << time_out[i] << "," << std::endl;
+    }
+
+    csv_file.close();
 
     return 0;
 }
@@ -1312,18 +1411,132 @@ void ne10_mdct_i32_neon::mdct(int16_t *time_signal, int32_t *spectrum)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
-\section{}\label{app:spectrum_comparison}
+\section{Comparaison des spectres de fréquences produits par les MDCT}\label{app:spectrum_comparison}
 \subsection{Code source}\label{app:spectrum_comparison_code}
 \paragraph{}
 \lstset{language=C++}
 \begin{lstlisting}
+#include <iomanip>
+#include <iostream>
+#include <fstream>
+
+#include <cstring>
+
+#include "ref_mdct.h"
+#include "sin_wave.h"
+
+#ifdef I32_C        // fixed point arithmetic plain C
+#include "ne10_mdct_i32_c.h"
+
+#define NE10_MDCT               ne10_mdct_i32_c
+#define INPUT_DATA              int16_t
+#define OUTPUT_DATA             int32_t
+#define GENERATE_SIN            sin_int
+#define REF_MDCT                ref_int_mdct
+
+#elif I32_NEON    // fixed point arithmetic with Neon optimizations
+#include "ne10_mdct_i32_neon.h"
+
+#define NE10_MDCT               ne10_mdct_i32_neon
+#define INPUT_DATA              int16_t
+#define OUTPUT_DATA             int32_t
+#define GENERATE_SIN            sin_int
+#define REF_MDCT                ref_int_mdct
+
+#else               // floating point arithmetic
+#include "fftw3_mdct_f32.h"
+#include "ne10_mdct_f32_c.h"
+
+#define NE10_MDCT               ne10_mdct_f32_c
+#define INPUT_DATA              float
+#define OUTPUT_DATA             float
+#define GENERATE_SIN            sin_float
+#define REF_MDCT                ref_float_mdct<float>
+#endif
+
+/**
+ * @brief comparison of the MDCTs algorithmswith a single tone signal (200Hz, sampled at 48kHz):
+ *  prints the spectrums generated by the Ne10, ref and FFTW3 MDCTs in a CSV file
+ */
+int main(void)
+{
+    // generate the time signal (200 Hz)
+    INPUT_DATA time_signal[MDCT_WINDON_LEN]__attribute__((aligned(16)));
+    GENERATE_SIN(time_signal, MDCT_WINDON_LEN, 0.9, 200.0, 0.0, FS);
+
+    // perform the reference MDCT
+    OUTPUT_DATA ref_mdct_spectrum[MDCT_M]__attribute__((aligned(16)));
+    memset(&ref_mdct_spectrum, 0, (MDCT_M)*sizeof(OUTPUT_DATA));
+    REF_MDCT(time_signal, ref_mdct_spectrum);
+
+    // perform the FFTW3 MDCT
+#ifdef F32_C
+    OUTPUT_DATA fftw_mdct_spectrum[MDCT_M]__attribute__((aligned(16)));
+    memset(&fftw_mdct_spectrum, 0, (MDCT_M)*sizeof(OUTPUT_DATA));
+    fftw3_mdct_f32 fftw3_mdct;
+    fftw3_mdct.mdct(time_signal, fftw_mdct_spectrum);
+#endif
+
+    // perform the Ne10 MDCT
+    OUTPUT_DATA ne10_mdct_spectrum[MDCT_M]__attribute__((aligned(16)));
+    memset(&ne10_mdct_spectrum, 0, (MDCT_M)*sizeof(OUTPUT_DATA));
+    NE10_MDCT ne10_mdct;
+    ne10_mdct.mdct(time_signal, ne10_mdct_spectrum);
+
+    // print the results in CSV file
+    std::ofstream csv_file;
+
+#ifdef I32_NEON
+    csv_file.open("comp_mdct_i32_neon.csv");
+    csv_file << "Frequency (Hz),Ne10 MDCT i32 Neon spectrum,Ref MDCT spectrum" << std::endl;
+#elif I32_C
+    csv_file.open("comp_mdct_i32_c.csv");
+    csv_file << "Frequency (Hz),Ne10 MDCT i32 plain C spectrum,Ref MDCT spectrum" << std::endl;
+#else
+    csv_file.open("comp_mdct_f32.csv");
+    csv_file << "Frequency (Hz),Ne10 MDCT f32 spectrum,FFTW3 f32 spectrum,Ref MDCT spectrum"
+        << std::endl;
+#endif
+
+    for (int i = 0; i < MDCT_M; ++i)
+    {
+        csv_file << (i+1.0)*FS/MDCT_WINDON_LEN << ","
+            << std::abs(ne10_mdct_spectrum[i]) << ","
+#ifdef F32_C
+            << std::abs(fftw_mdct_spectrum[i]) << ","
+#endif
+            << std::abs(ref_mdct_spectrum[i]) << std::endl;
+    }
+
+    csv_file.close();
+
+    return 0;
+}
 \end{lstlisting}
 
 \subsection{Code source}\label{app:spectrum_comparison_cmake}
 \paragraph{}
-\lstset{language=C++}
+\lstset{language=make}
 \begin{lstlisting}
+# Comparison of the MDCT spectrums
+# i32 plain C
+add_executable(comp_mdct_i32_c test/validation/mdct_spectrum.cpp
+    src/sin_wave.cpp src/ref_mdct.cpp src/ne10_mdct_i32_c.cpp)
+target_compile_definitions(comp_mdct_i32_c PUBLIC -DI32_C)
+target_link_libraries(comp_mdct_i32_c NE10)
+# i32 Neon
+add_executable(comp_mdct_i32_neon test/validation/mdct_spectrum.cpp
+    src/sin_wave.cpp src/ref_mdct.cpp src/ne10_mdct_i32_neon.cpp)
+target_compile_definitions(comp_mdct_i32_neon PUBLIC -DI32_NEON)
+target_link_libraries(comp_mdct_i32_neon NE10)
+# f32 plain C
+add_executable(comp_mdct_f32_c test/validation/mdct_spectrum.cpp src/fftw3_mdct_f32.cpp
+    src/sin_wave.cpp src/ref_mdct.cpp src/ne10_mdct_f32_c.cpp)
+target_compile_definitions(comp_mdct_f32_c PUBLIC -DF32_C)
+target_link_libraries(comp_mdct_f32_c NE10 fftw3f)
 \end{lstlisting}
+
+
 
 
 

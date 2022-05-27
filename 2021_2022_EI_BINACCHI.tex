@@ -224,7 +224,7 @@
     \begin{description}
         \item[filter bank] la banque de filtres décompose le signal temporel d'entrée en différentes composantes fréquentielles
         \item[perceptual model] le modèle psychoacoustique utilise le signal temporel et/ou sa décomposition fréquentielle pour éliminer les données audio dont l'absence ne nuira pas à la qualité perçue à l'écoute ()
-        \item[quantization and coding] la quantification attribue une valeur numérique aux données du spectre de fréquences : elle sont typiquement codées avec une méthode entropique qui peut être optimisée avec le modèle psychoacoustique
+        \item[quantization and coding] la quantification attribue une valeur numérique aux données du spectre de fréquences : elles sont typiquement codées avec une méthode entropique qui peut être optimisée avec le modèle psychoacoustique
         \item[encoding of bitstream] les données sont formatées en un flux contenant typiquement le spectre de fréquences codé et des informations supplémentaires permettant l'encodage
     \end{description}
     
@@ -292,7 +292,7 @@
 
 
     \paragraph{}
-    Le codec AAC (Advanced Audio coding) est définit  , défini par la norme . Les recherches en psychoacoustique ont permis de développer un algorithme d'encodage plus performant pour l'AAC que pour le MP3 : il permet d'encoder moins données audio tout en gardant la même qualité perçue au décodage\cite{1999-Brandenburg}.
+    Le codec AAC (Advanced Audio coding) est définit  , défini par la norme . Les recherches en psychoacoustique ont permis de développer un algorithme d'encodage plus performant pour l'AAC que pour le MP3 : il permet d'encoder moins de données audio tout en gardant la même qualité perçue au décodage\cite{1999-Brandenburg}.
 
 
 
@@ -302,6 +302,8 @@
     %     \item basée sur la DCT-IV
     %     \item niveaux de complexité (O...)
     % \end{itemize}
+
+    % faire un scema fonctionnel des 3 blocs de l'implementation de MDCT choisie : pre-processig - FFT - post-processing
 
 
     \newpage
@@ -327,7 +329,7 @@
     \section{Algorithmes MDCT de référence}
 
     \paragraph{}
-    La première étape de ce travail consiste à développer des algorithmes de référence afin de valider les différentes MDCT implémentées par la suite. Ces algorithmes de référence sont développés en algorithmique flottante sur base de la formule mathématique de la MDCT. Ils permettent de générer des spectres de fréquence en \emph{float} ou en \emph{integer} afin de valider les données de sortie des MDCT optimisées.
+    La première étape de ce travail consiste à développer des algorithmes de référence afin de valider les différentes MDCT implémentées par la suite. Ces algorithmes de référence sont développés en algorithmique flottante sur base de la formule mathématique de la MDCT. Ils permettent de générer des spectres de fréquences en \emph{float} ou en \emph{integer} afin de valider les données de sortie des MDCT optimisées.
 
     \subsection{Description mathématique}
     \label{sec:desc-math}
@@ -366,6 +368,13 @@
 
     \paragraph{}% TODO
     Présentation des résultats sous forme de données brutes ou de graphique.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.1\linewidth]{./images/TODO.png}
+        \caption{}
+        \label{fig:}
+    \end{figure}
+
 
     \paragraph{}% TODO
     Explication de la lecture des résultats, calcul des bandes de fréquences représentées. Mise en évidence qu'on a bien une seule composante fréquentielle comme attendu pour un signal single tone
@@ -382,7 +391,7 @@
 
     \newpage
     \section{Algorithme MDCT basé sur la FFT}
-    \subsection{Optimisations attentues}
+    \subsection{Optimisations attendues}
     % algo qui vient du code d'exemple dsprelated, basé sur la FFT
 %    \url{https://infoscience.epfl.ch/record/59946}
 %    \url{https://www.cis.rit.edu/class/simg716/Gauss_History_FFT.pdf}
@@ -422,6 +431,16 @@
     \paragraph{}
     Validé avec un single tone signal + l'algo de référence.
 
+    \paragraph{}% TODO
+    Présentation des résultats sous forme de données brutes ou de graphique.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.8\linewidth]{./images/fftw3_mdct_f32_signal_in_out.pdf}
+        \caption{}
+        \label{fig:}
+    \end{figure}
+
+
     \paragraph{}
     Code d'exemple qui teste l'algo de référence et l'algo FFTW3 avec les mêmes données d'entrée pour comparaison. (on fait la différence pour la précision ? ce n'est peut être pas pertinent de la faire déjà)
 
@@ -429,6 +448,13 @@
     Présentation des résultats sous forme de données brutes ou de graphiques.
 
     A ce niveau, pour valider, j'ai aussi essayé de faire la IMDCT mais dû à l'overlap, sur une seule fenetre, on ne sait pas reconstruire le signal -> pas possible de valider comme ça
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.8\linewidth]{./images/validation_mdct_fftw3_f32.pdf}
+        \caption{}
+        \label{fig:}
+    \end{figure}
 
 
     \newpage
@@ -482,9 +508,9 @@
 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=.1\linewidth]{./images/TODO.png}
+        \includegraphics[width=.8\linewidth]{./images/validation_mdct_ne10_f32.pdf}
         \caption{}
-        \label{fig:comp_mdct_float}
+        \label{fig:}
     \end{figure}
 
     \paragraph{}
@@ -749,7 +775,15 @@
     \paragraph{}
     Cette explication est cohérente avec les mesures des performances des différentes FFT (section \ref{sec:fft_perfs}) : la FFT de \emph{Ne10} en \emph{int 32 plain C} a un temps d'exécution moyen de \SI{11}{\micro\second} contre \SI{6}{\micro\second} pour la FFT \emph{Neon float 32 plain C} et \SI{5}{\micro\second} pour la FFT \emph{FFTW3 float 32}.
 
+    En + des performances, précision pas top avec beaucoup de dépassements, pas réussi à les supprimer de manière simple mais pas grave pcq ce n'est qu'un algo intermédiaire (si on veut le garder comme ref il faudrait le faire fonctionner). -> graphique qui montre que les dépassements faussent les résultats
 
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.8\linewidth]{./images/validation_mdct_i32_c.pdf}
+        \caption{}
+        \label{fig:}
+    \end{figure}
 
 
 
@@ -776,6 +810,8 @@
     %     \item utilisation des instructions intrinsèques de GCC \url{https://fr.wikipedia.org/wiki/Fonction_intrins%C3%A8que}
     % \end{itemize}
 
+    % rangement dans le fichier excel : décomposer les premières opérations et essayer de repérer le pattern puis validation dans l'excel
+
     \paragraph{}
     Les opérations SIMD permettent de faire plusieurs opérations en une fois où l'algo normal n'en fait qu'une à la fois. L'algo SIMD permet de faire plusieurs modifications à la fois -> il faut ranger les données de manière à pouvoir l'appliquer facilement (fonction fenêtre -> tri des données ? )
 
@@ -784,6 +820,13 @@
     Plus les données sur lesquelles on travaille sont petites, plus on peut faire d'opérations en parallèle -> il faut voir si la perte de précision est ok. -> mettre une représentation graphique, c'est beaucoup plus simple à comprendre. D'où l'intérêt de passer à du 16 bits, plutôt que de rester en 32 bits et il faut absolument éviter le 64 bits (aucun intérêt).
 
     Attention au flag pour la compilation + au header (accès aux intrinsics pas activé par défaut)
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.8\linewidth]{./images/validation_mdct_i32_neon.pdf}
+        \caption{}
+        \label{fig:}
+    \end{figure}
 
 
     \newpage
@@ -863,7 +906,7 @@
     Ces résultats montrent que l'implémentation des fonctions SIMD Neon était nécessaire afin d'obtenir des performances acceptables. Sans l'implémentation d'une MDCT optimisée avec ces instructions, l'utilisation d'une MDCT \emph{fixed point} aurait été compromis par les résultats insatisfaisants de l'implémentation \emph{plain C}.
 
     \paragraph{}
-    Enfin, pour les implémentation plain C, la MDCT \emph{Ne10} est un peu plus lente que la MDCT \emph{FFTW3} avec un temps d'exécution moyen de \SI{9020.1}{\nano\second} contre \SI{7446.84}{\nano\second}. Ce résultat est cohérent avec les performances des différentes FFT mesurées à la section \ref{sec:fft_perfs} : la FFT de \emph{FFTW3} en \emph{float 32} est en effet environ \SI{2}{\micro\second} plus rapide que la FFT de \emph{Ne10} en \emph{float 32 plain C}.
+    Enfin, pour les implémentation \emph{floating point plain C}, la MDCT \emph{Ne10} est un peu plus lente que la MDCT \emph{FFTW3} avec un temps d'exécution moyen de \SI{9020.1}{\nano\second} contre \SI{7446.84}{\nano\second}. Ce résultat est cohérent avec les performances des différentes FFT mesurées à la section \ref{sec:fft_perfs} : la FFT de \emph{FFTW3} en \emph{float 32} est en effet environ \SI{2}{\micro\second} plus rapide que la FFT de \emph{Ne10} en \emph{float 32 plain C}.
 
 
 
