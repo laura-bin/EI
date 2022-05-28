@@ -1114,8 +1114,10 @@ void ne10_mdct_i32_c::mdct(int16_t *time_signal, int32_t *spectrum)
         int16_t c = cos_tw[i];
         int16_t s = sin_tw[i];
 
-        spectrum[i] = ((((-r0+128)>>8)*c+16384)>>15) - ((((i0+128)>>8)*s+16384)>>15);
-        spectrum[MDCT_M-1-i] = ((((-r0+128)>>8)*s+16384)>>15) + ((((i0+128)>>8)*c+16384)>>15);
+        spectrum[i] = (((-(static_cast<int64_t>(r0)+128)>>8)*c+16384)>>15) 
+            - ((((static_cast<int64_t>(i0)+128)>>8)*s+16384)>>15);
+        spectrum[MDCT_M-1-i] = ((((-static_cast<int64_t>(r0)+128)>>8)*s+16384)>>15) 
+            + ((((static_cast<int64_t>(i0)+128)>>8)*c+16384)>>15);
     }
 }
 \end{lstlisting}
