@@ -196,9 +196,9 @@ Le fichier \texttt{mdct\_constants.h} rassemble les valeurs constantes des MDCT 
 
 \newpage
 \section{Algorithmes de référence}\label{app:mdct_ref}
-\subsection{MDCT de référence en \emph{float}}\label{app:mdct_ref_float}
+\subsection{MDCT de référence en \emph{floating point}}\label{app:mdct_ref_float}
 \paragraph{}
-Algorithme de référence basé sur la formule mathématique de la MDCT. Le template permet de réaliser les calculs en \emph{float} ou en \emph{double}.
+Algorithme de référence basé sur la formule mathématique de la MDCT. Le \emph{template} permet de réaliser les calculs en \emph{float} ou en \emph{double}.
 \lstset{language=C++}
 \begin{lstlisting}
 #include <cmath>
@@ -224,7 +224,7 @@ void ref_float_mdct(FLOAT *time_signal, FLOAT *spectrum)
 }
 \end{lstlisting}
 
-\subsection{MDCT de référence en \emph{integer}}\label{app:mdct_ref_int}
+\subsection{MDCT de référence en \emph{fixed point}}\label{app:mdct_ref_int}
 \paragraph{}
 Algorithme de référence basé sur la formule mathématique de la MDCT. Le spectre est calculé en \emph{double} puis converti en \emph{integer} sur 32 bits en représentation Q15.
 \lstset{language=C++}
@@ -261,9 +261,9 @@ void ref_int_mdct(int16_t *time_signal, int32_t *spectrum)
 
 \newpage
 \section{Génération d'un signal sinusoïdal}\label{app:sin_wave}
-\subsection{Génération d'un signal sinusoïdal en \emph{float}}\label{app:sin_wave_float}
+\subsection{Génération d'un signal sinusoïdal en \emph{floating point}}\label{app:sin_wave_float}
 \paragraph{}
-Code de génération d'un signal sinusoïdal en \emph{float} ou en \emph{double}.
+Code de génération d'un signal sinusoïdal en \emph{float} ou en \emph{double}. Le \emph{template} permet de générer ces deux types de signaux avec le même code.
 \lstset{language=C++}
 \begin{lstlisting}
 #include <cmath>
@@ -280,7 +280,7 @@ void sin_float(FLOAT *out, int n_samples, double amplitude,
 }
 \end{lstlisting}
 
-\subsection{Génération d'un signal sinusoïdal en \emph{integer}}\label{app:run_ref_mdct_fint}
+\subsection{Génération d'un signal sinusoïdal en \emph{fixed point}}\label{app:run_ref_mdct_fint}
 \paragraph{}
 La génération du signal sinusoïdal en \emph{integer} fait appel à la génération du signal sinusoïdal en \emph{double} avant de convertir le résultat en \emph{integer} (représentation Q15).
 \lstset{language=C++}
@@ -352,7 +352,7 @@ Initialisation de la MDCT dans le constructeur de la classe \texttt{mdct\_fftw3\
 \begin{itemize}
     \item Le tableau de \texttt{twiddle} est initialisé en \emph{float} sur 32 bits;
     \item La FFT de \emph{FFTW3} est initialisée en une dimension (pour l'audio) avec la taille de la FFT réduite à un quart de la taille de la fenêtre d'entrée par le pre-processing et avec l'option \texttt{FFTW\_MEASURE} plus lente à l'initialisation mais qui permet d'optimiser le temps d'exécution de la FFT;
-    \item Les tableaux contenant les données d'entrée (\texttt{fft\_in}) et de sortie (\texttt{fft\_out}) de la FFT sont alloués dynamiquement avec la fonction de \emph{FFTW3} et ils sont passé en paramètre à la configuration de la FFT.
+    \item Les tableaux contenant les données d'entrée (\texttt{fft\_in}) et de sortie (\texttt{fft\_out}) de la FFT sont alloués dynamiquement avec la fonction de \emph{FFTW3} et ils sont passés en paramètre à la configuration de la FFT.
 \end{itemize}
 \lstset{language=C++}
 \begin{lstlisting}
@@ -425,6 +425,8 @@ void fftw3_mdct_f32::mdct(float *time_signal, float *spectrum)
     {
         float r0 = time_signal[MDCT_M32-1-i] - time_signal[-MDCT_M2+i];
         float i0 = time_signal[MDCT_M2+i] + time_signal[MDCT_M52-1-i];
+\end{lstlisting}
+\begin{lstlisting}
 
         float c = cos_tw[i];
         float s = sin_tw[i];
@@ -467,9 +469,9 @@ void fftw3_mdct_f32::mdct(float *time_signal, float *spectrum)
 \section{Validation de la MDCT \emph{FFTW3} en \emph{float 32}}\label{app:fftw3_example}
 \subsection{Code source}\label{app:fftw3_example_code}
 \paragraph{}
-Test de la MDCT basée sur la FFT de \emph{FFTW3} en \emph{float 32} avec un signal d'entrée sinusoïdal à 200Hz :
+Test de la MDCT basée sur la FFT de \emph{FFTW3} en \emph{float 32} avec un signal d'entrée sinusoïdal à \SI{200}{\hertz} :
 \begin{itemize}
-    \item Génération et affichage d'un signal sinusoïdal à 200Hz;
+    \item Génération et affichage d'un signal sinusoïdal à \SI{200}{\hertz};
     \item Calcul et affichage du spectre de fréquences de ce signal;
     \item Opération inverse de la MDCT et affichage du signal temporel calculé à partir du spectre.
 \end{itemize}
@@ -661,6 +663,9 @@ void ne10_mdct_f32_c::mdct(float *time_signal, float *spectrum)
 
     // FFT
     ne10_fft_c2c_1d_float32_c(fft_out, fft_in, cfg, 0);
+\end{lstlisting}
+\newpage
+\begin{lstlisting}
 
     // post-twiddling
     for (int i = 0; i < (MDCT_M); i += 2)
@@ -693,7 +698,7 @@ void ne10_mdct_f32_c::mdct(float *time_signal, float *spectrum)
 \section{Mesure des performances des FFT de \emph{Ne10}}\label{app:perf_fft_ne10}
 \subsection{Code source}\label{app:perf_fft_ne10_code}
 \paragraph{}
-Code permettant de tester la vitesse d'exécution moyenne de différentes FFT proposées par la librairie \emph{Ne10}. La moyenne est calculée sur \SI{10000000}{} exécutions. Les données d'entrée de la FFT sont générées aléatoirement et sont différentes pour chaque exécution. Les variables de préprocesseur définies à la compilation permettent sur base du même code de mesurer le temps d'exécution moyen avec écart type :
+Code permettant de tester la vitesse d'exécution moyenne de différentes FFT proposées par la librairie \emph{Ne10}. La moyenne est calculée sur \SI{10000000}{} d'exécutions. Les données d'entrée de la FFT sont générées aléatoirement et sont différentes pour chaque exécution. Les variables de préprocesseur définies à la compilation permettent à partir du même code de mesurer le temps d'exécution moyen avec écart type :
 \begin{itemize}
     \item de la FFT \emph{complex to complex} en \emph{float 32} en \emph{plain C} ou avec les optimisations Neon;
     \item de la FFT \emph{complex to complex} en \emph{integer 32} en \emph{plain C} ou avec les optimisations Neon;
@@ -892,12 +897,11 @@ target_link_libraries(run_ne10_fft_i16_neon NE10)
 \section{Mesure des performances des FFT de \emph{FFTW3}}\label{app:perf_fft_fftw3}
 \subsection{Code source}\label{app:perf_fft_fftw3_code}
 \paragraph{}
-Code permettant de tester la vitesse d'exécution moyenne de la FFT en \emph{float 32} de la librairie \emph{FFTW3}. La moyenne est calculée sur \SI{10000000}{} exécutions. Les données d'entrée de la FFT sont générées aléatoirement et sont différentes pour chaque exécution.
+Code permettant de tester la vitesse d'exécution moyenne de la FFT en \emph{float 32} de la librairie \emph{FFTW3}. La moyenne est calculée sur \SI{10000000}{} d'exécutions. Les données d'entrée de la FFT sont générées aléatoirement et sont différentes pour chaque exécution.
 \lstset{language=C++}
 \begin{lstlisting}
 #include <iomanip>
 #include <iostream>
-
 #include <cmath>
 
 #include <fftw3.h>
@@ -1100,6 +1104,7 @@ void ne10_mdct_i32_c::mdct(int16_t *time_signal, int32_t *spectrum)
 \end{lstlisting}
 
 \begin{lstlisting}
+
     // post-twiddling
     // spectrum = Q9.23>>8 * Q1.15/4 + Q9.23>>8 * Q1.15/4
     //          = Q9.15 * Q1.15/4 + Q9.15 * Q1.15/4
@@ -1138,7 +1143,7 @@ void ne10_mdct_i32_c::mdct(int16_t *time_signal, int32_t *spectrum)
 \section{Implémentation de la MDCT basée sur la FFT de \emph{Ne10} en \emph{fixed point} avec optimisations \emph{Neon}}\label{app:mdct_ne10_i32_neon}
 \subsection{Header}\label{app:mdct_ne10_i32_neon_header}
 \paragraph{}
-Header de la classe \texttt{mdct\_ne10\_i32\_neon} : MDCT basée sur la FFT de la librairie \emph{Ne10} en \emph{integer} (32 bits) optimisée par l'utilisation des opérations SIMD Neon. La classe contient les structures de données \texttt{fft\_in} en représentation Q1.15 et \texttt{fft\_out} en Q9.15, les tableaux de facteurs de \texttt{twiddle} utilisé pour le pre- et le post-processing et la configuration de la FFT (\texttt{cfg}). Contrairement aux autres implémentations, les facteurs de twiddle ne sont pas rassemblés dans un seul tableau. Les tableaux de facteurs de \emph{pre-twiddling} et de \emph{post-twiddling} sont séparés car ils sont utilisés en 16 bits pour le \emph{pre-twiddling} et en 32 bits pour le \emph{post-twiddling}. Chacun de ses tableaux est séparé en deux car pour que chaque moitié puisse être initialisée dans un ordre qui facilite l'utilisation des opérations SIMD. L'implémentation des fonctions de ce header est présentée dans les annexes suivantes.
+Header de la classe \texttt{mdct\_ne10\_i32\_neon} : MDCT basée sur la FFT de la librairie \emph{Ne10} en \emph{integer} (32 bits) optimisée par l'utilisation des opérations SIMD Neon. La classe contient les structures de données \texttt{fft\_in} en représentation Q1.15 et \texttt{fft\_out} en Q9.15, les tableaux de facteurs de \texttt{twiddle} utilisés pour le \emph{pre-} et le \emph{post-processing} et la configuration de la FFT (\texttt{cfg}). Contrairement aux autres implémentations, les facteurs de twiddle ne sont pas rassemblés dans un seul tableau. Les tableaux de facteurs de \emph{pre-twiddling} et de \emph{post-twiddling} sont séparés car ils sont utilisés en 16 bits pour le \emph{pre-twiddling} et en 32 bits pour le \emph{post-twiddling}. Chacun de ces tableaux est séparé en deux afin que chaque moitié puisse être initialisée dans un ordre qui facilite l'utilisation des opérations SIMD. L'implémentation des fonctions de ce header est présentée dans les annexes suivantes.
 \lstset{language=C++}
 \begin{lstlisting}
 #pragma once
@@ -1219,7 +1224,7 @@ ne10_mdct_i32_neon::~ne10_mdct_i32_neon()
 \paragraph{}
 Implémentation de l'algorithme de MDCT basé sur la FFT de la librairie \emph{Ne10} en \emph{integer 32} avec utilisation des instructions SIMD Neon :
 \begin{itemize}
-    \item Initialisation du tableau d'entrée de la FFT : les opérations de \emph{pre-twiddling} permettant de réduire la fenêtre d'entrée de la FFT sont faites en algorithmique \emph{fixed point}. L'utilisation des fonctions SIMD permet d'effectuer quatre opérations en parallèle afin de réduire le temps d'exécution. Les facteurs de \emph{pre-twiddling} en 16 bits transforment le signal d'entrée en \emph{16 bits} en un tableau d'entrée de la FFT en 32 bits;
+    \item Initialisation du tableau d'entrée de la FFT : les opérations de \emph{pre-twiddling} permettant de réduire la fenêtre d'entrée de la FFT sont faites en algorithmique \emph{fixed point}. L'utilisation des fonctions SIMD permet d'effectuer quatre opérations en parallèle afin de réduire le temps d'exécution. Les facteurs de \emph{pre-twiddling} codés sur 16 bits transforment le signal d'entrée codé sur \emph{16 bits} en un tableau d'entrée de la FFT codé sur 32 bits;
     \item Appel de la fonction FFT de \emph{Ne10} optimisée par l'utilisation des instructions SIMD Neon;
     \item Calcul du spectre de fréquences : les opérations de \emph{post-twiddling} permettant de calculer le spectre à partir des données de sortie de la FFT et des facteurs de \emph{twiddle} sont faites en algorithmique \emph{fixed point}. Les fonctions SIMD permettent d'effectuer deux ou quatre opérations en parallèle afin de réduire le temps d'exécution.
 \end{itemize}
@@ -1556,7 +1561,7 @@ target_link_libraries(comp_mdct_f32_c NE10 fftw3f)
 \section{Mesure des performances des MDCT \emph{Ne10} et MDCT de référence}\label{app:perf_mdct_ne10}
 \subsection{Code source}\label{app:perf_mdct_ne10_code}
 \paragraph{}
-Code permettant de mesurer les performances des MDCT de \emph{Ne10} en \emph{float 32 plain C}, \emph{integer 32 plain C}, \emph{integer 32} avec optimisation Neon et de la MDCT de référence en \emph{double} (en fonction de la variable de préprocesseur définie à la compilation). Le code mesure et affiche le temps d'exécution moyen et l'écart type. Ces informations sont calculées sur un nombre d'exécution donné en paramètre à l'exécutable. Les MDCT sont testées avec le même signal sinusoïdal en entrée dont la valeur par défaut est de 200Hz.
+Code permettant de mesurer les performances des MDCT de \emph{Ne10} en \emph{float 32 plain C}, \emph{integer 32 plain C}, \emph{integer 32} avec optimisation Neon et de la MDCT de référence en \emph{double} (en fonction de la variable de préprocesseur définie à la compilation). Le code mesure et affiche le temps d'exécution moyen et l'écart type. Ces informations sont calculées sur un nombre d'exécution donné en paramètre à l'exécutable. Les MDCT sont testées avec le même signal sinusoïdal en entrée dont la valeur par défaut est de \SI{200}{\hertz}.
 \lstset{language=C++}
 \begin{lstlisting}
 #include <iostream>
@@ -1740,7 +1745,7 @@ target_link_libraries(run_ref_mdct NE10)
 \section{Mesure des performances de la MDCT \emph{FFTW3} en \emph{float 32}}\label{app:perf_mdct_fftw3}
 \subsection{Code source}\label{app:perf_mdct_fftw3_code}
 \paragraph{}
-Code permettant de mesurer les performances de la MDCT basée sur la FFT de \emph{FFTW3} en \emph{float 32}. Le code mesure et affiche le temps d'exécution moyen et l'écart type. Ces informations sont calculées sur \SI{10000000}{} exécutions. La MDCT est testée avec le même signal sinusoïdal en entrée dont la valeur est définie à 440Hz.
+Code permettant de mesurer les performances de la MDCT basée sur la FFT de \emph{FFTW3} en \emph{float 32}. Le code mesure et affiche le temps d'exécution moyen et l'écart type. Ces informations sont calculées sur \SI{10000000}{} d'exécutions. La MDCT est testée avec le même signal sinusoïdal en entrée dont la valeur est définie à \SI{440}{\hertz}.
 \lstset{language=C++}
 \begin{lstlisting}
 #include <iostream>
