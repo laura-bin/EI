@@ -99,17 +99,19 @@
 
     %L'amélioration des performances est nécessaire par la qualité grandissante des données audio et video -> de plus en plus grandes, et le besoin de maintenir plusieurs flux en tant réel dans le broadcast
 
-    \paragraph{}
-    Ce travail commencera par une présentation d'EVS et du département dans lequel s'est déroulé mon stage. Parmi les nombreux produits d'EVS, seul le serveur XT sera brièvement présenté puisque c'est spécifiquement pour ce dernier que le codec AAC est développé et optimisé.
+    % \paragraph{}
+    % Ce travail commencera par une présentation d'EVS et du département dans lequel s'est déroulé mon stage. Parmi les nombreux produits d'EVS, seul le serveur XT sera brièvement présenté puisque c'est spécifiquement pour ce dernier que le codec AAC est développé et optimisé.
 
-    \paragraph{}
-    Quelques notions théoriques indispensables à la compréhension du travail pratique seront ensuite développées avec une section consacrée au son et sa numérisation et une autre consacrée aux codecs MPEG, à leur fonctionnement et en particulier au fonctionnement du bloc MDCT de l'encodeur AAC.
+    % \paragraph{}
+    % Quelques notions théoriques indispensables à la compréhension du travail pratique seront ensuite développées avec une section consacrée au son et sa numérisation et une autre consacrée aux codecs MPEG, à leur fonctionnement et en particulier au fonctionnement du bloc MDCT de l'encodeur AAC.
 
     % But : garder la max de performance en perdant le moins en qualité
 
 
     %\paragraph{}
     %Si les sections de présentation des différentes itérations de la MDCT ont déjà permis de mettre en avant certains résultats en terme de performance ou de précision, c'est la section suivante qui présentera la protocole de valitation ainsi que les résultats obtenus pour la version finale de l'algorithme MDCT en \emph{integer}.
+
+    % présenter les annexes et dire laquelle est la plus importante l'annexe x ets particulièrement à souligner car + importante
 
     \newpage
     \section{EVS Broadcast Equipment}
@@ -252,12 +254,12 @@
         \caption{Effets de masque dans le domaine fréquentiel\cite{2019-Herre-Dick}}
     \end{figure}
 
-    \paragraph{}
-    Les lignes représentent le seuil 
-    \begin{description}
-        \item[Threshold in quiet] la ligne en pointillé représente le seuil d'audibilité dans le calme, indépendamment de tout autre élément qui pourrait interférer
-        \item[Masking threshold] 
-    \end{description}
+    % \paragraph{}
+    % Les lignes représentent le seuil 
+    % \begin{description}
+    %     \item[Threshold in quiet] la ligne en pointillé représente le seuil d'audibilité dans le calme, indépendamment de tout autre élément qui pourrait interférer
+    %     \item[Masking threshold] 
+    % \end{description}
 
 
     % SPL) A frequency dependent threshold of in hearing in quiet describes the minimum sound pressure level of a sound to be perceivable isolation and under extremely quite conditions. (SPL) of a sound be perceivable in isolation and curve under extremely conditions. • In the presence of to a masker, the threshold in quiet changes into quite a masking threshold, which bell-shaped increase the in frequencies the vicinity of the masker, depending on its • shows In the a presence of a masker, threshold in in quiet curve changes into a masking threshold, frequency, level, and signal increase type. Any sound beneath threshold is masked by the louder which shows a bell-shaped in frequencies in the this vicinity of the masker, depending on its signal, and level, thus and inaudible the Any average perceptual coding, the louder coding signal, error frequency, signal for type. sound listener. beneath In this threshold audio is masked by the (i.e., the introduced quantization noise) corresponds to the probe signal in this experimental and thus inaudible for the average listener. In perceptual audio coding, the coding error (i.e., scenario. the introduced quantization noise) corresponds to the probe signal in this experimental scenario. • Masking effects are are strongest strongest signals are within the critical bandwidth of the masker. • Masking effects for for signals that that are within the critical bandwidth of the masker. Within Within the critical bandwidth, the masking threshold remains constant. Furthermore, the the critical bandwidth, the masking threshold remains constant. Furthermore, the masking effects masking spread to frequencies the (so-called critical bandwidth (so-called The inter-band spread to effects frequencies beyond the critical beyond bandwidth inter-band masking). upper masking). The upper slope of the masking threshold depends on multiple factors, such as absolute slope of the masking threshold depends on multiple factors, such as absolute frequency and sound frequency and of sound pressure whereas level of the the lower masker, whereas lower slope dependency. hardly shows a level pressure level the masker, slope hardly the shows a level dependency. • Depending on the type of masker, i.e., tone or (narrow-band) noise, the strength of the masking • Depending the type of masker, i.e., can tone or (narrow-band) the strength of the masking effect varies. on While noise-like maskers mask tone-like signals noise, very well (up to a masker-to-probe effect varies. maskers can mask tone-like signals very well (up to a masker-to- level ratio of While about noise-like 6 dB), tone-like maskers can mask noise only to a much weaker extent [29] probe level ratio of about 6 dB), tone-like maskers can mask noise only to a much weaker extent (about 20 dB). [29] (about 20 dB).      \paragraph{}     Le calcul des   
@@ -266,14 +268,14 @@
     
     
     
-    Le calcul du seuil de masquage tient compte\cite{2019-Herre-Dick} :
-    \begin{itemize}
-        \item des effets de masquage monophonique de la perception non-linéaire des fréquences, plus fine pour les basses fréquences;
-        \item des effets de masque dans le temps;
-        \item de l'effet de masque dans une bande de fréquence ou entre bandes de fréquences;
-        \item l'impact de la tonalité sur le masquage
-        \item masking over time
-    \end{itemize}
+    % Le calcul du seuil de masquage tient compte\cite{2019-Herre-Dick} :
+    % \begin{itemize}
+    %     \item des effets de masquage monophonique de la perception non-linéaire des fréquences, plus fine pour les basses fréquences;
+    %     \item des effets de masque dans le temps;
+    %     \item de l'effet de masque dans une bande de fréquence ou entre bandes de fréquences;
+    %     \item l'impact de la tonalité sur le masquage
+    %     \item masking over time
+    % \end{itemize}
 
 
     \newpage
@@ -293,8 +295,8 @@
     % AAC uses only a modified discrete cosine transform (MDCT) algorithm, giving it higher compression efficiency than MP3, which uses a hybrid coding algorithm that is part MDCT and part FFT.[4]
 
 
-    \paragraph{}
-    Le codec AAC (Advanced Audio coding) est définit  , défini par la norme . Les recherches en psychoacoustique ont permis de développer un algorithme d'encodage plus performant pour l'AAC que pour le MP3 : il permet d'encoder moins de données audio tout en gardant la même qualité perçue au décodage\cite{1999-Brandenburg}.
+    % \paragraph{}
+    % Le codec AAC (Advanced Audio coding) est définit  , défini par la norme . Les recherches en psychoacoustique ont permis de développer un algorithme d'encodage plus performant pour l'AAC que pour le MP3 : il permet d'encoder moins de données audio tout en gardant la même qualité perçue au décodage\cite{1999-Brandenburg}.
 
 
 
@@ -310,20 +312,20 @@
 
     \newpage
     \section{Environnement de développement}
-    \paragraph{}
-    Plateformes : passage de Intel à ARM nécessaire à cause de la lib Ne10 et impossibilité de maintenir une version de référence Intel
+    % \paragraph{}
+    % Plateformes : passage de Intel à ARM nécessaire à cause de la lib Ne10 et impossibilité de maintenir une version de référence Intel
 
-    \paragraph{}
-    Développement remote sur RPI + photo raspberry
+    % \paragraph{}
+    % Développement remote sur RPI + photo raspberry
 
-    \paragraph{}
-    CentOS7 parce que utilisé sur tout le matériel linux EVS
+    % \paragraph{}
+    % CentOS7 parce que utilisé sur tout le matériel linux EVS
 
-    \paragraph{}
-    Projet en C++ mais qui ressemble fort à du C car implémentation d'un codec -> améliorations possibles : juste du C ?
+    % \paragraph{}
+    % Projet en C++ mais qui ressemble fort à du C car implémentation d'un codec -> améliorations possibles : juste du C ?
 
-    \paragraph{}
-    Le build du projet se fait grâce à un fichier CMake à la racine du projet. Ce fichier présenté dans l'annexe \ref{an:cmake_super} permet d'appeler les CMake du projet \emph{audio\_encoding} (projet contenant les MDCT et ses tests) et de la librairie \emph{Ne10}. Les commandes du CMake générant les exécutables de tests seront fournies en annexe à la suite du code source de ces tests.
+    % \paragraph{}
+    % Le build du projet se fait grâce à un fichier CMake à la racine du projet. Ce fichier présenté dans l'annexe \ref{an:cmake_super} permet d'appeler les CMake du projet \emph{audio\_encoding} (projet contenant les MDCT et ses tests) et de la librairie \emph{Ne10}. Les commandes du CMake générant les exécutables de tests seront fournies en annexe à la suite du code source de ces tests.
 
 
 
@@ -369,13 +371,31 @@
 
     \subsection{Validation}
     \paragraph{}
-    Les MDCT de référence sont validées en générant le spectre de fréquences d'un signal connu. Afin de faciliter la lecture des résultats, un signal avec une seule composante fréquentielle est donné en entrée de la MDCT. L'\textbf{annexe D} présente les codes permettant de générer des signaux sinusoïdaux. Les signaux sinusoïdaux sont produits en \emph{floating point} (\textbf{annexe D.1}) ou en \emph{fixed point} (\textbf{annexe D.2}).
+    Les MDCT de référence sont validées en générant le spectre de fréquences d'un signal connu pour pouvoir observer que celui-ci corresponde bien à ce qui est attendu. Tout au long de ce travail, les MDCT ont été validées avec divers signaux en entrée : des signaux à une ou plusieurs fréquences connues ou des données aléatoires. La section \ref{sec:validation} consacrée au protocole de validation donne plus de détails sur la génération des spectres de fréquences produits par les MDCT et leur interprétation. 
+
+    \paragraph{}
+    Afin de faciliter la lecture des résultats et les comparaisons, ce travail présentera principalement des tests effectués avec en entrée un signal à \SI{440}{\hertz}. L'\textbf{annexe D} présente les codes permettant de générer des signaux sinusoïdaux. Les signaux sinusoïdaux sont produits en \emph{floating point} (\textbf{annexe D.1}) ou en \emph{fixed point} (\textbf{annexe D.2}). Le signal est paramétrable :
+    \begin{itemize}
+        \item en taille ou nombre d'échantillons : la fenêtre d'entrée de la MDCT sera toujours de 1024 échantillons;
+        \item en amplitude : paramètre utilisé pour limiter le signal un un certain \emph{range} de valeurs;
+        \item en fréquence : la fréquence des exemples de résultats donnés dans ce travail sera le plus souvent de \SI{440}{\hertz} mais les MDCT ont été testées avec de nombreux autres signaux;
+        \item en déphasage : ce paramètre n'a pas été utilisé;
+        \item et en fréquence d'échantillonnage toujours à \SI{48}{\kilo\hertz}.
+    \end{itemize}
+
+    \paragraph{}
+    La \emph{headroom} est l'espace réservé aux valeurs limites du signal : le signal réel est clippé et ne couvre pas l'ensemble des valeurs possibles. Dans ce travail, la \emph{range} du signal est toujours comprise entre $-0.9$ et $0.9$, que le signal soit codé en \emph{floating point} ou en \emph{fixed point}. Ce fait est moins important pour les algorithmes travaillant en \emph{floating point} mais il sera essentiel pour la mise à échelle des données en représentation \emph{fixed point} (section \ref{sec:fixed_point}).
 
     \paragraph{}
     Les signaux codés en \emph{float} ou en \emph{double} serviront à valider les implémenations intermédiaires de la MDCT. L'objectif reste cependant de développer une MDCT capable de traiter des données entières sans transtypage. Le signal en \emph{integer} servira à valider les dernières itérations de la MDCT. Ce signal est codé en 16 bits (représentation Q15 signée) afin de correspondre aux données réelles qui seront reçues par l'algorithme.
 
     \paragraph{}
-    Tout au long de ce travail, les MDCT ont été validées avec divers signaux en entrée : des signaux à une ou plusieurs fréquences connues ou des données aléatoires. La section \ref{sec:validation} consacrée au protocole de validation donne plus de détails sur la génération des spectres de fréquences produits par les MDCT et leur interprétation. Pour faciliter la lecture des résultats et les comparaison ce travail présentera principalement des tests effectués avec en entrée un signal à \SI{440}{\hertz}.
+    La figure \ref{fig:signal_f32_f64} offre une représentation graphique des signaux sinusoïdaux en \emph{floating point} utilisés pour tester les MDCT en \emph{floating point} :
+    \begin{itemize}
+        \item les deux signaux sont équivalents : le signal généré en \emph{float} (en pointillés) se superpose parfaitement au signal généré en \emph{double};
+        \item la période du signal est de \SI{2.3}{\milli\second} correspondant à la fréquence de \SI{440}{\hertz} attendue;
+        \item les valeurs du signal sont comprises entre $-0.9$ et $0.9$ pour respecter une \emph{headroom}.
+    \end{itemize}
 
     \begin{figure}[H]
         \centering
@@ -384,28 +404,6 @@
         \label{fig:signal_f32_f64}
     \end{figure}
 
-    % TODO stopped here
-
-
-    \paragraph{}
-    La figure \ref{fig:signal_f32_f64} offre une représentation graphique des signaux sinusoïdaux en \emph{floating point}. Le signal généré en \emph{float} (en pointillés) se superpose parfaitement au signal généré en \emph{double}. La période du signal est de \SI{5}{\milli\second} correspondant à la fréquence de \SI{200}{\hertz} attendue.
-
-
-
-    \paragraph{}
-    Les valeurs maximale et minimale du signal sont de $0.9$ et $-0.9$ car le signal ne couvre jamais toute la \emph{range} de valeurs disponibles. Ce fait est moins important pour les algorithmes travaillant en \emph{floating point} mais il sera essentiel pour la mise à échelle des données en représentation \emph{fixed point} (section \ref{sec:fixed_point}).
-
-
-
-    \paragraph{}
-    Les MDCT de référence en \emph{floating point} prenant en entrée ces signaux sinusoïdaux à \SI{200}{\hertz} génèrent les spectres de fréquences présentés à la figure \ref{fig:validation_ref_mdct_float}. Le spectre généré par l'agorithme en \emph{float} (en pointillés) se superpose à celui généré en \emph{double} : les deux précision permettent donc bien de générer le même spectre.
-
-    \paragraph{}
-    La représentation graphique des spectres de fréquences met en évidence une composante fréquentielle principale aux alentours de \SI{200}{\hertz}. Le résultat obtenu est déjà satisfaisant puique la fréquence mise en évidence par le spectre est bien celle du signal d'entrée. Cependant, il est à noter que l'impléméntation d'une fonction de fenêtre appliquée au signal d'entrée permettrait d'améliorer encore le spectre. La section \ref{sec:ameliorations} consacrée aux améliorations possibles de ce travail expliquera ce qu'est cette fonction de fenêtre.
-
-    \paragraph{}
-    
-
     \begin{figure}[H]
         \centering
         \includegraphics[width=.8\linewidth]{./images/validation_ref_mdct_float.pdf}
@@ -413,48 +411,43 @@
         \label{fig:validation_ref_mdct_float}
     \end{figure}
 
-
-
-    
+    \paragraph{}
+    Les MDCT de référence en \emph{floating point} prenant en entrée ces signaux sinusoïdaux à \SI{440}{\hertz} génèrent les spectres de fréquences présentés à la figure \ref{fig:validation_ref_mdct_float} :
+    \begin{itemize}
+        \item les deux MDCT génèrent le même spectre : le spectre généré par l'agorithme en \emph{float} (en pointillés) se superpose parfaitement à celui généré en \emph{double};
+        \item la représentation graphique des spectres de fréquences met bien en évidence une composante fréquentielle principale aux alentours de \SI{440}{\hertz};
+    \end{itemize}
 
     \paragraph{}
-    La figure \ref{fig:signal_i16} montre que le signal en \emph{fixed point} prend la même forme que celui en \emph{floating point} avec une période de \SI{5}{\milli\second} correspondant bien à la fréquence de \SI{200}{\hertz} attendue.
+    Le résultat obtenu est déjà satisfaisant puique la fréquence mise en évidence par le spectre est bien celle du signal d'entrée. Cependant, l'impléméntation d'une fonction de fenêtre appliquée au signal d'entrée permettrait d'améliorer encore le spectre de fréquences généré par la MDCT. La section \ref{sec:ameliorations} consacrée aux améliorations possibles de ce travail revient sur cette fonction de fenêtre.
 
     \paragraph{}
-    La valeur du signal varie cette fois entre $29491$ et $-29491$ qui corespondent aux valeurs limites du signal en \emph{floating point} mises à échelle pour une représentation \emph{fixed point} Q15.
+    Le signal sinusoïdal en \emph{fixed point} utilisé pour la validation des MDCT \emph{fixed point} est représenté par la figure \ref{fig:signal_i16} :
+    \begin{itemize}
+        \item le signal prend la même forme que ceux en \emph{floating point} (figure \ref{fig:signal_f32_f64});
+        \item la période du signal de \SI{2.3}{\milli\second} correspond à la fréquence de \SI{440}{\hertz} attendue;
+        \item le signal varie entre $29491$ et $-29491$, valeurs qui corespondent aux valeurs limites du signal en \emph{floating point} mises à échelle pour une représentation \emph{fixed point} Q15.
+    \end{itemize}
 
     \begin{figure}[H]
         \centering
         \includegraphics[width=.8\linewidth]{./images/signal_i16.pdf}
-        \caption{Signal sinusoïdal à \SI{200}{\hertz} codé en \emph{fixed point} (Q15)}
+        \caption{Signal sinusoïdal à \SI{440}{\hertz} codé en \emph{fixed point} (Q15)}
         \label{fig:signal_i16}
     \end{figure}
 
     \paragraph{}
-    
-    
-
-
-
-    \paragraph{}% TODO
-    Explication de la lecture des résultats, calcul des bandes de fréquences représentées. Mise en évidence qu'on a bien une seule composante fréquentielle comme attendu pour un signal single tone
-
-    % \begin{itemize}
-    %     \item sortie des données et générations de graphiques avec gnuplot
-    %     \item résolution en fréquence pour une fenetre de 1024 samples pour un signal échantillonné à 48kHz : sur les graphiques $\frac{48000}{1024} = \SI{46.875}{\hertz}$ 1.3333... ms -> f = 1 / 1.33333 = 750 Hz OU res = fs / samples -> sur les graphiques on a des raies de fréquence de 750 Hz. Pour une fenêtre de 1024 = Hz
-    % \end{itemize}
-    % Graphiques sur sinusoide simple : augmenter la fréquence (i * qch pour déplacer la bande de fréquence), 
-
-    \paragraph{}% TODO
-    + les résultats auraient été plus précis avec la fonction de fenêtre -> voir améliorations possibles
-
-
-
+    La représentation graphique du spectre de fréquences généré par la MDCT de référence en \emph{fixed point} à partir du signal à \SI{440}{\hertz} est présentée par la figure \ref{fig:validation_ref_mdct_int} :
+    \begin{itemize}
+        \item le spectre prend la même forme que le spectre de fréquence généré par les MDCT en \emph{floating point} (figure \ref{fig:validation_ref_mdct_int});
+        \item le spectre met bien en évidence une composante fréquentielle principale aux alentours de \SI{440}{\hertz};
+        \item les valeurs des composantes fréquentielles sont beaucoup plus grandes que celles du spectre en \emph{floating point} puisqu'elles sont mise à échelle Q15.
+    \end{itemize}
 
     \begin{figure}[H]
         \centering
         \includegraphics[width=.8\linewidth]{./images/validation_ref_mdct_int.pdf}
-        \caption{}
+        \caption{Spectre de fréquences généré par les MDCT de référence en \emph{fixed point}}
         \label{fig:validation_ref_mdct_int}
     \end{figure}
 
@@ -907,10 +900,21 @@
     \section{Analyse des résultats}
     \subsection{Validation des données}
     \label{sec:validation}
+
+        % \paragraph{}% TODO
+    % Explication de la lecture des résultats, calcul des bandes de fréquences représentées. Mise en évidence qu'on a bien une seule composante fréquentielle comme attendu pour un signal single tone
+
+    % \begin{itemize}
+    %     \item sortie des données et générations de graphiques avec gnuplot
+    %     \item résolution en fréquence pour une fenetre de 1024 samples pour un signal échantillonné à 48kHz : sur les graphiques $\frac{48000}{1024} = \SI{46.875}{\hertz}$ 1.3333... ms -> f = 1 / 1.33333 = 750 Hz OU res = fs / samples -> sur les graphiques on a des raies de fréquence de 750 Hz. Pour une fenêtre de 1024 = Hz
+    % \end{itemize}
+    % Graphiques sur sinusoide simple : augmenter la fréquence (i * qch pour déplacer la bande de fréquence), 
+
+
     \paragraph{}
     Les sections précédentes ont montré que la les différentes itérations de la MDCT développées ont été validées à chaque étape. Cette validation consiste essentiellement en une vérification manuelle des données de sortie de la MDCT : avec un signal sinusoïdal connu en entrée, il est facile de vérifier que l'analyse fréquentielle ne contient bien qu'une seule composante fréquentielle, que la vérification se fasse en lisant les données brutes à la sortie de l'algorithme ou par une analyse graphique de celle-ci.
 
-    \paragraph{}
+    % \paragraph{}
     %La MDCT a également été validée par comparaison de ses données de sortie avec des algorithmes de référence : les implémentations de la formule mathématique de la MDCT présentée dans les annexes \ref{an:ref_mdct_float} pour l'implémentation en arithmétique \emph{floating point} et \ref{an:ref_mdct_int} en \emph{fixed point}.
 
     \paragraph{}
