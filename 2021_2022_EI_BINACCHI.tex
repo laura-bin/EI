@@ -542,19 +542,19 @@
     La librairie \emph{Ne10} s'installe simplement en suivant les instructions données par la documentation : clone du projet GitHub, run du CMake et build du projet\cite{Ne10}. La librairie ne peut cependant être installée que sur une plateforme Linux, Android ou iOS reposant sur une architecture ARM. À partir de ce moment, il n'est donc plus possible de maintenir une implémentation de référence de la MDCT pour une architecture Intel.
 
     \paragraph{}
-    \emph{Ne10} propose des algorithmes de FFT \emph{real to complex} et \emph{complex to complex} en \emph{floating point} (32 bits) ou en \emph{integer} (32 bits et 16 bits). L'objectif est évidemment de passer toute la MDCT en \emph{integer} mais pour un premier test de la librairie, l'algorithme de la section précédente a tout d'abord été repris en remplaçant la FFT de \emph{FFTW3} par la fonction \texttt{ne10\_fft\_c2c\_1d\_float32\_neon} de \emph{Ne10} : FFT en \emph{complex to complex} en \emph{float 32}, i.e. l'entrée et la sortie de la FFT sont représentées sous forme de tableaux de nombres complexes codés en \emph{float} sur 32 bits.
+    \emph{Ne10} propose des algorithmes de FFT \emph{real to complex} et \emph{complex to complex} en \emph{floating point} (32 bits) ou en \emph{integer} (32 bits et 16 bits). L'objectif est évidemment de passer toute la MDCT en \emph{integer} mais pour un premier test de la librairie, l'algorithme de la section précédente a tout d'abord été repris en remplaçant la FFT de \emph{FFTW3} par la fonction \texttt{ne10\_fft\_c2c\_1d\_float32\_c} de \emph{Ne10} : FFT en \emph{complex to complex} en \emph{float 32}, i.e. l'entrée et la sortie de la FFT sont représentées sous forme de tableaux de nombres complexes codés en \emph{float} sur 32 bits.
 
     \paragraph{}
-    L'annexe \ref{an:mdct_ne10_f32} présente le code de cette implémentation. L'annexe \ref{an:mdct_ne10_f32_header} montre que ce code est construit sur le même modèle que le code utilisant la librairie \emph{FFTW3}. La classe contient la configuration de la FFT et les tableaux contenant les données d'entrée, les données de sortie et les facteurs de twiddling. La classe définit trois fonctions publiques : le constructeur, le destructeur et la fonction MDCT.
+    L'\textbf{annexe G} présente le code de cette implémentation. L'\textbf{annexe G.1} montre que ce code est construit sur le même modèle que le code utilisant la librairie \emph{FFTW3}. La classe contient la configuration de la FFT et les tableaux contenant les données d'entrée, les données de sortie et les facteurs de twiddling. La classe définit trois fonctions publiques : le constructeur, le destructeur et la fonction MDCT.
 
     \paragraph{}
-    L'annexe \ref{an:mdct_ne10_f32_constructor} montre l'initialisation de la MDCT dans le constructeur de la classe. Le constructeur initialise les tableaux de facteurs de twiddling de le même manière que l'algorithme basé sur la FFT de \emph{FFTW3}. La configuration de la FFT de \emph{Ne10} se fait conformément au code d'exemple donné par la documentation de la librairie\cite{Ne10} avec en paramètre la taille de la FFT qui correspond au quart de la taille de la fenêtre d'entrée.
+    L'\textbf{annexe G.2} montre l'initialisation de la MDCT dans le constructeur de la classe. Le constructeur initialise les tableaux de facteurs de twiddling de le même manière que l'algorithme basé sur la FFT de \emph{FFTW3}. La configuration de la FFT de \emph{Ne10} se fait conformément au code d'exemple donné par la documentation de la librairie\cite{Ne10} avec en paramètre la taille de la FFT qui correspond au quart de la taille de la fenêtre d'entrée.
 
     \paragraph{}
-    Le destructeur présenté à l'annexe \ref{an:mdct_ne10_f32_destructor} permet de libérer la mémoire allouée pour la FFT en appelant la fonction adéquate de la librairie \emph{Ne10}.
+    Le destructeur présenté à l'\textbf{annexe G.3} permet de libérer la mémoire allouée pour la FFT en appelant la fonction adéquate de la librairie \emph{Ne10}.
 
     \paragraph{}
-    La fonction MDCT présentée dans l'annexe \ref{an:mdct_ne10_f32_func}, comme pour l'algorithme précédent :
+    La fonction MDCT présentée dans l'\textbf{annexe G.4}, comme pour l'algorithme précédent :
     \begin{itemize}
         \item effectue les opérations de \emph{pre-processing} ou \emph{pre-twiddling} : ce sont les mêmes que celle de la MDCT \emph{FFTW3} en arithmétique \emph{floating point} sur 32 bits;
         \item appelle l'algorithme de FFT : la FFT de \emph{Ne10} prend en paramètres les tableaux contenant les données d'entrée et de sortie, la configuration de la FFT et un \emph{integer} à \texttt{0} pour réaliser la FFT ou à \texttt{1} pour réaliser l'opération inverse;
@@ -566,10 +566,11 @@
 
     \subsection{Validation}
     \paragraph{}
-    L'utilisation de la librairie \emph{Ne10} est validée par comparaison du spectre de fréquences qu'elle génère avec les spectres générés par la MDCT de référence en \emph{double} et par la MDCT basée sur \emph{FFTW3} également en \emph{double}. Les MDCT sont appelées en \emph{double} pour plus de précision. La comparaison aurait pu se faire sur base de tous les algorithmes de MDCT en \emph{float} sur 32 bits mais le choix qui a été fait ici permet en plus de vérifier que la perte de précision entre le \emph{float} et le \emph{double} soit acceptable.
-
-    \paragraph{}
-    Le code source permettant de comparer les trois MDCT en \emph{floating point} est présenté à l'annexe \ref{an:valid_comp_source}. Il sera expliqué en détail dans la section \ref{sec:validation} consacrée à la validation des données des MDCT. Compilé avec les commandes CMake de l'annexe \ref{an:valid_comp_float}, le code produit un exécutable permettant de comparer les spectres de fréquence produits par les trois MDCT \emph{floating point} en les affichant en console.
+    L'utilisation de la librairie \emph{Ne10} est validée par comparaison du spectre de fréquences qu'elle génère avec le spectre généré par la MDCT de référence en \emph{double}. La validation des données est expliquée plus en détails dans la section \ref{sec:validation}. Pour faciliter la comparaison avec les autres spectres de fréquences, la représentation graphique du spectre de fréquences de la figure \ref{fig:validation_ne10_f32} a été généré avec un signal d'entrée à \SI{440}{\hertz} :
+    \begin{itemize}
+        \item le spectre de fréquences produit par la MDCT basée sur la FFT de \emph{Ne10} en \emph{float 32} se superpose parfaitement au spectre de fréquences généré par la MDCT de référence:
+        \item la principale composant fréquentielle relevée se situe bien aux alentours de \SI{440}{\hertz}.
+    \end{itemize}
 
     \begin{figure}[H]
         \centering
@@ -578,120 +579,56 @@
         \label{fig:validation_ne10_f32}
     \end{figure}
 
-    \paragraph{}
-    En redirigeant les données sorties en console vers un fichier texte, il est possible d'exploiter ces données sous forme de graphique. (voir figure \ref{fig:comp_mdct_float}) TODO : explication du graphique
+    % TODO précision
 
-    \paragraph{}
-    TODO : présentation de la précision
 
     \subsection{Performances}
     \label{sec:fft_perfs}
-    Une fois l'utilisation de la librairie \emph{Ne10} validée,  Mesure de la différence de performance entre différentes FFT : code en annexe
+    Une fois l'utilisation de la librairie \emph{Ne10} validée, j'ai effectué des mesures de performances sur les différentes FFT proposées par \emph{Ne10} qu'il était alors envisagé d'utiliser pour la suite du travail en comparant les FFT en plain C ou avec optimisations SIMD Neon.
 
-    FFT Ne10 f32 plain C
-    average run time:   5632.06 ns
-    standard deviation: 4.38439e-09 ns
+    \paragraph{}
+    La mesure de ces performances a été effectuée par le code présenté dans l'\textbf{annexe H} : le même code (\textbf{annexe H.1}) per met de générer un exécutable capable de mesurer les performances d'une des FFT de \emph{Ne10} en fonction des variables de préprocesseur défines à la compilation (\textbf{annexe H.1}).
 
-    FFT Ne10 f32 Neon
-    average run time:   3115.18 ns
-    standard deviation: 2.81769e-06 ns
+    \paragraph{}
+    Les performances de la FFT de \emph{FFTW3} en \emph{float 32} ont été mesurées à titre comparatif. L'\textbf{annexe I} présente le code utilisé pour la mesure des performances (\textbf{annexe I.1}) et les commandes utilisées pour le compiler (\textbf{annexe I.2}).
 
-    FFT Ne10 i32 plain C
-    average run time:   10723.1 ns
-    standard deviation: 1.77145e-06 ns
+    \paragraph{}
+    Les tests de performances ont été effectués sur \SI{10000000}{} d'exécutions pour chaque FFT avec des données aléatoires différentes pour chaque exécution. Les tests de performance via un script permettant de lancer tous les exécutables de test les uns à la suite des autres en redirigeant la sortie standard vers un fichier texte. Ce script a été lancé sur le Raspberry via une connexion SSH, en ne réalisant aucune autre action sur le temps d'exécution des tests.
 
-    FFT Ne10 i32 Neon
-    average run time:   3455.78 ns
-    standard deviation: 5.35823e-07 ns
+    \paragraph{}
+    Les tests de performances ont également été réalisés avec d'autres signaux en entrée, e.g. un signal sinusoïdal simple répété à chaque exécution. Les résultats de ces tests sont équivalents aux résultats des tests présentés dans table \ref{tab:perf_fft} avec des données aléatoires en entrée.
 
-    FFT Ne10 i16 plain C
-    average run time:   9557.52 ns
-    standard deviation: 1.69145e-07 ns
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{ l | D{.}{.}{-1} | D{x}{\times}{-1} }
+            \multicolumn{1}{c|}{\textbf{FFT}} & \multicolumn{1}{M{3cm}|}{\textbf{Temps d'exécution moyen (ns)}} &\multicolumn{1}{c}{\textbf{Écart type (ns)}} \\
+            \hline
+            \emph{Ne10 f32 plain C} &  5538.36              & 0.61161 x 10^{-6} \\
+            \emph{Ne10 f32 Neon}    &  3013.71              & 0.11833 x 10^{-6} \\
+            \emph{Ne10 i32 plain C} & 10678.9               & 2.12600 x 10^{-6} \\
+            \emph{Ne10 i32 Neon}    &  3396.91              & 0.84808 x 10^{-6} \\
+            \emph{Ne10 i16 plain C} &  9569.07              & 0.01582 x 10^{-6} \\
+            \emph{Ne10 i16 Neon}    &  2002.41              & 0.08582 x 10^{-6} \\
+            \emph{FFTW3 f32}        &  4661.46              & 0.13637 x 10^{-6} \\
+        \end{tabular}
+        \caption{Test de performance des algorithmes FFT}
+        \label{tab:perf_fft}
+    \end{table}
 
-    FFT Ne10 i16 Neon
-%     average run time:   2007.07 ns
-%     standard deviation: 2.58836e-07 ns
-% 
-%     FFT FFTW3 f32 plain C
-%     average run time:   4641.64 ns
-%     standard deviation: 2.69836e-07 ns
-% 
-%     echo "Ne10 FFT f32 plain C"
-%     ./../build/audio_encoding/run_ne10_fft_f32_c
-%     
-%     echo "Ne10 FFT i32 plain C"
-%     ./../build/audio_encoding/run_ne10_fft_i32_c
-%     
-%     echo "Ne10 FFT i16 plain C"
-%     ./../build/audio_encoding/run_ne10_fft_i16_c
-%     
-%     echo "Ne10 FFT f32 neon"
-%     ./../build/audio_encoding/run_ne10_fft_f32_neon
-%     
-%     echo "Ne10 FFT i32 neon"
-%     ./../build/audio_encoding/run_ne10_fft_i32_neon
-%     
-%     echo "Ne10 FFT i16 neon"
-%     ./../build/audio_encoding/run_ne10_fft_i16_neon
-%     
-%     echo "FFTW3 FFT f32 plain C"
-%     ./../build/audio_encoding/run_fftw3_fft_f32
-% 
-%     ./audio_encoding/run_fftw3_mdct_f32 
-% MDCT FFTW3 f32 plain C: 10000000 runs with a single tone signal (440Hz)
-% average run time: 7599.66 ns
-% standard deviation: 2.06124e-06
-% pi@rpi-evs-dev01:~/Dev/aac-lbin/build $ ^C
-% pi@rpi-evs-dev01:~/Dev/aac-lbin/build $ cd ../
-% algorithms/     build/          .git/           wav/            
-% audio_encoding/ fftw-3.3.9/     Ne10/           
-% pi@rpi-evs-dev01:~/Dev/aac-lbin/build $ cd ../audio_encoding/
-% pi@rpi-evs-dev01:~/Dev/aac-lbin/audio_encoding $ ./test/performance/mdct_performance.sh 
-% MDCT Ne10 i32 C
-% MDCT Ne10 i32 plain C: 1000000 runs with a single tone signal (440Hz)
-% average run time: 14918.7 ns
-% standard deviation: 2.0867e-07
-% MDCT Ne10 i32 Neon
-% MDCT Ne10 i32 Neon: 1000000 runs with a single tone signal (440Hz)
-% average run time: 5804.49 ns
-% standard deviation: 1.37386e-08
-% MDCT Ne10 f32 C
-% MDCT Ne10 f32 plain C: 1000000 runs with a single tone signal (440Hz)
-% average run time: 8920.73 ns
-% standard deviation: 3.7541e-10
-% FFTW3 MDCT f32
-% MDCT FFTW3 f32 plain C: 10000000 runs with a single tone signal (440Hz)
-% average run time: 7584.66 ns
-% standard deviation: 1.66076e-07
-% pi@rpi-evs-dev01:~/Dev/aac-lbin/audio_encoding \$ ./test/performance/fft_performance.sh 
-% Ne10 FFT f32 plain C
-% FFT Ne10 f32 plain C
-% average run time:   5538.36 ns
-% standard deviation: 6.1161e-07 ns
-% Ne10 FFT i32 plain C
-% FFT Ne10 i32 plain C
-% average run time:   10678.9 ns
-% standard deviation: 2.126e-06 ns
-% Ne10 FFT i16 plain C
-% FFT Ne10 i16 plain C
-% average run time:   9569.07 ns
-% standard deviation: 1.58159e-08 ns
-% Ne10 FFT f32 neon
-% FFT Ne10 f32 Neon
-% average run time:   3013.71 ns
-% standard deviation: 1.18327e-07 ns
-% Ne10 FFT i32 neon
-% FFT Ne10 i32 Neon
-% average run time:   3396.91 ns
-% standard deviation: 8.48083e-07 ns
-% Ne10 FFT i16 neon
-% FFT Ne10 i16 Neon
-% average run time:   2002.41 ns
-% standard deviation: 8.582e-08 ns
-% FFTW3 FFT f32 plain C
-% FFT FFTW3 f32 plain C
-% average run time:   4661.46 ns
-% standard deviation: 1.36369e-07 ns
+    \paragraph{}
+    Conformément à ce qui pouvait être attendu, les FFT optimisées avec les instructions SIMD Neon sont en moyenne plus rapides que leur équivalent en plain C.
+
+    \paragraph{}
+    La FFT en \emph{integer} sur 16 bits avec optimisations Neon est la plus rapide de  toutes : ce résultat n'est pas étonnant puisque les opérations SIMD permettent de réaliser plus d'opérations en parallèle avec des données codées sur moins de bits (cf section \ref{sec:simd} consacrée aux opérations SIMD Neon). Elle aurait été la FFT la plus intéressante à utiliser mais la section \ref{sec:fixed_point} montrera pourquoi cela n'a pas été possible.
+
+    \paragraph{}
+    Contrairement aux attentes initiales, les FFT en \emph{integer} sur 32 bits sont en moyenne plus lentes que les FFT en \emph{float} : la FFT en plain C est deux fois plus lente en \emph{integer} avec un temps d'exécution moyen de \SI{10}{\micro\second} contre \SI{5}{\micro\second} pour le \emph{float} et la FFT avec optimisations Neon est légèrement plus lente en \emph{integer} avec un temps d'exécution moyen de \SI{3.4}{\micro\second} contre \SI{3}{\micro\second} pour le \emph{float}.
+
+    \paragraph{}
+    Ces résultats s'expliquent par la modernité de l'architecture ARM qui, contrairement aux architecture plus anciennes, est capable de réaliser de très nombreuses opérations en \emph{float} sur 32 bits\cite{DOC-ARM}. Sur 32 bits, une instruction en \emph{integer} ne sera pas plus rapide qu'une instruction en \emph{float}. En plus de ne pas permettre de gagner en performances, l'arithmétique \emph{fixed point} va rendre l'algorithme plus lent car elle contient généralement plus d'opérations que l'arithmétique \emph{fixed point} pour arriver au même résultat, e.g. une multiplication en \emph{floating point} devra être remplacée par une multiplication et une rotation de bits en \emph{fixed point} (cf section \ref{sec:fixed_point}). La différence est moins marquée sur les FFT avec optimisations Neon car les opérations SIMD permettent parfois de plusieurs opérations en une seule.
+
+    \paragraph{}
+    Enfin, la FFT de \emph{FFTW3} en \emph{float 32} est plus performante que celle de \emph{Ne10} avec un temps d'exécution moyen de \SI{4.7}{\micro\second} contre \SI{5.5}{\micro\second} pour la FFT de \emph{Ne10} en \emph{float 32 plain C}. Elle est cepandant plus performante avec les optimisations Neon, que ce soit en \emph{float} sur 32 bits (\SI{3}{\micro\second}) ou en \emph{integer} sur 32 bits (\SI{3.4}{\micro\second}).
 
 
 
@@ -843,7 +780,7 @@
     \subsection{Performances}
     \label{sec:fixed_point_perfs}
     \paragraph{}
-    Les performances de la MDCT \emph{fixed point} en \emph{plain C} sont moins bonnes que celles de l'implémentation en \emph{floating point} (voir section \ref{sec:mdct_perfs} pour plus d'explications sur la mesure des performances):
+    Les performances de la MDCT \emph{fixed point} en \emph{plain C} sont moins bonnes que celles de l'implémentation en \emph{floating point} (cf section \ref{sec:mdct_perfs} pour plus d'explications sur la mesure des performances):
     \begin{itemize}
         \item La MDCT \emph{Neon float 32 plain C} a un temps d'exécution moyen de \SI{9}{\micro\second};
         \item La MDCT \emph{Neon integer 32 plain C} a un temps d'exécution moyen de \SI{22}{\micro\second}.
@@ -872,6 +809,7 @@
     % \subsubsection{FFT de la librairie Ne10}
 
     \subsection{Utilisation des fonctions Neon SIMD (intrinsic)}
+    \label{sec:simd}
     % instructions principales utilisées + contraintes associées : types d'entrée + sortie -> comment ça s'agence avec le reste
     % \begin{itemize}
     %     \item voir la doc de neon \url{https://developer.arm.com/documentation/dht0002/a/Introducing-NEON/What-is-SIMD-/ARM-SIMD-instructions}
@@ -1016,6 +954,7 @@
     % projet compilé en release pour les tests de perf
 
     \subsection{Perte de précision}
+    \label{sec:precision}
     % Comparaison avec l'algorithme de référence
     % Annexe : algo de référence, test de comparaison, résultats avec des données aléatoires et avec un sinus simple
     % ce serait mieux de voir la perte de précision sur tout l'encodeur mais c'est déjà une indication, maintenant est-ce que ç aprête tellement à conséquence ?
