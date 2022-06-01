@@ -117,12 +117,12 @@
     \section{EVS Broadcast Equipment}
     \subsection{Présentation d'EVS et du département R\&D}
     \paragraph{}
-    Mon stage s'est déroulé au sein de la société EVS Broadcast Equipment dont la figure \ref{fig:logo} représente le logo. EVS est une entreprise d'origine liégeoise devenue internationale. Fondée en 1994 par Pierre L'Hoest, Laurent Minguet et Michel Counson, EVS compte aujourd'hui plus de 600 employés dans plus de 20 bureaux à travers le monde mais son siège principal se situe toujours à Liège.
+    Mon stage s'est déroulé au sein de la société EVS Broadcast Equipment dont la figure \ref{fig:logo} représente le logo. EVS est une entreprise d'origine liégeoise devenue internationale. Fondée en 1994 par Pierre L'Hoest, Laurent Minguet et Michel Counson, EVS compte aujourd'hui plus de 600 employés dans plus de 20 bureaux à travers le monde mais son siège principal se situe toujours à Liège\cite{EVS:website}.
 
     \begin{figure}[H]
         \centering
         \includegraphics[width=.5\linewidth]{./images/EVS-logo.png}
-        \caption{Logo de la société EVS Broadcast Equipment\cite{EVS:website}}
+        \caption{Logo de la société EVS Broadcast Equipment}
         \label{fig:logo}
     \end{figure}
 
@@ -147,7 +147,7 @@
         \begin{subfigure}[b]{0.4\linewidth}
             \includegraphics[width=\linewidth]{./images/XT-VIA-ar.jpg}
         \end{subfigure}
-        \caption{Vues avant et arrière (en configuration IP) de l'XT-VIA\cite{EVS:products}}
+        \caption{Vues avant et arrière (en configuration IP) de l'XT-VIA}
         \label{fig:xt-via}
     \end{figure} 
 
@@ -210,7 +210,7 @@
     Les codecs audio qui implémentent les normes MPEG ont pour point commun d'être des codecs avec perte de données basés sur un modèle psychoacoustique. Le premier est le MP3, défini par la norme MPEG-1 Layer-3 ISO/IEC 11172-3:1993. Le codec AAC est conçu en 1997 pour remplacer le MP3. Il est défini par les normes MPEG-2 partie 7 ISO/IEC 13818-7:2006\cite{ISO13818-7} et MPEG-4 partie 3 ISO/IEC 14496-3:2019\cite{ISO14496-3}.
 
     \paragraph{}
-    Les normes MPEG définissent les grandes lignes de l'encodage et du décodage et le format du conteneur mais pas l'implémentation du codec qui peut de ce fait être plus ou moins performant. Les codecs MPEG sont typiquement composés des blocs suivants :
+    Les normes MPEG définissent les grandes lignes de l'encodage et du décodage et le format du conteneur mais pas l'implémentation du codec qui peut de ce fait être plus ou moins performant. Les codecs MPEG sont typiquement composés des blocs suivants\cite{1999-Brandenburg} :
     \begin{figure}[H]
         \centering
         \begin{subfigure}[b]{.6\linewidth}
@@ -221,7 +221,7 @@
             \includegraphics[width=\linewidth]{./images/1999-Brandenburg-simple-AAC-decoder.png}
             \caption{Schéma fonctionnel du décodeur}
         \end{subfigure}
-        \caption{Vue simplifiée d'un codec MPEG basé sur un modèle psychoacoustique\cite{1999-Brandenburg}}
+        \caption{Vue simplifiée d'un codec MPEG basé sur un modèle psychoacoustique}
     \end{figure}
     \paragraph{}
     L'encodeur est composé des blocs suivants :
@@ -251,7 +251,7 @@
     \begin{figure}[H]
         \centering
         \includegraphics[width=.6\linewidth]{./images/2019-Herre-Dick-masking-effect.png}
-        \caption{Effets de masque dans le domaine fréquentiel\cite{2019-Herre-Dick}}
+        \caption{Effets de masque dans le domaine fréquentiel}
     \end{figure}
 
     % \paragraph{}
@@ -406,7 +406,7 @@
 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=.8\linewidth]{./images/validation_ref_mdct_float.pdf}
+        \includegraphics[width=.8\linewidth]{./images/validation_ref_float.pdf}
         \caption{Spectres de fréquences générés par les MDCT de référence en \emph{floating point}}
         \label{fig:validation_ref_mdct_float}
     \end{figure}
@@ -439,14 +439,14 @@
     \paragraph{}
     La représentation graphique du spectre de fréquences généré par la MDCT de référence en \emph{fixed point} à partir du signal à \SI{440}{\hertz} est présentée par la figure \ref{fig:validation_ref_mdct_int} :
     \begin{itemize}
-        \item le spectre prend la même forme que le spectre de fréquence généré par les MDCT en \emph{floating point} (figure \ref{fig:validation_ref_mdct_int});
+        \item le spectre prend la même forme que le spectre de fréquence généré par les MDCT en \emph{floating point} (figure \ref{fig:validation_ref_mdct_float});
         \item le spectre met bien en évidence une composante fréquentielle principale aux alentours de \SI{440}{\hertz};
         \item les valeurs des composantes fréquentielles sont beaucoup plus grandes que celles du spectre en \emph{floating point} puisqu'elles sont mise à échelle Q15.
     \end{itemize}
 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=.8\linewidth]{./images/validation_ref_mdct_int.pdf}
+        \includegraphics[width=.8\linewidth]{./images/validation_ref_int.pdf}
         \caption{Spectre de fréquences généré par les MDCT de référence en \emph{fixed point}}
         \label{fig:validation_ref_mdct_int}
     \end{figure}
@@ -467,56 +467,58 @@
     % Annexes : code de la MDCT, test et procédure d'installation de la librairie FFTW
 
     % au code de base, il faut aussi ajouter la fonction de fenêtre (MLT) qui n'était pas présente.
-    \paragraph{}
-    Choix de l'optimisation de la MDCT basé sur sur une DCT : la FFT -> complexité de O (N log N) (N taille de la fenetre) + O(N) opérations de pré et de post processing.
+    
+    
+    % \paragraph{}
+    % Choix de l'optimisation de la MDCT basé sur sur une DCT : la FFT -> complexité de O (N log N) (N taille de la fenetre) + O(N) opérations de pré et de post processing.
 
-    \paragraph{}
-    But : utiliser une FFT déjà optimisée pour n'avoir à optimiser "que" les opérations de pré et de post processing
-    Exemple trouvé sur le site DSP related -> Annexe ? Citation ?
+    % \paragraph{}
+    % But : utiliser une FFT déjà optimisée pour n'avoir à optimiser "que" les opérations de pré et de post processing
+    % Exemple trouvé sur le site DSP related -> Annexe ? Citation ?
 
     \subsection{Implémentation de la MDCT basée sur la FFT de la librairie FFTW3}
-    \paragraph{}
-    Code développé à partir de cet exemple en annexe. Il est basé sur la librairie FFTW3 qu'on ne peut pas garder car ne permet pas de travailler en integer -> sera amené à être retravaillé.
+    % \paragraph{}
+    % Code développé à partir de cet exemple en annexe. Il est basé sur la librairie FFTW3 qu'on ne peut pas garder car ne permet pas de travailler en integer -> sera amené à être retravaillé.
 
-    \paragraph{}
-    Explications des paramètres du code :
-    \begin{itemize}
-        \item fenêtre de 1024
-        \item pre-twiddle -> 256
-        \item FFT => FFT avec une fenêtre d'entrée réduite et donc une complexité réduite
-        \item post-twiddle -> 512
-    \end{itemize}
+    % \paragraph{}
+    % Explications des paramètres du code :
+    % \begin{itemize}
+    %     \item fenêtre de 1024
+    %     \item pre-twiddle -> 256
+    %     \item FFT => FFT avec une fenêtre d'entrée réduite et donc une complexité réduite
+    %     \item post-twiddle -> 512
+    % \end{itemize}
 
     % \subsection{Réduction de la fenêtre d'entrée}
     % (pre et post processing/twiddles pour faire moins de FFT) -> réduction de la fenêtre de la FFT
 
     \subsection{Validation}
-    \paragraph{}
-    Validé avec un single tone signal + l'algo de référence.
+    % \paragraph{}
+    % Validé avec un single tone signal + l'algo de référence.
 
     \paragraph{}% TODO
-    Présentation des résultats sous forme de données brutes ou de graphique.
+    % Présentation des résultats sous forme de données brutes ou de graphique.
     \begin{figure}[H]
         \centering
         \includegraphics[width=.8\linewidth]{./images/fftw3_mdct_f32_signal_in_out.pdf}
-        \caption{}
-        \label{fig:}
+        \caption{Signaux temporels en entrée de la MDCT FFTW3 \emph{float} et en sortie de la IMDCT}
+        \label{fig:signal_imdct}
     \end{figure}
 
 
-    \paragraph{}
-    Code d'exemple qui teste l'algo de référence et l'algo FFTW3 avec les mêmes données d'entrée pour comparaison. (on fait la différence pour la précision ? ce n'est peut être pas pertinent de la faire déjà)
+    % \paragraph{}
+    % Code d'exemple qui teste l'algo de référence et l'algo FFTW3 avec les mêmes données d'entrée pour comparaison. (on fait la différence pour la précision ? ce n'est peut être pas pertinent de la faire déjà)
 
-    \paragraph{}
-    Présentation des résultats sous forme de données brutes ou de graphiques.
+    % \paragraph{}
+    % Présentation des résultats sous forme de données brutes ou de graphiques.
 
-    A ce niveau, pour valider, j'ai aussi essayé de faire la IMDCT mais dû à l'overlap, sur une seule fenetre, on ne sait pas reconstruire le signal -> pas possible de valider comme ça
+    % A ce niveau, pour valider, j'ai aussi essayé de faire la IMDCT mais dû à l'overlap, sur une seule fenetre, on ne sait pas reconstruire le signal -> pas possible de valider comme ça
 
     \begin{figure}[H]
         \centering
         \includegraphics[width=.8\linewidth]{./images/validation_fftw_f32.pdf}
-        \caption{}
-        \label{fig:validation_fftw_f32}
+        \caption{Spectre de fréquences généré par la MDCT FFTW3 \emph{float} comparé au spectre de référence}
+        \label{fig:validation_fftw3_f32}
     \end{figure}
 
 
@@ -572,7 +574,7 @@
     \begin{figure}[H]
         \centering
         \includegraphics[width=.8\linewidth]{./images/validation_ne10_f32.pdf}
-        \caption{}
+        \caption{Spectre de fréquences généré par la MDCT Ne10 i32 plain C comparé au spectre de référence}
         \label{fig:validation_ne10_f32}
     \end{figure}
 
@@ -828,7 +830,7 @@
     \begin{figure}[H]
         \centering
         \includegraphics[width=.8\linewidth]{./images/validation_ne10_i32_c.pdf}
-        \caption{Comparaison des spectres des fréquences produits par la MDCT Ne10 i32 plain C et par la MDCT de référence en \emph{integer}}
+        \caption{Spectre de fréquences généré par la MDCT Ne10 i32 plain C comparé au spectre de référence}
         \label{fig:validation_ne10_i32_c}
     \end{figure}
 
@@ -865,7 +867,7 @@
     \section{Optimisations à l'architecture ARM}
     \subsection{Spécificités de l'architecture ARMv7}
     \paragraph{}
-    Globalement reprend les tutos ARM
+    % Globalement reprend les tutos ARM
     % FFT déjà optimisées pour Neon mais limitations sur ce qui entre et ce qui sort
     % \subsubsection{FFT de la librairie Ne10}
 
@@ -879,19 +881,24 @@
 
     % rangement dans le fichier excel : décomposer les premières opérations et essayer de repérer le pattern puis validation dans l'excel
 
-    \paragraph{}
-    Les opérations SIMD permettent de faire plusieurs opérations en une fois où l'algo normal n'en fait qu'une à la fois. L'algo SIMD permet de faire plusieurs modifications à la fois -> il faut ranger les données de manière à pouvoir l'appliquer facilement (fonction fenêtre -> tri des données ? )
+%    \paragraph{}
+%    Les opérations SIMD permettent de faire plusieurs opérations en une fois où l'algo normal n'en fait qu'une à la fois. L'algo SIMD permet de faire plusieurs modifications à la fois -> il faut ranger les données de manière à pouvoir l'appliquer facilement (fonction fenêtre -> tri des données ? )
+%
+%
+%    \paragraph{}
+%    Plus les données sur lesquelles on travaille sont petites, plus on peut faire d'opérations en parallèle -> il faut voir si la perte de précision est ok. -> mettre une représentation graphique, c'est beaucoup plus simple à comprendre. D'où l'intérêt de passer à du 16 bits, plutôt que de rester en 32 bits et il faut absolument éviter le 64 bits (aucun intérêt).
+%
+%    Attention au flag pour la compilation + au header (accès aux intrinsics pas activé par défaut)
+%
+
+    \subsection{Implémentations de la MDCT basée sur la FFT de \emph{Ne10} en arithmétique \emph{fixed point} avec optimisations \emph{Neon}}
 
 
-    \paragraph{}
-    Plus les données sur lesquelles on travaille sont petites, plus on peut faire d'opérations en parallèle -> il faut voir si la perte de précision est ok. -> mettre une représentation graphique, c'est beaucoup plus simple à comprendre. D'où l'intérêt de passer à du 16 bits, plutôt que de rester en 32 bits et il faut absolument éviter le 64 bits (aucun intérêt).
-
-    Attention au flag pour la compilation + au header (accès aux intrinsics pas activé par défaut)
-
+    \subsection{Validation}
     \begin{figure}[H]
         \centering
         \includegraphics[width=.8\linewidth]{./images/validation_ne10_i32_neon.pdf}
-        \caption{}
+        \caption{Spectre de fréquences généré par la MDCT Ne10 i32 Neon comparé au spectre de référence}
         \label{fig:validation_ne10_i32_neon}
     \end{figure}
 
@@ -1044,6 +1051,7 @@
     Sur base du cahier des charges de début de stage, il a été décidé que mon travail s
     % Résultats obtenus + améliorations possibles
 
+    \newpage
     \bibliography{biblio} 
     \bibliographystyle{ieeetr.bst}
     \addcontentsline{toc}{section}{\protect\numberline{}Références}
