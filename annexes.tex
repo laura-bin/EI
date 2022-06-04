@@ -133,12 +133,71 @@
 \newpage
 \setcounter{page}{1}
 \pagenumbering{Roman}
-\renewcommand{\thesection}{\Alph{section}} 
+\renewcommand{\thesection}{\Alph{section}}
+
+\section{Raspberry Pi 4 CPU info}\label{app:cpuinfo}
+\paragraph{}
+Informations sur les CPU du Raspberry Pi 4 contenues dans le fichier \texttt{/proc/cpuinfo}.
+\lstset{language=bash}
+\begin{lstlisting}
+$ cat /proc/cpuinfo
+processor       : 0
+model name      : ARMv7 Processor rev 3 (v7l)
+BogoMIPS        : 108.00
+Features        : half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae
+ evtstrm crc32 
+CPU implementer : 0x41
+CPU architecture: 7
+CPU variant     : 0x0
+CPU part        : 0xd08
+CPU revision    : 3
+
+processor       : 1
+model name      : ARMv7 Processor rev 3 (v7l)
+BogoMIPS        : 108.00
+Features        : half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae
+ evtstrm crc32 
+CPU implementer : 0x41
+CPU architecture: 7
+CPU variant     : 0x0
+CPU part        : 0xd08
+CPU revision    : 3
+
+processor       : 2
+model name      : ARMv7 Processor rev 3 (v7l)
+BogoMIPS        : 108.00
+Features        : half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae
+ evtstrm crc32 
+CPU implementer : 0x41
+CPU architecture: 7
+CPU variant     : 0x0
+CPU part        : 0xd08
+CPU revision    : 3
+
+processor       : 3
+model name      : ARMv7 Processor rev 3 (v7l)
+BogoMIPS        : 108.00
+Features        : half thumb fastmult vfp edsp neon vfpv3 tls vfpv4 idiva idivt vfpd32 lpae
+ evtstrm crc32 
+CPU implementer : 0x41
+CPU architecture: 7
+CPU variant     : 0x0
+CPU part        : 0xd08
+CPU revision    : 3
+
+Hardware        : BCM2711
+Revision        : b03112
+Serial          : 1000000022221a34
+Model           : Raspberry Pi 4 Model B Rev 1.2
+\end{lstlisting}
+
+
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % 5 Environnement de développement
     %       - app:cmake_super
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
 \section{CMake principal}\label{app:cmake_super}
 \paragraph{}
 Fichier CMake principal placé à la racine du projet. Il permet de compiler :
@@ -1141,6 +1200,9 @@ void ne10_mdct_i32_c::mdct(int16_t *time_signal, int32_t *spectrum)
 
 \newpage
 \section{Implémentation de la MDCT basée sur la FFT de \emph{Ne10} en \emph{fixed point} avec optimisations \emph{Neon}}\label{app:mdct_ne10_i32_neon}
+\paragraph{}
+Le code de cette annexe utilise les instructions intrinsèques Neon et doit être compilé avec l'option \texttt{-mfpu=neon}.
+
 \subsection{Header}\label{app:mdct_ne10_i32_neon_header}
 \paragraph{}
 Header de la classe \texttt{mdct\_ne10\_i32\_neon} : MDCT basée sur la FFT de la librairie \emph{Ne10} en \emph{integer} (32 bits) optimisée par l'utilisation des opérations SIMD Neon. La classe contient les structures de données \texttt{fft\_in} en représentation Q1.15 et \texttt{fft\_out} en Q9.15, les tableaux de facteurs de \texttt{twiddle} utilisés pour le \emph{pre-} et le \emph{post-processing} et la configuration de la FFT (\texttt{cfg}). Contrairement aux autres implémentations, les facteurs de twiddle ne sont pas rassemblés dans un seul tableau. Les tableaux de facteurs de \emph{pre-twiddling} et de \emph{post-twiddling} sont séparés car ils sont utilisés en 16 bits pour le \emph{pre-twiddling} et en 32 bits pour le \emph{post-twiddling}. Chacun de ces tableaux est séparé en deux afin que chaque moitié puisse être initialisée dans un ordre qui facilite l'utilisation des opérations SIMD. L'implémentation des fonctions de ce header est présentée dans les annexes suivantes.
@@ -1179,7 +1241,6 @@ Initialisation de la MDCT dans le constructeur de la classe \texttt{mdct\_ne10\_
     \item Le tableau de \texttt{twiddle} est initialisé en \emph{double} puis converti en \emph{integer} (représentation Q15 en 16 bits pour le \emph{pre-twiddling} et en 32 bits pour le \emph{post-twiddling}) : la première moitié des tableaux est rangée à l'endroit dans les tableaux \texttt{pretwiddle\_start} et \texttt{posttwiddle\_start} tandis que la seconde est rangée à l'envers dans les tableaux \texttt{pretwiddle\_end} et \texttt{posttwiddle\_end};
     \item La configuration de la FFT de \emph{Ne10} est initialisée en \emph{complex to complex} en \emph{integer 32} avec en paramètre la taille de la fenêtre de la FFT réduite à un quart de la taille de la fenêtre d'entrée avec la fonction adaptée pour l'exécution d'une FFT optimisée avec les instructions SIMD Neon.
 \end{itemize}
-\newpage
 \lstset{language=C++}
 \begin{lstlisting}
 ne10_mdct_i32_neon::ne10_mdct_i32_neon()
@@ -1418,129 +1479,17 @@ void ne10_mdct_i32_neon::mdct(int16_t *time_signal, int32_t *spectrum)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newpage
-\section{Comparaison des spectres de fréquences produits par les MDCT}\label{app:spectrum_comparison}
+\section{Validation des spectres de fréquences produits par les MDCT}\label{app:spectrum_comparison}
 \subsection{Code source}\label{app:spectrum_comparison_code}
 \paragraph{}
 \lstset{language=C++}
 \begin{lstlisting}
-#include <iomanip>
-#include <iostream>
-#include <fstream>
-
-#include <cstring>
-
-#include "ref_mdct.h"
-#include "sin_wave.h"
-
-#ifdef I32_C        // fixed point arithmetic plain C
-#include "ne10_mdct_i32_c.h"
-
-#define NE10_MDCT               ne10_mdct_i32_c
-#define INPUT_DATA              int16_t
-#define OUTPUT_DATA             int32_t
-#define GENERATE_SIN            sin_int
-#define REF_MDCT                ref_int_mdct
-
-#elif I32_NEON    // fixed point arithmetic with Neon optimizations
-#include "ne10_mdct_i32_neon.h"
-
-#define NE10_MDCT               ne10_mdct_i32_neon
-#define INPUT_DATA              int16_t
-#define OUTPUT_DATA             int32_t
-#define GENERATE_SIN            sin_int
-#define REF_MDCT                ref_int_mdct
-
-#else               // floating point arithmetic
-#include "fftw3_mdct_f32.h"
-#include "ne10_mdct_f32_c.h"
-
-#define NE10_MDCT               ne10_mdct_f32_c
-#define INPUT_DATA              float
-#define OUTPUT_DATA             float
-#define GENERATE_SIN            sin_float
-#define REF_MDCT                ref_float_mdct<float>
-#endif
-
-/**
- * @brief comparison of the MDCTs algorithmswith a single tone signal (200Hz, sampled at 48kHz):
- *  prints the spectrums generated by the Ne10, ref and FFTW3 MDCTs in a CSV file
- */
-int main(void)
-{
-    // generate the time signal (200 Hz)
-    INPUT_DATA time_signal[MDCT_WINDOW_LEN]__attribute__((aligned(16)));
-    GENERATE_SIN(time_signal, MDCT_WINDOW_LEN, 0.9, 200.0, 0.0, FS);
-
-    // perform the reference MDCT
-    OUTPUT_DATA ref_mdct_spectrum[MDCT_M]__attribute__((aligned(16)));
-    memset(&ref_mdct_spectrum, 0, (MDCT_M)*sizeof(OUTPUT_DATA));
-    REF_MDCT(time_signal, ref_mdct_spectrum);
-
-    // perform the FFTW3 MDCT
-#ifdef F32_C
-    OUTPUT_DATA fftw_mdct_spectrum[MDCT_M]__attribute__((aligned(16)));
-    memset(&fftw_mdct_spectrum, 0, (MDCT_M)*sizeof(OUTPUT_DATA));
-    fftw3_mdct_f32 fftw3_mdct;
-    fftw3_mdct.mdct(time_signal, fftw_mdct_spectrum);
-#endif
-
-    // perform the Ne10 MDCT
-    OUTPUT_DATA ne10_mdct_spectrum[MDCT_M]__attribute__((aligned(16)));
-    memset(&ne10_mdct_spectrum, 0, (MDCT_M)*sizeof(OUTPUT_DATA));
-    NE10_MDCT ne10_mdct;
-    ne10_mdct.mdct(time_signal, ne10_mdct_spectrum);
-
-    // print the results in CSV file
-    std::ofstream csv_file;
-
-#ifdef I32_NEON
-    csv_file.open("comp_mdct_i32_neon.csv");
-    csv_file << "Frequency (Hz),Ne10 MDCT i32 Neon spectrum,Ref MDCT spectrum" << std::endl;
-#elif I32_C
-    csv_file.open("comp_mdct_i32_c.csv");
-    csv_file << "Frequency (Hz),Ne10 MDCT i32 plain C spectrum,Ref MDCT spectrum" << std::endl;
-#else
-    csv_file.open("comp_mdct_f32.csv");
-    csv_file << "Frequency (Hz),Ne10 MDCT f32 spectrum,FFTW3 f32 spectrum,Ref MDCT spectrum"
-        << std::endl;
-#endif
-
-    for (int i = 0; i < MDCT_M; ++i)
-    {
-        csv_file << (i+1.0)*FS/MDCT_WINDOW_LEN << ","
-            << std::abs(ne10_mdct_spectrum[i]) << ","
-#ifdef F32_C
-            << std::abs(fftw_mdct_spectrum[i]) << ","
-#endif
-            << std::abs(ref_mdct_spectrum[i]) << std::endl;
-    }
-
-    csv_file.close();
-
-    return 0;
-}
 \end{lstlisting}
 
-\subsection{Code source}\label{app:spectrum_comparison_cmake}
+\subsection{Compilation}\label{app:spectrum_comparison_cmake}
 \paragraph{}
 \lstset{language=make}
 \begin{lstlisting}
-# Comparison of the MDCT spectrums
-# i32 plain C
-add_executable(comp_mdct_i32_c test/validation/mdct_spectrum.cpp
-    src/sin_wave.cpp src/ref_mdct.cpp src/ne10_mdct_i32_c.cpp)
-target_compile_definitions(comp_mdct_i32_c PUBLIC -DI32_C)
-target_link_libraries(comp_mdct_i32_c NE10)
-# i32 Neon
-add_executable(comp_mdct_i32_neon test/validation/mdct_spectrum.cpp
-    src/sin_wave.cpp src/ref_mdct.cpp src/ne10_mdct_i32_neon.cpp)
-target_compile_definitions(comp_mdct_i32_neon PUBLIC -DI32_NEON)
-target_link_libraries(comp_mdct_i32_neon NE10)
-# f32 plain C
-add_executable(comp_mdct_f32_c test/validation/mdct_spectrum.cpp src/fftw3_mdct_f32.cpp
-    src/sin_wave.cpp src/ref_mdct.cpp src/ne10_mdct_f32_c.cpp)
-target_compile_definitions(comp_mdct_f32_c PUBLIC -DF32_C)
-target_link_libraries(comp_mdct_f32_c NE10 fftw3f)
 \end{lstlisting}
 
 
