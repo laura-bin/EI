@@ -497,68 +497,88 @@
     \end{itemize}
 
 
+
     \newpage
     \section{Algorithme MDCT basé sur la FFT}
-    % algo qui vient du code d'exemple dsprelated, basé sur la FFT
-%    \url{https://infoscience.epfl.ch/record/59946}
-%    \url{https://www.cis.rit.edu/class/simg716/Gauss_History_FFT.pdf}
-%    \url{https://sci-hub.se/https://www.jstor.org/stable/29775194#}
 
-    %jouer sur la symétrie pour ne calculer que la moitié
+    \paragraph{}
+    Il a été décidé en amont de ce travail d'implémenter une MDCT basée sur une FFT existante. À cette fin, un code d'exemple m'a été fourni\cite{dsprelated}. Ce code d'exemple fait appel à la FFT de la librairie \emph{FFTW3}. Cette FFT est disponible en \emph{float} ou en \emph{double} mais cette section ne présentera que son utilisation en \emph{float}.
 
-    % \subsection{Code DSP related}
-    % Code qui se base sur une FFT avec opérations de pre et de post twiddle
-    % Annexes : code de la MDCT, test et procédure d'installation de la librairie FFTW
+    \paragraph{}
+    Le principe de cette implémentation de la MDCT est de pré-processer le signal temporel pour pouvoir le faire passer dans une FFT déjà optimisée puis de post-processer la sortie de la FFT afin de reconstituer le spectre de fréquences de la MDCT (figure \ref{fig:schema-mdct}). Seules les opérations de \emph{pre-} et de \emph{post-processing} (aussi appelées \emph{pre-} et \emph{post-twiddling}) devront alors être optimisées.
 
-    % au code de base, il faut aussi ajouter la fonction de fenêtre (MLT) qui n'était pas présente.
-    
-    
-    % \paragraph{}
-    % Choix de l'optimisation de la MDCT basé sur sur une DCT : la FFT -> complexité de O (N log N) (N taille de la fenetre) + O(N) opérations de pré et de post processing.
-
-    % \paragraph{}
-    % But : utiliser une FFT déjà optimisée pour n'avoir à optimiser "que" les opérations de pré et de post processing
-    % Exemple trouvé sur le site DSP related -> Annexe ? Citation ?
-
-    \subsection{Implémentation de la MDCT basée sur la FFT de la librairie FFTW3}
-    % rangelment des facteurs de twiddling qui alternent sin et cos plutôt que d'avoir 2 tableaux
-    % pareil pour les complexes qui sont dans un seul tableau -> partie réelle, complexe, etc. 
-    % \paragraph{}
-    % Code développé à partir de cet exemple en annexe. Il est basé sur la librairie FFTW3 qu'on ne peut pas garder car ne permet pas de travailler en integer -> sera amené à être retravaillé.
-
-    % \paragraph{}
-    % Explications des paramètres du code :
-    % \begin{itemize}
-    %     \item fenêtre de 1024
-    %     \item pre-twiddle -> 256
-    %     \item FFT => FFT avec une fenêtre d'entrée réduite et donc une complexité réduite
-    %     \item post-twiddle -> 512
-    % \end{itemize}
-
-    % \subsection{Réduction de la fenêtre d'entrée}
-    % (pre et post processing/twiddles pour faire moins de FFT) -> réduction de la fenêtre de la FFT
-
-    \subsection{Validation de la MDCT \emph{FFTW3 float 32}}
-    % \paragraph{}
-    % Validé avec un single tone signal + l'algo de référence.
-
-    \paragraph{}% TODO
-    % Présentation des résultats sous forme de données brutes ou de graphique.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=.8\linewidth]{./images/fftw3_mdct_f32_signal_in_out.pdf}
-        \caption{Signaux temporels à \SI{440}{\hertz} en entrée de la MDCT FFTW3 \emph{float} et en sortie de la IMDCT}
-        \label{fig:signal_imdct}
+        \includegraphics[width=\linewidth]{./images/schema-mdct.pdf}
+        \caption{Schéma fonctionnel de la MDCT}
+        \label{fig:schema-mdct}
+    \end{figure}
+
+    \paragraph{}
+    Les FFT de \emph{FFTW3} ne sont disponibles qu'en arithmétique \emph{floating point}. Cette librairie ne pourra donc pas être conservée pour les itérations suivantes de la MDCT. L'implémentation de la MDCT présentée dans cette section vise uniquement à valider l'algorithme de MDCT fourni puisqu'il constitue la base de toutes les MDCT développées dans ce travail.
+
+
+    \subsection{Utilisation de la librairie \emph{FFTW3}}
+
+    \paragraph{}
+    \emph{FFTW} est une librairie développée au MIT afin de proposer des algorithmes de FFT\cite{FFTW05}. \emph{FFTW 3.3.9} était la dernière version disponible de la librairie au moment de la réalisation de ce travail. Elle a récemment été mise à jour avec la version 3.3.10.
+
+    \paragraph{}
+    La librairie s'installe simplement en téléchargeant les sources sur le site de \emph{FFTW}\cite{fftw} et en les compilant avec le Makefile fourni. La librairie fonctionne par défaut en \emph{double} mais elle peut également fonctionner en \emph{float} en activant l'option \texttt{--enable-float} à la configuration. Le header \texttt{<fftw3.h>} doit ensuite être inclus dans les fichiers source faisant appel à la FFT. Enfin, la librairie doit être linkée à l'exécutable lors de la compilation.
+
+
+    \subsection{Implémentation de la MDCT basée sur la FFT de la librairie FFTW3}
+
+    \paragraph{}
+    L'implémentation de la MDCT basée dur la FFT de \emph{FFTW3} en \emph{float} sur 32 bits est présentée à l'\textbf{annexe F}. Le code est structuré de la manière suivante :
+    \begin{itemize}
+        \item Le header définit la classe \texttt{fftw3\_mdct\_f32} : les données qu'elle contient et les prototypes de ses fonctions (constructeur, destructeur et fonction MDCT);
+        \item le constructeur initialise les facteurs de \emph{pre-} et de \emph{post-processing} et la configuration de la FFT;
+        \item le destructeur libère la mémoire allouée dans le construucteur;
+        \item la fonction MDCT opère les opérations de \emph{pre-processing}, fait appel à la FFT et opère les opérations de \emph{pos-processing}.
+    \end{itemize}
+
+    \paragraph{}
+    Le header de la classe \texttt{fftw3\_mdct\_f32} (\textbf{annexe F.1}) définit les données suivantes :
+    \begin{itemize}
+        \item \texttt{fft\_plan} : la configuration de la FFT de \emph{FFTW3};
+        \item \texttt{fft\_in} et \texttt{fft\_out} : les tableaux contenant les données d'entrée et de sortie de la FFT;
+        \item le tableau \texttt{twiddle} contenant les facteurs utilisés pour le \emph{pre-} et le \emph{post-processing}.
+    \end{itemize}
+
+    \paragraph{}
+    Le constructeur (\textbf{annexe F.2}) initialise :
+    \begin{itemize}
+        \item les facteurs de \emph{twiddling} : la tableau contient en alternance un facteur calculé par un cosinus (aux index pairs) et un facteur calculté par un sinus (aux index impairs);
+        \item la configuration de la FFT conformément à la documentation de \emph{FFTW3}.
+    \end{itemize}
+
+    \paragraph{}
+    Le destructeur (\textbf{annexe F.3}) libère la mémoire allouée aux tableaux d'entrée et de sortie de la FFT et à la configuration de la FFT.
+
+    \paragraph{}
+    La fonction MDCT de la classe \texttt{fftw3\_mdct\_f32} est présentée dans l'\textbf{annexe F.4}. Elle opère les fonctions de \emph{pre-twiddling} sur le signal temporel, appelle la FFT et opère les opérations de \emph{post-twiddling} comme exposé par la figure \ref{fig:schema-mdct}. La fonction prend en entrée un signal temporel codé en \emph{float} pour générer un spectre de fréquences lui aussi en \emph{float} (figure \ref{fig:func_fftw3_mdct_f32}).
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.8\linewidth]{./images/func_fftw3_mdct_f32.pdf}
+        \caption{Fonction \texttt{fftw3\_mdct\_f32}}
+        \label{fig:func_fftw3_mdct_f32}
     \end{figure}
 
 
-    % \paragraph{}
-    % Code d'exemple qui teste l'algo de référence et l'algo FFTW3 avec les mêmes données d'entrée pour comparaison. (on fait la différence pour la précision ? ce n'est peut être pas pertinent de la faire déjà)
+    \paragraph{}
+    Les opérations de \emph{pre-twiddling} ont pour but de réduire de moitié la taille de la fenêtre d'entrée. Les transformations effectuées par les calculs fournis tranforment la fenêtre de 1024 échantillons temporels (réels) en une fenêtre de 256 nombres complexes. Ces nombres sont placés dans de tableau \texttt{fft\_in} qui alterne les parties réelles et imaginaires des nombres complexes qu'il contient.
 
-    % \paragraph{}
-    % Présentation des résultats sous forme de données brutes ou de graphiques.
+    \paragraph{}
+    La FFT de \emph{FFTW3} en \emph{float 32} est appelée sur ce tableau. Le résultat de la FFT est placé dans le tableau \texttt{fft\_out} lui aussi en nombre complexes. Le fait d'avoir réduit d'un quart la taille de la fenêtre d'entrée a permis de diminuer la complexité de l'algorithme.
 
-    % A ce niveau, pour valider, j'ai aussi essayé de faire la IMDCT mais dû à l'overlap, sur une seule fenetre, on ne sait pas reconstruire le signal -> pas possible de valider comme ça
+    \paragraph{}
+    Le spectre de fréquences est reconstitué par les opérations de \emph{post-twiddling} en combinant le tableau de sortie de la FFT et les facteurs de \emph{twiddling}. Ce spectre de fréquences contient également des nombres complexes dans un tableau à une dimension alternant les parties réelles et imaginaires de ces nombres.
+
+
+    \subsection{Validation de la MDCT \emph{FFTW3 float 32}}
+    \paragraph{}
+    La MDCT \emph{FFTW3 float 32} est validée par comparaison avec l'algorithme de référence développé dans la section précédente, en \emph{double} pour plus de précisions. La MDCT a été validée avec de nombreux signaux en entrée, y compris avec des données aléatoires. Pour faciliter la lecture des résultats et la comparaison avec les résultats présentés dans les autres sections, le spectre de fréquences présenté à la figure (\ref{fig:validation_fftw3_f32}) a été généré à partir d'un signal sinusoïdal à \SI{440}{\hertz}.
 
     \begin{figure}[H]
         \centering
@@ -566,6 +586,21 @@
         \caption{Spectre de fréquences généré par la MDCT FFTW3 \emph{float} comparé au spectre de référence (\SI{440}{\hertz})}
         \label{fig:validation_fftw3_f32}
     \end{figure}
+
+    \paragraph{}
+    Le spectre généré par la MDCT \emph{FFTW3 float 32} se superpose parfaitement au spectre de fréquences de référence. Il fait bien apparaître une composante fréquentielle principale aux alentours de \SI{440}{\hertz}.
+
+    \paragraph{}
+    L'algorithme basé sur la FFT validé, il est maintenant possible de passer à la suite du développement de ce projet. Puisque \emph{FFTW3} ne travaille qu'en \emph{floating point}, la prochaine étape est d'intégrer une autre librairie capable d'opérer une FFT en \emph{fixed point}.
+
+    % A ce niveau, pour valider, j'ai aussi essayé de faire la IMDCT mais dû à l'overlap, sur une seule fenetre, on ne sait pas reconstruire le signal -> pas possible de valider comme ça
+    % \begin{figure}[H]
+    %     \centering
+    %     \includegraphics[width=.8\linewidth]{./images/fftw3_mdct_f32_signal_in_out.pdf}
+    %     \caption{Signaux temporels à \SI{440}{\hertz} en entrée de la MDCT FFTW3 \emph{float} et en sortie de la IMDCT}
+    %     \label{fig:signal_imdct}
+    % \end{figure}
+
 
 
     \newpage
