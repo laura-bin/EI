@@ -306,16 +306,14 @@
     % \end{itemize}
 
     % faire un scema fonctionnel des 3 blocs de l'implementation de MDCT choisie : pre-processig - FFT - post-processing
+    \begin{itemize}
+        \item overlap
+    \end{itemize}
+
 
 
     \newpage
     \section{Environnement de développement}
-
-    % \paragraph{}
-    % Projet en C++ mais qui ressemble fort à du C car implémentation d'un codec -> améliorations possibles : juste du C ?
-
-    % \paragraph{}
-    % Le build du projet se fait grâce à un fichier CMake à la racine du projet. Ce fichier présenté dans l'annexe \ref{an:cmake_super} permet d'appeler les CMake du projet \emph{audio\_encoding} (projet contenant les MDCT et ses tests) et de la librairie \emph{Ne10}. Les commandes du CMake générant les exécutables de tests seront fournies en annexe à la suite du code source de ces tests.
 
     \paragraph{}
     Les tests des différentes itérations de la MDCT ont été faits sur un Raspberry Pi 4. Le Raspberry est un \emph{single-board computer} (SBC) développé par la Raspberry Foundation et Broadcom depuis 2012. Le modèle 4B utilisé pour ce travail (figure \ref{fig:raspberry}) date de 2019. Il a été choisi car il possède un processeur ARM, processeur pour lequel les optimisations de la MDCT doivent être développées\cite{raspberry-doc}.
@@ -342,7 +340,7 @@
     Le Raspberry Pi 4 possède également des instructions VFP (\emph{Vector Floating Point}) qui offrent des performances très intéressantes pour les opérations en \emph{float}. Les instructions VFP ne sont pas liées au instructions NEON : la plupart des ARM possèdent les deux mais ce n'est pas toujours le cas. Les mesures de performances de différentes MDCT développées dans ce travail mettront plusieurs fois en évidence l'influence de ces instructions sur les très bonnes performances observées dans les algorithmes en \emph{floating point}.
 
     \paragraph{}
-    Le développement de ce travail s'est fait uniquement sous OS Linux et principalement en \emph{remote} sur le Raspberry : seule la première itération de la MDCT a pu être testée sur une machine équipée d'un processeur Intel.
+    Le développement de ce travail s'est fait uniquement sous OS Linux et principalement en \emph{remote} sur le Raspberry : seule la première itération de la MDCT a pu être testée sur une machine équipée d'un processeur Intel. Il aurait été intéressant de maintenir une implémentation de référence de la MDCT compatible Intel mais l'utilisation de la librairie \emph{Ne10} ne l'a pas permis.
 
     \paragraph{}
     Le code a été développé dans Visual Studio Code. Cet éditeur de texte offre des extensions pour le développement en C et C++. Il permet de se connecter facilement en SSH au Raspberry pour le développement en \emph{remote}.
@@ -378,39 +376,59 @@
     À cette équation s'ajoute le facteur d'échelle $\frac{2}{\sqrt{2N}}$.
 
     \paragraph{}
-    La MDCT a été implémentée avec une fenêtre d'entrée de $2N = 1024$ échantillons. Le bloc de sortie, i.e. le spectre de fréquences de la fenêtre d'entrée, aura donc une taille de 512. Ces valeurs, utilisées à de très nombreux endroits du code, sont rassemblées dans le header \texttt{mdct\_constants.h} présenté dans l'\textbf{annexe C}. Ce fichier contient également d'autres valeurs pré-calculées sur base de la taille de la fenêtre d'entrée.
+    La MDCT a été implémentée avec une fenêtre d'entrée de $2N = 1024$ échantillons : $N = 512$ échantillons utiles et $N = 512$ échantillons pour l'\emph{overlap}. Le bloc de sortie, i.e. le spectre de fréquences de la fenêtre d'entrée a une taille de $N = 512$ composantes fréquentielles en nombres complexes, ou de $\frac{N}{2} = 256$ composantes fréquentielles en nombres réels. Ces valeurs, utilisées à de très nombreux endroits du code, sont rassemblées dans le header \texttt{mdct\_constants.h} présenté dans l'\textbf{annexe C}. Ce fichier contient également d'autres valeurs pré-calculées sur base de la taille de la fenêtre d'entrée.
 
     \paragraph{}
-    La section suivante présente deux implémentations simples de cette formule. Ces implémentations ne pourraient pas être utilisées sans avoir été optimisées car elles seraient beaucoup trop lentes pour un codec qui doit tenir le temps réel sur plusieurs canaux. La complexité de l'implémentation de cette formule est de $O(N^2)$ opérations (où N est la taille de la fenêtre d'entrée). Cette complexité peut être ramenée à $O(N \log N)$ opérations par une factorisation récursive. La complexité peut également être diminuée en se basant sur une autre transformation, e.g. une DFT (\emph{Discrete Fourier Transorm}) ou une autre DCT (\emph{Discrete Cosine Transform}) : la complexité sera alors de $O(N)$ opérations de \emph{pre-} et \emph{post-processing} en plus de la complexité de la DFT ou de la DCT choisie\cite{wiki:MDCT}. C'est cette dernière option qui a été retenue pour ce travail.
+    La section suivante présente deux implémentations simples de cette formule. Ces implémentations ne pourraient pas être utilisées sans avoir été optimisées car elles seraient beaucoup trop lentes pour un codec qui doit tenir le temps réel sur plusieurs canaux.
+
+    \paragraph{}
+    La complexité de l'implémentation de cette formule est de $O(N^2)$ opérations (où N est la taille de la fenêtre d'entrée). Cette complexité peut être ramenée à $O(N \log N)$ opérations par une factorisation récursive. La complexité peut également être diminuée en se basant sur une autre transformation, e.g. une DFT (\emph{Discrete Fourier Transorm}) ou une autre DCT (\emph{Discrete Cosine Transform}). La complexité sera alors de $O(N)$ opérations de \emph{pre-} et \emph{post-processing} en plus de la complexité de la DFT ou de la DCT choisie\cite{wiki:MDCT}. C'est cette dernière option qui a été retenue pour ce travail.
+
 
     \subsection{Implémentations des MDCT de référence en \emph{floating point} et \emph{fixed point}}
 
     \paragraph{}
-    La formule mathématique de la MDCT a été implémentée très simplement en algorithmique flottante avec la possibilité d'obtenir le spectre de fréquences codé en \emph{float}, \emph{double} ou \emph{int32}. L'objectif de ces implémentations est de pouvoir valider les spectres de fréquences calculés par les implémentations optimisées de la MDCT. Les MDCT de référence serviront également à mesurer la précision des MDCT optimisées.
+    La formule mathématique de la MDCT a été implémentée très simplement en algorithmique flottante avec la possibilité d'obtenir le spectre de fréquences codé en \emph{float}, \emph{double} ou \emph{integer} sur 32 bits (\textbf{annexe D}). L'objectif de ces implémentations est de pouvoir valider les spectres de fréquences calculés par les implémentations optimisées de la MDCT. Les MDCT de référence serviront également à mesurer la précision des MDCT optimisées.
 
     \paragraph{}
-    La première implémentation de l'équation de la MDCT est présentée dans l'\textbf{annexe D.1}. Les calculs et les résultats peuvent être obtenus aussi bien en \emph{float} (32 bits) qu'en \emph{double} (64 bits) grâce à l'utilisation d'un \emph{template}. Le signal temporel a la même précision (\emph{float} ou \emph{double}) que le spectre généré.
+    La première implémentation de l'équation de la MDCT est présentée dans l'\textbf{annexe D.1} et représentée par la figure \ref{fig:func_ref_float_mdct}. Les calculs et les résultats peuvent être effectués et obtenus aussi bien en \emph{float} (32 bits) qu'en \emph{double} (64 bits) grâce à l'utilisation d'un \emph{template}. Le signal temporel a la même précision (\emph{float} ou \emph{double}) que le spectre généré.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.8\linewidth]{./images/func_ref_float_mdct.pdf}
+        \caption{Fonction \texttt{ref\_float\_mdct}}
+        \label{fig:func_ref_float_mdct}
+    \end{figure}
 
     \paragraph{}
-    La seconde fonction de référence est présentée dans l'\textbf{annexe D.2}. Elle permettra de vérifier les résultats des implémentations optimisées en \emph{fixed point}. Tous les calculs ne sont pas fait en algorithmique entière : la fonction fait les mêmes calculs que la fonction de référence en algorithmique flottante (uniquement en \emph{double} cette fois pour garder le plus de précision possible) et transtype le résultat final dans un \emph{integer} de 32 bits qui correspond à une notation Qx.15 signée.
+    La seconde fonction de référence est présentée dans l'\textbf{annexe D.2} et représentée par la figure \ref{fig:func_ref_int_mdct}. Elle permettra de vérifier les résultats des implémentations optimisées en \emph{fixed point}. Tous les calculs ne sont faint en algorithmique flottante (\emph{double} pour plus de précision) avant de transtyper le spectre de fréquences en \emph{integer} sur 32 bits.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.8\linewidth]{./images/func_ref_int_mdct.pdf}
+        \caption{Fonction \texttt{ref\_int\_mdct}}
+        \label{fig:func_ref_int_mdct}
+    \end{figure}
+    
+    \paragraph{}
+    La représentation \emph{fixed point} du spectre de fréquences correspond à une notation Qx.15 signée. Le Q15 a été choisi car il était souhaité que l'algorithme MDCT soit implémenté entièrement en 16 bits. Cela n'a pas été possible à cause d'une trop grande perte de précision (cf. section \ref{sec:fixed_point} consacrée au passage en arithmétique \emph{fixed point} de la MDCT). La mise à échelle Q15 a été conservée mais une autre représentation pourrait facilement être mise en place selon les besoins du bloc suivant.
 
 
     \subsection{Validation des MDCT de référence}
-    \paragraph{}
-    Les MDCT de référence sont validées en générant le spectre de fréquences d'un signal connu pour pouvoir observer que celui-ci corresponde bien à ce qui est attendu. Tout au long de ce travail, les MDCT ont été validées avec divers signaux en entrée : des signaux à une ou plusieurs fréquences connues ou des données aléatoires. La section \ref{sec:validation} consacrée au protocole de validation donne plus de détails sur la génération des spectres de fréquences produits par les MDCT et leur interprétation.
 
     \paragraph{}
-    Afin de faciliter la lecture des résultats et les comparaisons, ce travail présentera principalement des tests effectués avec en entrée un signal à \SI{440}{\hertz}. L'\textbf{annexe E} présente les codes permettant de générer des signaux sinusoïdaux. Les signaux sinusoïdaux sont produits en \emph{floating point} (\textbf{annexe E.1}) ou en \emph{fixed point} (\textbf{annexe E.2}). Le signal est paramétrable :
+    Les MDCT de référence sont validées en générant le spectre de fréquences d'un signal connu pour pouvoir observer que celui-ci corresponde bien à ce qui est attendu. Tout au long de ce travail, les MDCT ont été validées avec divers signaux en entrée : des signaux à une ou plusieurs fréquences connues ou des données aléatoires. La section \ref{sec:validation} consacrée au protocole de validation donne plus de détails sur la génération des spectres de fréquences produits par les MDCT et leur interprétation. Afin de faciliter la lecture des résultats et les comparaisons, ce travail présentera principalement des tests effectués avec un signal à \SI{440}{\hertz} en entrée des MDCT.
+
+    \paragraph{}
+    L'\textbf{annexe E} présente les codes permettant de générer les signaux sinusoïdaux destinés à être donnés en entrée aux MDCT. Les signaux sinusoïdaux sont produits en \emph{floating point} (\textbf{annexe E.1}) ou en \emph{fixed point} (\textbf{annexe E.2}). Le signal est paramétrable :
     \begin{itemize}
         \item en taille ou nombre d'échantillons : la fenêtre d'entrée de la MDCT sera toujours de 1024 échantillons;
         \item en amplitude : paramètre utilisé pour limiter le signal à une certaine \emph{range} de valeurs;
-        \item en fréquence : la fréquence des exemples de résultats donnés dans ce travail sera le plus souvent de \SI{440}{\hertz} mais les MDCT ont été testées avec de nombreux autres signaux;
+        \item en fréquence : les résultats présentés dans ce travail utilisent le plus souvent une fréquence de \SI{440}{\hertz} mais les MDCT ont été testées avec de nombreux autres signaux;
         \item en déphasage : ce paramètre n'a pas été utilisé;
         \item et en fréquence d'échantillonnage toujours à \SI{48}{\kilo\hertz}.
     \end{itemize}
 
     \paragraph{}
-    La \emph{headroom} est l'espace réservé aux valeurs limites du signal : le signal réel est clippé et ne couvre pas l'ensemble des valeurs possibles. Dans ce travail, la \emph{range} du signal est toujours comprise entre $-0.9$ et $0.9$, que le signal soit codé en \emph{floating point} ou en \emph{fixed point}. Ce fait est moins important pour les algorithmes travaillant en \emph{floating point} mais il sera essentiel pour la mise à échelle des données en représentation \emph{fixed point} (section \ref{sec:fixed_point}).
+    Dans ce travail, la \emph{range} du signal est toujours comprise entre $-0.9$ et $0.9$, que le signal soit codé en \emph{floating point} ou en \emph{fixed point}. Cette limitation de la \emph{range} vise à reproduire la \emph{headroom} du signal temporel, i.e. l'espace réservé aux valeurs limites du signal : le signal réel est clippé et ne couvre pas l'ensemble des valeurs possibles. Le fait de ne pas coder le signal sur toutes les valeurs possibles est moins important pour les algorithmes travaillant en \emph{floating point} mais il sera essentiel pour la mise à échelle des données en représentation \emph{fixed point} (section \ref{sec:fixed_point}).
 
     \paragraph{}
     Les signaux codés en \emph{float} ou en \emph{double} serviront à valider les implémentations intermédiaires de la MDCT. L'objectif reste cependant de développer une MDCT capable de traiter des données entières sans transtypage. Le signal en \emph{integer} servira à valider les dernières itérations de la MDCT. Ce signal est codé en 16 bits (représentation Q15 signée) afin de correspondre aux données réelles qui seront reçues par l'algorithme.
@@ -430,19 +448,20 @@
         \label{fig:signal_f32_f64}
     \end{figure}
 
+    \newpage
+    \paragraph{}
+    Les MDCT de référence en \emph{floating point} prenant en entrée ces signaux sinusoïdaux à \SI{440}{\hertz} génèrent les spectres de fréquences présentés à la figure \ref{fig:validation_ref_mdct_float} :
+    \begin{itemize}
+        \item les deux MDCT génèrent le même spectre : le spectre généré par l'algorithme en \emph{float} (en pointillés) se superpose parfaitement à celui généré en \emph{double};
+        \item la représentation graphique des spectres de fréquences met bien en évidence une composante fréquentielle principale aux alentours de \SI{440}{\hertz} (la section \ref{sec:validation} expliquera pourquoi la résolution du spectre de fréquences ne permet pas de trouver exactement une fréquence à \SI{440}{\hertz}).
+    \end{itemize}
+
     \begin{figure}[H]
         \centering
         \includegraphics[width=.8\linewidth]{./images/validation_ref_float.pdf}
         \caption{Spectres de fréquences générés par les MDCT de référence en \emph{floating point} (\SI{440}{\hertz})}
         \label{fig:validation_ref_mdct_float}
     \end{figure}
-
-    \paragraph{}
-    Les MDCT de référence en \emph{floating point} prenant en entrée ces signaux sinusoïdaux à \SI{440}{\hertz} génèrent les spectres de fréquences présentés à la figure \ref{fig:validation_ref_mdct_float} :
-    \begin{itemize}
-        \item les deux MDCT génèrent le même spectre : le spectre généré par l'algorithme en \emph{float} (en pointillés) se superpose parfaitement à celui généré en \emph{double};
-        \item la représentation graphique des spectres de fréquences met bien en évidence une composante fréquentielle principale aux alentours de \SI{440}{\hertz};
-    \end{itemize}
 
     \paragraph{}
     Le résultat obtenu est déjà satisfaisant puisque la fréquence mise en évidence par le spectre est bien celle du signal d'entrée. Cependant, l'implémentation d'une fonction de fenêtre appliquée au signal d'entrée permettrait d'améliorer encore le spectre de fréquences généré par la MDCT. La section \ref{sec:ameliorations} consacrée aux améliorations possibles de ce travail revient sur cette fonction de fenêtre.
@@ -462,6 +481,13 @@
         \label{fig:signal_i16}
     \end{figure}
 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.8\linewidth]{./images/validation_ref_int.pdf}
+        \caption{Spectre de fréquences généré par la MDCT de référence en \emph{fixed point} (\SI{440}{\hertz})}
+        \label{fig:validation_ref_mdct_int}
+    \end{figure}
+
     \paragraph{}
     La représentation graphique du spectre de fréquences généré par la MDCT de référence en \emph{fixed point} à partir du signal à \SI{440}{\hertz} est présentée par la figure \ref{fig:validation_ref_mdct_int} :
     \begin{itemize}
@@ -469,13 +495,6 @@
         \item le spectre met bien en évidence une composante fréquentielle principale aux alentours de \SI{440}{\hertz};
         \item les valeurs des composantes fréquentielles sont beaucoup plus grandes que celles du spectre en \emph{floating point} puisqu'elles sont mises à échelle Q15.
     \end{itemize}
-
-    \begin{figure}[H]
-        \centering
-        \includegraphics[width=.8\linewidth]{./images/validation_ref_int.pdf}
-        \caption{Spectre de fréquences généré par les MDCT de référence en \emph{fixed point} (\SI{440}{\hertz})}
-        \label{fig:validation_ref_mdct_int}
-    \end{figure}
 
 
     \newpage
@@ -596,7 +615,7 @@
 
     \subsection{Validation de la MDCT \emph{Ne10 float 32}}
     \paragraph{}
-    L'utilisation de la librairie \emph{Ne10} est validée par comparaison du spectre de fréquences qu'elle génère avec le spectre généré par la MDCT de référence en \emph{double}. La validation des données est expliquée plus en détails dans la section \ref{sec:validation}. Pour faciliter la comparaison avec les autres spectres de fréquences, la représentation graphique du spectre de fréquences de la figure \ref{fig:validation_ne10_f32} a été généré avec un signal d'entrée à \SI{440}{\hertz} :
+    L'utilisation de la librairie \emph{Ne10} est validée par comparaison du spectre de fréquences qu'elle génère avec le spectre généré par la MDCT de référence en \emph{double}. La validation des données est expliquée plus en détails dans la section \ref{sec:validation}. Pour faciliter la comparaison avec les autres spectres de fréquences, la représentation graphique du spectre de fréquences de la figure \ref{fig:validation_ne10_f32} a été générée avec un signal d'entrée à \SI{440}{\hertz} :
     \begin{itemize}
         \item le spectre de fréquences produit par la MDCT basée sur la FFT de \emph{Ne10} en \emph{float 32} se superpose parfaitement au spectre de fréquences généré par la MDCT de référence:
         \item la principale composante fréquentielle relevée se situe bien aux alentours de \SI{440}{\hertz}.
@@ -626,7 +645,7 @@
     Les tests de performances ont été effectués sur \SI{10000000}{} d'exécutions pour chaque FFT avec des données aléatoires différentes pour chaque exécution. Les tests de performance via un script permettant de lancer tous les exécutables de test les uns à la suite des autres en redirigeant la sortie standard vers un fichier texte. Ce script a été lancé sur le Raspberry via une connexion SSH, en ne réalisant aucune autre action sur le temps d'exécution des tests.
 
     \paragraph{}
-    Les tests de performances ont également été réalisés avec d'autres signaux en entrée, e.g. un signal sinusoïdal simple répété à chaque exécution. Les résultats de ces tests sont équivalents aux résultats des tests présentés dans table \ref{tab:perf_fft} avec des données aléatoires en entrée.
+    Les tests de performances ont également été réalisés avec d'autres signaux en entrée, e.g. un signal sinusoïdal simple répété à chaque exécution. Les résultats de ces tests sont équivalents aux résultats des tests présentés dans la table \ref{tab:perf_fft} avec des données aléatoires en entrée.
 
     \begin{table}[H]
         \centering
@@ -856,7 +875,7 @@
 
     \subsection{Instructions ARM NEON}
     \paragraph{}
-    Le jeu d'instructions NEON, ou \emph{Advanced SIMD} est le jeu d'instructions SIMD spécifique à l'architecture ARMv7. Les instructions SIMD sont effectuées sur des registres spécifiques. La banque de registres NEON compte 32 registres de 64 bits. Ces registres sont partagés entre NEON et VFP (\emph{Vector Floating Point}, jeu d'instruction SIMD pour \emph{float} sur 32 bits). Les 32 registres qui peuvent aussi être utilisés comme 16 registres de 128 bits en associant ces registres deux à deux\cite{DOC-ARM}. La figure \ref{fig:neon-registers} montre la correspondance entre les registres NEON et VFP et montre comment les 32 registres de 64 bits (\texttt{D0} à \texttt{D31}) sont associés pour former 16 registres de 128 bits (\texttt{Q0} à \texttt{Q15}).
+    Le jeu d'instructions NEON, ou \emph{Advanced SIMD} est le jeu d'instructions SIMD spécifique à l'architecture ARMv7. Les instructions SIMD sont effectuées sur des registres spécifiques. La banque de registres NEON compte 32 registres de 64 bits. Ces registres sont partagés entre NEON et VFP (\emph{Vector Floating Point}, jeu d'instructions SIMD pour \emph{float} sur 32 bits). Les 32 registres peuvent aussi être utilisés comme 16 registres de 128 bits en associant ces registres deux à deux\cite{DOC-ARM}. La figure \ref{fig:neon-registers} montre la correspondance entre les registres NEON et VFP et montre comment les 32 registres de 64 bits (\texttt{D0} à \texttt{D31}) sont associés pour former 16 registres de 128 bits (\texttt{Q0} à \texttt{Q15}).
 
     \begin{figure}[H]
         \centering
@@ -866,7 +885,7 @@
     \end{figure}
 
     \paragraph{}
-    Les instructions NEON permettent de travailler avec des \emph{integer} de 8, 16, 32 ou 64 bits, signés et non signés. Pout le développement de la MDCT, seules des représentations signées en 16 ou en 32 bits seront utilisées. Le 8 bits n'est pas assez précis pour de l'audio, il est généralement utilisé pour de la vidéo. Le 64 bits serait désavantageux par rapport à un algorithme en \emph{float} sur 32 bits : son utilisation doit donc être évitée.
+    Les instructions NEON permettent de travailler avec des \emph{integer} de 8, 16, 32 ou 64 bits, signés et non signés. Pour le développement de la MDCT, seules des représentations signées en 16 ou en 32 bits seront utilisées. Le 8 bits n'est pas assez précis pour de l'audio, il est généralement utilisé pour de la vidéo. Le 64 bits serait désavantageux par rapport à un algorithme en \emph{float} sur 32 bits : son utilisation doit donc être évitée.
 
     \paragraph{}
     Les données doivent être chargées dans les registres NEON avec des instructions de \emph{load} spécifiques avant de pouvoir appeler les instructions SIMD dessus. Ces instructions de chargement ne permettent pas de charger n'importe quelles données dans n'importe quel ordre : les données à charger doivent être consécutives et devront donc être rangées dans le bon ordre avant leur chargement. Après avoir exécuté les instructions SIMD souhaitées, les données sont déchargées des registres avec des instructions de \emph{store}.
