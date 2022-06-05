@@ -643,7 +643,7 @@
     Le destructeur présenté à l'\textbf{annexe H.3} permet de libérer la mémoire allouée pour la FFT en appelant la fonction adéquate de la librairie \emph{Ne10}.
 
     \paragraph{}
-    La fonction MDCT présentée dans l'\textbf{annexe H.4}, comme pour l'itération précédente, permer de transformer un signal temporel en \emph{float} en un spectre de fréquences en \emph{float} (figure \ref{fig:func_ne10_mdct_f32}).
+    La fonction MDCT présentée dans l'\textbf{annexe H.4}, comme pour l'itération précédente, permet de transformer un signal temporel en \emph{float} en un spectre de fréquences en \emph{float} (figure \ref{fig:func_ne10_mdct_f32}).
     \begin{figure}[H]
         \centering
         \includegraphics[width=.8\linewidth]{./images/func_ne10_mdct_f32_c.pdf}
@@ -680,10 +680,10 @@
 
     \subsection{Performances des FFT}
     \label{sec:fft_perfs}
-    Une fois l'utilisation de la librairie \emph{Ne10} validée, j'ai effectué des mesures de performances sur les différentes FFT proposées par \emph{Ne10}. J'ai choisi de mesurer les temps d'exécution moyens des FFT qu'il était alors envisager d'utiliser en comparant les implémentations en \emph{plain C} ou avec optimisations NEON.
+    Une fois l'utilisation de la librairie \emph{Ne10} validée, j'ai effectué des mesures de performances sur les différentes FFT proposées par \emph{Ne10}. J'ai choisi de mesurer les temps d'exécution moyens des FFT qu'il était alors envisagé d'utiliser en comparant les implémentations en \emph{plain C} ou avec optimisations NEON.
 
     \paragraph{}
-    La mesure de ces performances a été effectuée par le code présenté dans l'\textbf{annexe I} : le même code (\textbf{annexe I.1}) permet de générer les différents exécutables de mesure des performances des FFT enn fonction de la variable de préprocesseur définie à la compilation (\textbf{annexe I.2}).
+    La mesure de ces performances a été effectuée par le code présenté dans l'\textbf{annexe I} : le même code (\textbf{annexe I.1}) permet de générer les différents exécutables de mesure des performances des FFT en fonction de la variable de préprocesseur définie à la compilation (\textbf{annexe I.2}).
 
     \paragraph{}
     À titre comparatif, les performances de la FFT de \emph{FFTW3} en \emph{float 32} ont également été mesurées. L'\textbf{annexe J} présente le code utilisé pour la mesure des performances de cette FFT (\textbf{annexe J.1}) et les commandes utilisées pour le compiler (\textbf{annexe J.2}).
