@@ -1187,6 +1187,21 @@
 
     % donner un exemple avec plusieurs composantes fréquentielles
 
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.8\linewidth]{./images/signal_multi_freq.pdf}
+        \caption{Signal temporal a plusieurs fréquences codé en \emph{integer} (Q15)}
+        \label{fig:signal_multi_freq}
+    \end{figure}
+
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.8\linewidth]{./images/validation_multi_freq.pdf}
+        \caption{Validation de la génération d'un spectre composé de multiples fréquences}
+        \label{fig:validation_multi_freq}
+    \end{figure}
+
 
 
     \subsection{Gain en performance}
@@ -1233,6 +1248,20 @@
         \label{tab:perf_mdct}
     \end{table}
     % TODO ajouter plus de données -> demander si des fréquences sont plus intéressantes que d'autre
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{ l | D{.}{.}{-1} | D{x}{\times}{-1} }
+            \multicolumn{1}{c|}{\textbf{MDCT}} & \multicolumn{1}{M{3cm}|}{\textbf{Temps d'exécution moyen (ns)}} &\multicolumn{1}{c}{\textbf{Écart type (ns)}} \\
+            \hline
+            \emph{Ne10 i32 NEON}   &  5738.84              & 0.29399 x 10^{-6} \\
+            \emph{Ne10 i32 C}      & 21805.5               & 0.28367 x 10^{-6} \\
+            \emph{Ne10 f32}        &  8948.4               & 0.26262 x 10^{-6} \\
+            \emph{FFTW3 f32}       &  7574.63              & 0.13941 x 10^{-6} \\
+            \emph{Reference f32}   & 29253.1 \times 10^3   & 4.58387 x 10^{-6} \\
+        \end{tabular}
+        \caption{Tests de performances des algorithmes MDCT}
+        \label{tab:perf_mdct_random}
+    \end{table}
 
     \paragraph{}
     Les résultats montrent que la MDCT optimisée avec les instructions ARM NEON est bien plus rapide que les autres MDCT développées avec un temps d'exécution moyen de \SI{5796.35}{\nano\second}. L'objectif du stage est donc bien atteint.
