@@ -1362,19 +1362,19 @@ void ne10_mdct_i32_neon::mdct(int16_t *time_signal, int32_t *spectrum)
         int32x4x2_t start;
         start.val[0] = vshrq_n_s32(
             vaddq_s32(
-                vaddq_s32
+                vaddq_s32(
                     vmull_s16(t4.val[1], start_tw.val[0]),
                     vmull_s16(t3.val[0], start_tw.val[0])),
-                vaddq_s32
+                vaddq_s32(
                     vmull_s16(t1.val[0], start_tw.val[1]),
                     vmull_s16(vneg_s16(t2.val[1]), start_tw.val[1])))
                 , 7);
-        start.val[1] = vshrq_n_s32
+        start.val[1] = vshrq_n_s32(
             vaddq_s32(
-                vaddq_s32
+                vaddq_s32(
                     vmull_s16(t1.val[0], start_tw.val[0]),
                     vmull_s16(vneg_s16(t2.val[1]), start_tw.val[0])),
-                vaddq_s32
+                vaddq_s32(
                     vmull_s16(vneg_s16(t4.val[1]), start_tw.val[1]),
                     vmull_s16(vneg_s16(t3.val[0]), start_tw.val[1])))
                 , 7);
@@ -1382,22 +1382,23 @@ void ne10_mdct_i32_neon::mdct(int16_t *time_signal, int32_t *spectrum)
         // end.val[0] -> real part
         // end.val[1] -> imaginary part
         int32x4x2_t end;
-        end.val[0] = vshrq_n_s32
+        end.val[0] = vshrq_n_s32(
             vaddq_s32(
-                vaddq_s32(vmull_s16(t1.val[1], end_tw.val[0]),
-                vmull_s16(vneg_s16(t2.val[0]), end_tw.val[0])),
-            vaddq_s32
+                vaddq_s32(
+                    vmull_s16(t1.val[1], end_tw.val[0]),
+                    vmull_s16(vneg_s16(t2.val[0]), end_tw.val[0])),
+            vaddq_s32(
                 vmull_s16(t4.val[0], end_tw.val[1]),
                 vmull_s16(t3.val[1], end_tw.val[1])))
             , 7);
-        end.val[1] = vshrq_n_s32
+        end.val[1] = vshrq_n_s32(
             vaddq_s32(
-                vaddq_s32
+                vaddq_s32(
                     vmull_s16(t4.val[0], end_tw.val[0]),
                     vmull_s16(t3.val[1], end_tw.val[0])),
-            vaddq_s32
-                vmull_s16(vneg_s16(t1.val[1]), end_tw.val[1]),
-                vmull_s16(t2.val[0], end_tw.val[1])))
+                vaddq_s32(
+                    vmull_s16(vneg_s16(t1.val[1]), end_tw.val[1]),
+                    vmull_s16(t2.val[0], end_tw.val[1])))
             , 7);
 
         // reverse the end part

@@ -1,4 +1,4 @@
-% recherche psycho acoustique avec ou sans tiret, spectre de fréquence, connection, effet de masque, range, en moyenne entre virgules, 
+% recherche psycho acoustique avec ou sans tiret, spectre de fréquence, connection, effet de masque, range, en moyenne entre virgules, "je", enlever les articles des titre de section
 
 
 \documentclass{article}
@@ -23,6 +23,13 @@
     %\interfootnotelinepenalty=10000
 }
 \renewcommand\ttdefault{cmvtt}
+
+\usepackage{listings}
+\lstset{%
+    backgroundcolor=\color{black!5}, % set backgroundcolor
+    basicstyle=\footnotesize,% basic font setting
+    language=C++
+}
 
 \usepackage{wrapfig}
 \usepackage{graphicx}
@@ -64,16 +71,20 @@
     \pagenumbering{gobble}
     \includepdf[pages={1}]{pdg}
     \newpage
+    \pagenumbering{arabic}
     \tableofcontents
     \newpage
     \listoffigures
 
     \newpage
     \section*{Remerciements}
+
+    \newpage
+    \section*{Glossaire}
+    \addcontentsline{toc}{section}{\protect\numberline{}Glossaire}
     % TODO
 
     \newpage
-    \pagenumbering{arabic}
     \section*{Introduction}
     \addcontentsline{toc}{section}{\protect\numberline{}Introduction}
 
@@ -98,7 +109,7 @@
     % sur base du cahier des charges, il a été décidé avec les personnes qui ont supervisé mon travail de me consacrer à l'optimisation du bloc MDCT
 
     \paragraph{}
-    %Mon travail s'inscrit dans la continuité de celui de Wafaa Heddari, stagiaire qui m'a précédée au sein du département hardware-firmware d'EVS pour y travailler sur le codec AAC. Après une étude du codec AAC et des différents blocs qui le composent, son mémoire dégage des pistes d'amélioration des performances du codec AAC : like Removal of block switching, Fast MDCT, and Optimized TNS. And then test their implementation on C Code to compare the compilation speed between the original Codec and the optimized one\cite{Wafaa}.
+    %Mon travail s'inscrit dans la continuité de celui de Wafaa Heddari, stagiaire qui m'a précédée au sein du département hardware-firmware d'EVS pour y travailler sur le codec AAC. Après une étude du codec AAC et des différents blocs qui le composent, son mémoire dégage des pistes d'amélioration des performances du codec AAC : like Removal of block switching, Fast MDCT, and Optimized TNS. And then test their implementation on C Code to compare the compilation speed between the original Codec and the optimized one\cite{Wafaa}. + le fait que certaines choses ont été décidées avant le début de mon stage
 
     %L'amélioration des performances est nécessaire par la qualité grandissante des données audio et video -> de plus en plus grandes, et le besoin de maintenir plusieurs flux en tant réel dans le broadcast
 
@@ -116,6 +127,10 @@
 
     % présenter les annexes et dire laquelle est la plus importante l'annexe x ets particulièrement à souligner car + importante
 
+    % dire ce qu'est une MDCT
+    % parler du fixed point et des avantages attendus
+
+
     \newpage
     \section{EVS Broadcast Equipment}
     \subsection{Présentation d'EVS et du département R\&D}
@@ -127,7 +142,6 @@
 
     \paragraph{}
     Plus de 50\% des employés d'EVS travaillent en recherche et développement afin de répondre au marché du broadcast en constante évolution. Outre ses solutions techniques innovantes, EVS se différencie de ses concurrents par la proximité entretenue avec les clients en leur proposant des solutions à l'écoute de leurs besoins et en leur offrant un service de support de qualité.
-    % TODO règle "leur" ?
 
     \paragraph{}
     C'est en R\&D, dans l'équipe Hardware-Firmware, que s'est déroulé mon stage. Sous la direction de Justin Mannesberg, cette équipe se compose d'une vingtaine d'employés spécialisés en développement embarqué et en développement FPGA. La situation particulière dans laquelle s'est déroulé mon stage, en pleine pandémie de Covid et alors que tous les employés étaient confinés, ne m'a pas permis d'interagir avec beaucoup de membres de l'équipe ni de pouvoir observer leur travail. Bernard Thilmant (Software Engineer dans l'équipe Hardware-Firmware) a cependant réussi à m'apporter le soutien nécessaire à la bonne réalisation de mon stage : il m'a permis de m'initier au C++, m'a aidée à ne pas me perdre dans les concepts parfois complexes de l'encodage audio et m'a aidée à apporter la rigueur scientifique nécessaire à la réalisation de mon travail. J'ai également pu bénéficier de l'expertise technique de Frédéric Lefranc (Principal Embedded System Architect dans l'équipe Hardware-Firmware) ainsi que du suivi de Justin Mannesberg (Manager de l'équipe Hardware-Firmware).
@@ -527,7 +541,7 @@
     La librairie s'installe simplement en téléchargeant les sources sur le site de \emph{FFTW}\cite{fftw} et en les compilant avec le Makefile fourni. La librairie fonctionne par défaut en \emph{double} mais elle peut également fonctionner en \emph{float} en activant l'option \texttt{--enable-float} à la configuration. Le header \texttt{<fftw3.h>} doit ensuite être inclus dans les fichiers source faisant appel à la FFT. Enfin, la librairie doit être linkée à l'exécutable lors de la compilation.
 
 
-    \subsection{Implémentation de la MDCT basée sur la FFT de la librairie FFTW3}
+    \subsection{Implémentation de la MDCT basée sur la FFT de la librairie \emph{FFTW3}}
 
     \paragraph{}
     L'implémentation de la MDCT basée sur la FFT de \emph{FFTW3} en \emph{float} sur 32 bits est présentée à l'\textbf{annexe F}. Le code est structuré de la manière suivante :
@@ -750,6 +764,7 @@
 
 
     \subsection{Arithmétique \emph{fixed point}}
+    %TODO + de refs
 
     \paragraph{}
     La représentation \emph{fixed point} est une alternative au \emph{floating point} pour le codage des nombres décimaux\cite{2007-Oberstar}. Le principe est de réserver un certain nombre de bits pour coder la partie entière et un autre nombre de bits pour coder la partie décimale du nombre. Ce travail utilise deux notations pour la représentation en \emph{fixed point}, toujours signée :
@@ -934,7 +949,17 @@
 
     \subsection{Instructions ARM NEON}
     \paragraph{}
-    Le jeu d'instructions NEON, ou \emph{Advanced SIMD} est le jeu d'instructions SIMD spécifique à l'architecture ARMv7. Les instructions SIMD sont effectuées sur des registres spécifiques. La banque de registres NEON compte 32 registres de 64 bits. Ces registres sont partagés entre NEON et VFP (\emph{Vector Floating Point}, jeu d'instructions SIMD pour \emph{float} sur 32 bits). Les 32 registres peuvent aussi être utilisés comme 16 registres de 128 bits en associant ces registres deux à deux\cite{DOC-ARM}. La figure \ref{fig:neon-registers} montre la correspondance entre les registres NEON et VFP et montre comment les 32 registres de 64 bits (\texttt{D0} à \texttt{D31}) sont associés pour former 16 registres de 128 bits (\texttt{Q0} à \texttt{Q15}).
+    Le jeu d'instructions NEON, ou \emph{Advanced SIMD} est le jeu d'instructions SIMD spécifique à l'architecture ARMv7. Les instruction SIMD permettent d'exécuter une même instruction (\emph{Single Instruction}) sur des plusieurs données (\emph{Multiple Data}), par opposition aux instruction SISD (\emph{Single Instruction on Single Data}) ou MIMD (\emph{Multiple Instruction on Multiple Data}). La vectorisation des données permet de réaliser simultanément une instruction sur celles-ci (figure \ref{fig:simd})\cite{wiki:SIMD}. Des contraites fortes s'appliquent à l'utilisation des instructions SIMD en raison de leur mode de fonctionnement propre. Les algorithmes de traitement de signal, comme c'est le cas ici avec la MDCT, se prêtent bien à la vectorisation.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.22\linewidth]{./images/SIMD.pdf}
+        \caption{Fonctionnement d'une instruction SIMD (\emph{Single Instruction on Multiple Data})}
+        \label{fig:simd}
+    \end{figure}
+    
+    \paragraph{}
+    Les instructions SIMD sont appelées sur des registres spécifiques. La banque de registres NEON compte 32 registres de 64 bits. Ces registres sont partagés entre NEON et VFP (\emph{Vector Floating Point}, jeu d'instructions SIMD pour \emph{float} sur 32 bits). Les 32 registres peuvent aussi être vus comme 16 registres de 128 bits en associant les registres de 63 bits deux à deux\cite{DOC-ARM}. La figure \ref{fig:neon-registers} montre la correspondance entre les registres NEON et VFP et montre comment les 32 registres de 64 bits (\texttt{D0} à \texttt{D31}, \texttt{D} pour \emph{doubleword}) peuvent être associés pour former 16 registres de 128 bits (\texttt{Q0} à \texttt{Q15}, \texttt{Q} pour \emph{quadword}).
 
     \begin{figure}[H]
         \centering
@@ -947,13 +972,13 @@
     Les instructions NEON permettent de travailler avec des \emph{integer} de 8, 16, 32 ou 64 bits, signés et non signés. Pour le développement de la MDCT, seules des représentations signées en 16 ou en 32 bits seront utilisées. Le 8 bits n'est pas assez précis pour de l'audio, il est généralement utilisé pour de la vidéo. Le 64 bits serait désavantageux par rapport à un algorithme en \emph{float} sur 32 bits : son utilisation doit donc être évitée.
 
     \paragraph{}
-    Les données doivent être chargées dans les registres NEON avec des instructions de \emph{load} spécifiques avant de pouvoir appeler les instructions SIMD dessus. Ces instructions de chargement ne permettent pas de charger n'importe quelles données dans n'importe quel ordre : les données à charger doivent être consécutives et devront donc être rangées dans le bon ordre avant leur chargement. Après avoir exécuté les instructions SIMD souhaitées, les données sont déchargées des registres avec des instructions de \emph{store}.
+    Les données doivent être chargées dans les registres NEON avec des instructions de \emph{load} spécifiques. Ces instructions de chargement ne permettent pas de charger n'importe quelles données dans n'importe quel ordre : les données à charger doivent être consécutives et devront être rangées dans le bon ordre avant leur chargement. Après avoir exécuté les instructions SIMD souhaitées, les données sont déchargées des registres avec des instructions de \emph{store}.
 
     \paragraph{}
-    Les instructions NEON permettent de réaliser une même instruction (\emph{Single Instruction}) sur plusieurs données à la fois (\emph{Multiple Data}) après que celles-ci aient été vectorisées. Pour les instructions sur deux vecteurs, les instructions sont appliquées sur les nombres dans l'ordre dans lequel ils ont été chargés dans les vecteurs. Pour une addition, le premier nombre du premier vecteur est additionné au premier nombre du second vecteur, le deuxième nombre du premier vecteur est additionné au deuxième nombre du second vecteur, etc. L'instruction \texttt{VADD.I16} schématisée à la figure \ref{fig:neon-example} permet, par exemple d'additionner deux vecteurs de 128 bits contenant chacun 8 nombres entiers signés de 16 bits.
+    Les instructions NEON permettent de réaliser une même instruction (\emph{Single Instruction}) sur plusieurs données à la fois (\emph{Multiple Data}) après que celles-ci aient été vectorisées. Pour les instructions sur deux vecteurs, les instructions sont appliquées sur les nombres dans l'ordre dans lequel ils ont été chargés dans les vecteurs. Pour une addition, le premier nombre du premier vecteur est additionné au premier nombre du second vecteur, le deuxième nombre du premier vecteur est additionné au deuxième nombre du second vecteur, etc. Par exemple, l'instruction \texttt{VADD.I16}, schématisée à la figure \ref{fig:neon-example}, additionne deux vecteurs de 128 bits contenant chacun 8 nombres entiers signés de 16 bits.
 
     \paragraph{}
-    Les résultats des instructions SIMD sont placés dans des vecteurs dans le même ordre. Le résultat de l'instruction \texttt{VADD.I16} est placé dans un troisième vecteur de 128 bits contenant également 8 nombres entiers signés de 16 bits. Les résultats des instructions SIMD peuvent également être placés dans des vecteurs contenant deux fois moins de données afin de conserver plus de précision : par exemple : le résultat de la multiplication de deux vecteurs contenant chacun quatre \emph{integer} codés sur 16 bits peut être placée dans un vecteur contenant quatre \emph{integer} en 32 bits.
+    Les résultats des instructions SIMD sont placés dans des vecteurs dans le même ordre. Le résultat de l'instruction \texttt{VADD.I16} est placé dans un troisième vecteur de 128 bits contenant également 8 nombres entiers signés de 16 bits. Les résultats des instructions SIMD peuvent également être placés dans des vecteurs contenant deux fois moins de données afin de conserver plus de précision : par exemple, le résultat de la multiplication de deux vecteurs contenant chacun quatre \emph{integer} codés sur 16 bits peut être placée dans un vecteur contenant quatre \emph{integer} en 32 bits.
 
     \begin{figure}[H]
         \centering
@@ -962,22 +987,20 @@
         \label{fig:neon-example}
     \end{figure}
 
-
-
-    \begin{itemize}
-        \item revoir les exemples du blog
-        \item conventions de nommage : Commence par v = advanced SIMD, etc. relire toutes celles utilisées pour l'implémentation pour en donner la définition
-    \end{itemize}
-
-
     \paragraph{}
-    Enfin, pour pouvoir utiliser les instructions NEON, le code doit inclure le header \texttt{<arm\_neon.h>} et doit être compilé avec l'option \texttt{-mfpu=neon} car l'accès aux fonctions intrinsèques du compilateur n'est pas activé par défaut.
+    GCC rend disponible l'accès aux \emph{intrinsic} NEON via le \emph{header} \texttt{<arm\_neon.h>}\cite{NEON-list}. L'utilisation de ces instructions est activée avec l'option \texttt{-mfpu=neon} à la compilation. Les noms donnés à aux fonctions de ce \emph{header} permettent de facilement comprendre le rôle de ces fonctions. C'est la cas, par exemple, de la fonction \texttt{vmull\_s16}, utlisée à de nombreuses reprises dans ce travail :
+    \begin{description}
+        \item[v] le \texttt{v} en début d'instruction indique qu'il s'agit d'une fonction \emph{Advanced SIMD};
+        \item[mul] indique que l'instruction appelée est un multiplication;
+        \item[l] indique que le résultat de la multiplication sera entièrement conservé, et pas uniquement les bits de poids fort;
+        \item[s16] la multiplication est effectué sur un vecteur de nombres signés de 16 bits : le résultat sera donc un vecteur de nombres signés de 32 bits.
+    \end{description}
 
 
     \subsection{Implémentation de la MDCT basée sur la FFT de \emph{Ne10} en arithmétique \emph{fixed point} avec optimisations NEON}
 
     \paragraph{}
-    L'\textbf{annexe L} présente l'implémentation de la MDCT \emph{Ne10 fixed point} avec optimisations NEON. Le \emph{header} de la classe \texttt{mdct\_ne10\_i32\_neon} (\textbf{annexe L.1}) contient les mêmes définitions de fonctions que l'implémentation \emph{plain C}. La fonction MDCT a la même signature avec optimisations NEON qu'en \emph{plain C}. La configuration de la FFT et les tableaux d'entrée et de sortie de la FFT sont également les mêmes qu'en \emph{plain C}. La différence se trouve au niveau des facteurs de \emph{twiddling} qui sont désormais séparés en quatre tableaux.
+    L'\textbf{annexe L} présente l'implémentation de la MDCT \emph{Ne10 fixed point} avec optimisations NEON. Le \emph{header} de la classe \texttt{mdct\_ne10\_i32\_neon} (\textbf{annexe L.1}) contient les mêmes définitions de fonctions que l'implémentation \emph{plain C} (figure \ref{fig:func_ne10_mdct_i32_neon}). La fonction MDCT a la même signature avec optimisations NEON qu'en \emph{plain C}. La configuration de la FFT et les tableaux d'entrée et de sortie de la FFT sont également les mêmes qu'en \emph{plain C}. La différence se trouve au niveau des facteurs de \emph{twiddling} qui sont désormais séparés en quatre tableaux.
     \begin{figure}[H]
         \centering
         \includegraphics[width=.8\linewidth]{./images/func_ne10_mdct_i32_neon.pdf}
@@ -1012,29 +1035,100 @@
     \paragraph{}
     Le passage de la FFT en \emph{plain C} à la FFT optimisée NEON est assez simple puisque les deux fonctions ont la même signature et sont appelées de la même manière. Pour pouvoir remplacer l'appel de la fonction \emph{plain C} par l'appel de la fonction optimisée, il suffit d'initialiser au préalable la configuration de la FFT avec la fonction appropriée, i.e. \texttt{ne10\_fft\_alloc\_c2c\_int32\_neon} au lieu de \texttt{ne10\_fft\_alloc\_c2c\_int32\_c} (\textbf{annexe L.2}). L'espace mémoire alloué à la configuration est libéré de la même manière qu'en \emph{plain C} (\textbf{annexe L.3}).
 
+    \subsubsection{Organisation des données du signal temporel}
+    \paragraph{}
+    Comme le facteurs de \emph{twiddling}, les échantillons du signal temporel doivent être organisés afin de pouvoir appeler efficacement les instructions SIMD dessus. Pour trouver l'organisation des données les plus efficaces, j'ai décomposé les opérations de \emph{pre-twiddling} pour pouvoir y identifier les schémas répétitifs. J'ai ensuite validé l'organisation des opérations dans un tableur. Le détail de ces opérations est donné en commentaire dans l'\textbf{annexe L.4}.
+
+    \paragraph{}
+    Le tableau contenant les échantillons du signal temporel est décomposé en quatre partie : de \texttt{t1} à \texttt{t4}. Ces données sont chargées dans les vecteurs NEON avec l'opération \texttt{vld2\_s16} : instruction \emph{Advanced SIMD} (\textbf{v}) de chargement (\textbf{ld}) dans deux vecteurs (avec un désentrelacement de \textbf{2}) de données signées codées sur 16 bits (\textbf{s16}). Le désentrelacement charge une donnée sur deux dans un vecteur et les données restantes dans un second vecteur (figure \ref{fig:vld2_s16})\cite{tuto-neon}.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.6\linewidth]{./images/vld2_s16.pdf}
+        \caption{Fonctionnement de l'instruction \texttt{VLD2.16\{D0, D1\}, [R0]}}
+        \label{fig:vld2_s16}
+    \end{figure}
+
+    \paragraph{}
+    Les données des tableaux \texttt{t2} et \texttt{t4} sont inversées pour être rangées de la dernière à la première. Cette opération se fait en appelant deux instructions SIMD de \emph{reverse} :
+    \begin{itemize}
+        \item \texttt{vrev32\_s16} qui inverse les données au sein des registres de poids fort et les données au sein des registres de poids faible;
+        \item \texttt{vrev64\_s32} qui inverse les registres de poids fort avec les registres de poids faible.
+    \end{itemize}
+
+    \paragraph{}
+    La figure \ref{fig:double-reverse} montre l'effet de cette double instruction de \emph{reverse} sur un vecteur de quatre données.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.3\linewidth]{./images/double-reverse.pdf}
+        \caption{Inversion des données dans un vecteur de quatre éléments}
+        \label{fig:double-reverse}
+    \end{figure}
 
 
-    % Globalement reprend les tutos ARM
-    % FFT déjà optimisées pour Neon mais limitations sur ce qui entre et ce qui sort
-    % \subsubsection{FFT de la librairie Ne10}
+    \subsubsection{Pre-processing}
 
-    % \subsection{Utilisation des fonctions Neon SIMD (intrinsic)}
-    % \label{sec:simd}
-    % instructions principales utilisées + contraintes associées : types d'entrée + sortie -> comment ça s'agence avec le reste
-    % \begin{itemize}
-    %     \item voir la doc de neon \url{https://developer.arm.com/documentation/dht0002/a/Introducing-NEON/What-is-SIMD-/ARM-SIMD-instructions}
-    %     \item voir comment faire ce qui doit être fait en fonction des instructions SIMD dispo : souvent il faut ranger correctement, splitter les registres correctement
-    %     \item utilisation des instructions intrinsèques de GCC \url{https://fr.wikipedia.org/wiki/Fonction_intrins%C3%A8que}
-    % \end{itemize}
+    \paragraph{}
+    Les opérations de \emph{pre-twiddling} suivent la même logique que celles de l'itérations, à la différence qu'elles sont effecuées sur plusieurs données en même temps. La première de ces instructions en \emph{plain C} :
+    $$fft\_in[i/2].r = (((r0*c)+64)>>7) + (((i0*s)+64)>>7);$$
+    $$\text{devient}$$
+    \begin{equation*}
+        \begin{split}
+        star &t.val[0] = vshrq\_n\_s32(vaddq\_s32( \\
+        &vaddq\_s32(vmull\_s16(t4.val[1], start\_tw.val[0]), vmull\_s16(t3.val[0], start\_tw.val[0])),\\
+        &vaddq\_s32(vmull\_s16(t1.val[0], start\_tw.val[1]), vmull\_s16(vneg\_s16(t2.val[1]), start\_tw.val[1]))), 7);
+        \end{split}
+    \end{equation*}
+    \begin{description}
+        \item[]\textbf{t1.val[x], t2.val[x], t3.val[x], t4.val[x]} vecteurs contenant quatre échantillons du signal temporel;
+        \item[]\textbf{start\_tw.val[x]} vecteur contenant quatre facteurs de \emph{twiddling};
+        \item[]\textbf{vmull\_s16(t4.val[1], start\_tw.val[0])} instruction ARM SIMD (\textbf{v}) qui multiplie (\textbf{mul}) \texttt{t4.val[1]} par \texttt{start\_tw.val[0]}, \emph{integers} signés sur 16 bits (\textbf{s16}), et garde les 32 bits de résultat (\textbf{l});
+        \item[]\textbf{vaddq\_s32(vmull\_s16(...), vmull\_s16(...))} addition (\textbf{add}) de deux vecteurs contenant quatre entiers signés de 32 bits (\textbf{s32}), ces vecteurs sont le résultat de deux opérations de multiplication;
+        \item[]\textbf{vaddq\_s32(vaddq\_s32(...), vaddq\_s32(...))} la même instruction SIMD que celle appelée à l'étape précédente addition les résultats de deux additions et place le résulat dans un vecteur de quatre entiers signés codés sur 32 bits;
+        \item[]\textbf{vshrq\_n\_s32(vaddq\_s32(...), 7)} rotation de bits vers la droite (\textbf{sh}ift \textbf{r}ight) réalisée afin de conserver la \emph{headroom} nécessaire pour la FFT.
+    \end{description}
 
-    % rangement dans le fichier excel : décomposer les premières opérations et essayer de repérer le pattern puis validation dans l'excel
+    \paragraph{}
+    Les résultats des opérations de \emph{pre-twiddling} sont déchargés dans le tableau d'entrée de la FFT avec l'instruction \texttt{vst2q\_s32}. C'est une instruction \emph{Advanced SIMD} (\textbf{v}) de \emph{store} (\textbf{st}) qui entrelace deux vecteurs (\textbf{2}) d'entiers signés de 32 bits (\textbf{s32}).
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.6\linewidth]{./images/vst2_s32.pdf}
+        \caption{Fonctionnement de l'instruction \texttt{VST2.32 \{D0, D1\}, [R0]}}
+        \label{fig:vst2_s32}
+    \end{figure}
 
 
-%    \paragraph{}
-%    Les opérations SIMD permettent de faire plusieurs opérations en une fois où l'algo normal n'en fait qu'une à la fois. L'algo SIMD permet de faire plusieurs modifications à la fois -> il faut ranger les données de manière à pouvoir l'appliquer facilement (fonction fenêtre -> tri des données ? )
+    \subsubsection{Post-processing}
+    \paragraph{}
+    Les données de sortie de la FFT sont chargées dans des vecteurs, certaines dans l'ordre dans lequel elles se trouvent en mémoire et certaines dans l'ordre inverse. Les instructions SIMD utilisées pour leur chargement sont un peu différentes de celles utilisées pour le \emph{pre-twiddling} puisque les données de sortie de la FFT sont codées sur 16 bits mais le principe reste le même.
+
+    \paragraph{}
+    Les opérations de \emph{post-processing} de l'itération précédent sont adaptées à l'utilisation d'instructions SIMD, Ainsi, la première des opérations de \emph{post-processing} :
+    $$spectrum[i] = ((((-r0+128)>>8)*c+16384)>>15) - ((((i0+128)>>8)*s+16384)>>15);$$
+    $$\text{devient}$$
+    \begin{equation*}
+        \begin{split}
+        spec &trum\_start.val[0] = vshrq\_n\_s32(vaddq\_s32( \\
+        &vqrdmulhq\_s32(vnegq\_s32(fft\_out\_start.val[0]), start\_tw.val[0]),\\
+        &vqrdmulhq\_s32(vnegq\_s32(fft\_out\_start.val[1]), start\_tw.val[1])), 8);
+        \end{split}
+    \end{equation*}
+    \begin{description}
+        \item[]\textbf{fft\_out\_start.val[x]} vecteurs contenant quatre résultats de sortie de la FFT;
+        \item[]\textbf{start\_tw.val[x]} vecteur contenant quatre facteurs de \emph{twiddling};
+        \item[]\textbf{vnegq\_s32(fft\_out\_start.val[x])} instruction \emph{Advanced SIMD} (\textbf{v}) qui transforme en leur valeur négative (\textbf{neg}) quatre nombres entiers signés de 32 bits (\textbf{s32}) pour une vue en 128 bits du registre (\textbf{q}\emph{uadword});
+        \item[]\textbf{vqrdmulhq\_s32(vnegq\_s32(fft\_out\_start.val[x]), start\_tw.val[x])} intruction ARM SIMD (\textbf{v}) qui opère sur une vue en 128 bits des registres (\textbf{q}) une multiplication (\textbf{mul}) sur des entiers signés en 32 bits (\textbf{s32} : le résultat de cette opération est un vecteur de quatre entiers signés sur 32 bits (\textbf{q}) qui ne conserve que les bits de poids forts (\textbf{h}) du produit de la multiplication;
+        \item[]\textbf{vaddq\_s32(vaddq\_s32(vqrdmulhq\_s32(...), vqrdmulhq\_s32(...))} les deux vecteurs de quatre éléments entiers sur 32 bits sont additionnés (\textbf{add}) avec pour résulat un autre vercteur de quatre entiers signés sur 32 bits pour une représentation en 128 bits des vecteurs;
+        \item[]\textbf{vshrq\_n\_s32(vaddq\_s32(...), 8)} le résultat final subit une rotation vers la droite (\textbf{sh}ift \textbf{r}ight) de 8 bits pour revenir à une échalle Q15.
+    \end{description}
+
+    \paragraph{}
+    Les résultats des opérations de \emph{post-twiddling} sont déchargées des registres NEON par les mêmes opérations de \emph{store} (\texttt{vst2q\_s32}) que les résultats des opérations de \emph{pre-twiddling}.
 
 
     \subsection{Validation}
+
+    \paragraph{}
+    L'implémentation de la MDCT \emph{fixed point} avec optimisations NEON a été testée de la même manière que toutes les autres MDCT (cf. section \ref{sec:validation}). Parmi les nombreux tests effectués, le figure \ref{fig:validation_ne10_i32_neon} présente le spectre de fréquence que génère cette MDCT avec un signal à \SI{440}{\hertz} en entrée.
     \begin{figure}[H]
         \centering
         \includegraphics[width=.8\linewidth]{./images/validation_ne10_i32_neon.pdf}
@@ -1042,8 +1136,16 @@
         \label{fig:validation_ne10_i32_neon}
     \end{figure}
 
+    \paragraph{}
+    Le spectre généré par la MDCT \emph{Ne10 i32 neon} se superpose bien au spectre de référence. La principale composante fréquentielle relevée est, comme attendu, aux alentours de \SI{440}{\hertz.}
+
 
     \subsection{Performances}
+    \paragraph{}
+    Les performances de cette dernière itération de la MDCT sont cette fois satisfaisantes. Avec un temps d'exécutions moyen de \SI{5.8}{\micro\second}, elle est la plus rapide des MDCT développées dans ce travail. Elle est évidemment plus rapide que l'algorithme en \emph{fixed point plain C} qui était le plus lent de tous les algorithmes optimisés avec \SI{22}{\micro\second} de temps d'exécution moyen. Mais elle est surtout plus rapide que les MDCT en \emph{floating point} (\SI{9}{\micro\second} pour la MDCT basée sur la FFT de \emph{Ne10} et \SI{7.4}{\micro\second} pour celle basée sur la FFT de \emph{FFTW3}).
+
+    \paragraph{}
+    La section suivante revient plus en détail sur le protocole de mesure des performances et les comparaisons entre les différentes MDCT.
 
 
     \newpage
@@ -1059,7 +1161,7 @@
     % \begin{itemize}
     %     \item sortie des données et générations de graphiques avec gnuplot
     %     \item résolution en fréquence pour une fenetre de 1024 samples pour un signal échantillonné à 48kHz : sur les graphiques $\frac{48000}{1024} = \SI{46.875}{\hertz}$ 1.3333... ms -> f = 1 / 1.33333 = 750 Hz OU res = fs / samples -> sur les graphiques on a des raies de fréquence de 750 Hz. Pour une fenêtre de 1024 = Hz
-    % \end{itemize}
+    % \end{itemize} -> mettre les valeurs exactes sorties au niveau du pic de fréquences
     % Graphiques sur sinusoide simple : augmenter la fréquence (i * qch pour déplacer la bande de fréquence), 
 
 
@@ -1139,7 +1241,7 @@
     L'algorithme MDCT de référence est le plus lent de tous avec un temps d'exécution moyen de \SI{29212.6}{\micro\second}. Ce résultat est tout à fait normal puisque cet algorithme a été développé sans optimisation particulière.
 
     \paragraph{}
-    La MDCT \emph{fixed point} en \emph{plain C} est la plus lente des MDCT optimisées avec un temps d'exécution moyen de \SI{22066.8}{\nano\second}. La section \ref{sec:fixed_point_perfs} permet de comprendre en quoi ce résultat est cohérent puisque e processeur ARMv7 supporte de nombreuses instructions en \emph{float} sur 32 bits et que l'arithmétique \emph{fixed point} nécessite souvent plusieurs opérations là où une seule est nécessaire en \emph{floating point}.
+    La MDCT \emph{fixed point} en \emph{plain C} est la plus lente des MDCT optimisées avec un temps d'exécution moyen de \SI{22066.8}{\nano\second}. La section \ref{sec:fixed_point_perfs} permet de comprendre en quoi ce résultat est cohérent puisque le processeur ARMv7 supporte de nombreuses instructions en \emph{float} sur 32 bits et que l'arithmétique \emph{fixed point} nécessite souvent plusieurs opérations là où une seule est nécessaire en \emph{floating point}.
 
     \paragraph{}
     Ces résultats montrent que l'implémentation des instructions ARM NEON était nécessaire afin d'obtenir des performances acceptables. Sans l'implémentation d'une MDCT optimisée avec ces instructions, l'utilisation d'une MDCT \emph{fixed point} aurait été compromis par les résultats insatisfaisants de l'implémentation \emph{plain C}.
@@ -1207,6 +1309,7 @@
     \begin{itemize}
         \item découverte d'EVS (technologies modernes, esprit d'entreprise collaboratif et axé sur la qualité de ce qui est délivré), du domaine audiovisuel
         \item rapport à la théorie
+        \item frustration par rapport au manque de temps à pouvoir consacrer aux aspects théoriques
     \end{itemize}
 
     \paragraph{}
