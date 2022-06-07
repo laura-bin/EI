@@ -83,6 +83,7 @@
     \section*{Glossaire}
     \addcontentsline{toc}{section}{\protect\numberline{}Glossaire}
     % TODO
+    ARM, Codec, FFT, fixed point, MDCT, Ne10, NEON, twiddling, wrapper, SIMD, ARM NEON/Advanced SIMD, floating point, fixed point
 
     \newpage
     \section*{Introduction}
@@ -129,6 +130,8 @@
 
     % dire ce qu'est une MDCT
     % parler du fixed point et des avantages attendus
+
+    % but de la section validation : montrer une plus grande variété de tests que dans le reste du travail
 
 
     \newpage
@@ -1153,47 +1156,71 @@
     \subsection{Validation des données}
     \label{sec:validation}
 
-    % insister sur le fait de faire varier le moins de choses possible dans les conditions de test
 
         % \paragraph{}% TODO
     % Explication de la lecture des résultats, calcul des bandes de fréquences représentées. Mise en évidence qu'on a bien une seule composante fréquentielle comme attendu pour un signal single tone
-
     % \begin{itemize}
-    %     \item sortie des données et générations de graphiques avec gnuplot
-    %     \item résolution en fréquence pour une fenetre de 1024 samples pour un signal échantillonné à 48kHz : sur les graphiques $\frac{48000}{1024} = \SI{46.875}{\hertz}$ 1.3333... ms -> f = 1 / 1.33333 = 750 Hz OU res = fs / samples -> sur les graphiques on a des raies de fréquence de 750 Hz. Pour une fenêtre de 1024 = Hz
-    % \end{itemize} -> mettre les valeurs exactes sorties au niveau du pic de fréquences
-    % Graphiques sur sinusoide simple : augmenter la fréquence (i * qch pour déplacer la bande de fréquence), 
 
 
     \paragraph{}
-    Les sections précédentes ont montré que les différentes itérations de la MDCT développées ont été validées à chaque étape. Cette validation consiste essentiellement en une vérification manuelle des données de sortie de la MDCT : avec un signal sinusoïdal connu en entrée, il est facile de vérifier que l'analyse fréquentielle ne contient bien qu'une seule composante fréquentielle, que la vérification se fasse en lisant les données brutes à la sortie de l'algorithme ou par une analyse graphique de celle-ci.
-
-    % \paragraph{}
-    %La MDCT a également été validée par comparaison de ses données de sortie avec des algorithmes de référence : les implémentations de la formule mathématique de la MDCT présentée dans les annexes \ref{an:ref_mdct_float} pour l'implémentation en arithmétique \emph{floating point} et \ref{an:ref_mdct_int} en \emph{fixed point}.
+    Les sections précédentes ont montré que les différentes itérations de la MDCT ont été validées à chaque étape du développement de ce travail. Cette validation consiste essentiellement en une vérification manuelle des données de sortie de la MDCT sur base de divers signaux en entrée.
 
     \paragraph{}
-    Ces tests auraient pu être améliorés en automatisant la vérification, e.g. en générant une fois les données de référence attendues pour permettre le développement d'un code de test qui compare automatiquement les données de références avec les données à vérifier. En effet, devoir relancer les tests et vérifier les données à chaque fois qu'une modification est faite dans le code peut s'avérer laborieux et mettre en place des tests automatiques aurait permis de gagner un temps précieux.
+    L'\textbf{annexe M} présente le code de test utilisé pour ces vérifications. Les tests génèrent différents types de signaux : signaux sinusoïdaux à une ou plusieurs fréquences et données aléatoires. Les différentes MDCT génèrent des spectres de fréquences qui sont sortis dans un fichier CSV afin de pouvoir être exploités sous forme graphique.
 
+    \paragraph{}
+    Avec un signal sinusoïdal connu en entrée, il est facile de vérifier que le spectre ne contienne bien qu'une seule composante fréquentielle, que la vérification se fasse en lisant les données brutes à la sortie de l'algorithme ou par une analyse graphique de celles-ci. Ce travail a présenté les spectres de fréquences générés par les MDCT avec un signal à \SI{440}{\hertz}. Les MDCT ont bien entendu été testées avec d'autres signaux. La figure \ref{fig:validation_ne10_i32_neon_10k} présente, par exemple, le spectre de fréquences d'un signal sinusoïdal à \SI{10}{\kilo\hertz}.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.8\linewidth]{./images/validation_ne10_i32_neon_10k.pdf}
+        \caption{Spectre de fréquences généré par la MDCT Ne10 i32 NEON comparé au spectre de référence (\SI{20}{\kilo\hertz})}
+        \label{fig:validation_ne10_i32_neon_10k}
+    \end{figure}
 
-    %     Réaliser une fonction qui calcule la somme des cosinus (formule de wikipedia) pour chaque samples (pas du tout optimisée donc super lente). Pour la calcul en integer, on peut autoriser un manque de précision de max 1 LSB.
+    \paragraph{}
+    La figure \ref{fig:validation_ne10_i32_neon_10k} montre que le spectre de fréquences généré par la MDCT optimisée se superpose bien au spectre de fréquences de référence. Toutes les MDCT optimisées ont été validées par comparaison du spectre de fréquences : comparaison visuelle, comme ici avec un graphique, ou calcul de la différence entre les données des deux spectres. Cette validation a pu mettre en évidence les dépassements produits et de les corriger.
 
+    \paragraph{}
+    Les spectres de fréquences ont également été comparés avec les spectres de fréquences générés par la MDCT basée sur la FFT de \emph{FFTW3}, directement en \emph{float} ou mis à échelle Q15. Ces comparaisons ne sont pas reproduites dans ce travail à cause du manque de lisibilité de graphiques superposant trois spectres de fréquences.
 
+    \paragraph{}
+    La composante fréquentielle principale mise en évidence par le spectre de fréquences de la figure \ref{fig:validation_ne10_i32_neon_10k} ne se situe pas exactement à \SI{10}{\kilo\hertz}. En effet, la résolution du spectre de fréquences n'offre pas une analyse aussi fine du signal. La résolution pour un spectre de fréquences de 256 composantes fréquentielles (512 éléments en nombres complexes), pour une fréquence d'échantillonnage de \SI{48}{\kilo\hertz} est de $\frac{Fs / 2}{size} = \frac{24000}{256} = \SI{93.75}{\hertz}$.
 
-    % \paragraph{}
-    % Pour les codecs c'est important de garder l'implémentation de référence mais à un moment on ne peut plus tester sur l'architecture intel. En pratique on utilise des pointeurs de fonction à déréférencer pour appeler l'implémentation voulue. En fonction du CPU ID, on sait quelles instructions on utilise. Au runtime, on choisit une ou l'autre implémentation en fonction de l'architecture, e.g. certains ARM n'ont pas les routines NEON
+    \paragraph{}
+    Pour rappel, les données du spectre de fréquences produit par la MDCT sont des complexes contenus dans un tableau à une dimension alternant les parties réelles aux parties imaginaires des composantes fréquentielles. Le code de test de l'\textbf{annexe M} calcule donc le module de ces composantes fréquentielles avant de les écrire dans le fichier CSV utilisé pour générer les différents graphiques présentés dans ce travail.
 
-    % one algorithm to compare them all
+    \paragraph{}
+    En plus de signaux à une seule fréquence, les MDCT ont été testées avec des signaux à multiples fréquences. La figure \ref{fig:signal_multi_ampl} représente un de ces signaux. Il est composé de deux sinus d'amplitude différentes :
+    \begin{itemize}
+        \item un signal sinusoïdal d'amplitude \SI{0.9}{} à \SI{440}{\hertz};
+        \item un signal sinusoïdal d'amplitude \SI{0.45}{} à \SI{880}{\hertz}.
+    \end{itemize}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.8\linewidth]{./images/signal_multi_ampl.pdf}
+        \caption{Signal temporel composé de deux sinus d'amplitude différente à \SI{440}{} et \SI{880}{\hertz}}
+        \label{fig:signal_multi_ampl}
+    \end{figure}
+    
+    \paragraph{}
+    La figure \ref{fig:validation_ne10_i32_neon_multi_ampl} montre le spectre de fréquences produit par la dernière itération de la MDCT avec ce signal en entrée. Les composantes fréquentielles mises en évidence par le graphique sont bien celles attendues : \SI{440}{} et \SI{880}{\hertz}.
 
-
-    % donner un exemple avec plusieurs composantes fréquentielles
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.8\linewidth]{./images/validation_ne10_i32_neon_multi_ampl.pdf}
+        \caption{Spectre de fréquences généré par la MDCT Ne10 i32 NEON pour un signal composé de deux sinus d'amplitude différente}
+        \label{fig:validation_ne10_i32_neon_multi_ampl}
+    \end{figure}
 
     \begin{figure}[H]
         \centering
         \includegraphics[width=.8\linewidth]{./images/signal_multi_freq.pdf}
-        \caption{Signal temporal a plusieurs fréquences codé en \emph{integer} (Q15)}
+        \caption{Signal temporel composé de sinus à \SI{440}{\hertz}, \SI{880}{\hertz}, \SI{4.4}{\kilo\hertz}, \SI{8.8}{\kilo\hertz} et \SI{17.6}{\kilo\hertz}}
         \label{fig:signal_multi_freq}
     \end{figure}
 
+    \paragraph{}
+    Un signal composé de multiples fréquences de même amplitude (\ref{fig:signal_multi_freq}) confirme la validité de la MDCT. La figure \ref{fig:validation_multi_freq} met bien en évidence les composantes fréquentielles attendues à \SI{440}{\hertz}, \SI{880}{\hertz}, \SI{4.4}{\kilo\hertz}, \SI{8.8}{\kilo\hertz} et \SI{17.6}{\kilo\hertz}.
 
     \begin{figure}[H]
         \centering
@@ -1201,6 +1228,12 @@
         \caption{Validation de la génération d'un spectre composé de multiples fréquences}
         \label{fig:validation_multi_freq}
     \end{figure}
+
+    \paragraph{}
+    Les MDCT ont enfin été testées sur base de données d'entrée générées aléatoirement. Les résultats de ces tests ont été validés en calculant la différence entre les valeurs du spectre généré par la MDCT de référence et les valeurs du spectre de la MDCT testée pour s'assurer que l'écart entre les deux soit acceptable.
+
+    \paragraph{}
+    Les tests de validation auraient pu être améliorés en automatisant la vérification, e.g. en générant une fois les données de référence attendues pour permettre le développement d'un code de test qui compare automatiquement les données de références avec les données à vérifier. En effet, devoir relancer les tests et vérifier les données à chaque fois qu'une modification est faite dans le code peut s'avérer laborieux et mettre en place des tests automatiques aurait permis de gagner un temps précieux.
 
 
 
@@ -1213,7 +1246,7 @@
     L'objectif en terme de temps d'exécution n'étant pas fini, il a été décidé de tenter de gagner le maximum de performances sur le temps de mon stage. Le critère de réussite est dès lors d'obtenir des performances au moins équivalentes pour la version finale de la MDCT que pour ses itérations précédentes.
 
     \paragraph{}
-    Le temps d'exécution de la MDCT \emph{fixed point} doit évidemment être inférieur au temps d'exécution de l'algorithme de référence puisque celui-ci ne contient aucune optimisation. Ce temps peut toutefois être équivalent au temps d'exécution de la MDCT \emph{floating point} : à performances équivalentes, l'algorithme \emph{fixed point} rendra tout de même l'encodeur AAC plus performant en économisant les transtypages \emph{integer}-\emph{floating point} à l'entrée et à la sortie du bloc MDCT. En effet, les données sont reçues par la MDCT en \emph{integer} et devront être traitées en \emph{integer} par le bloc de quantification à la sortie de la MDCT.
+    Le temps d'exécution de la MDCT \emph{fixed point} doit évidemment être inférieur au temps d'exécution de l'algorithme de référence puisque celui-ci ne contient aucune optimisation. Ce temps peut toutefois être équivalent au temps d'exécution de la MDCT \emph{floating point} : à performances équivalentes, l'algorithme \emph{fixed point} rendra tout de même l'encodeur AAC plus performant en économisant les transtypages \emph{integer}-\emph{float} à l'entrée et à la sortie du bloc MDCT. En effet, les données sont reçues par la MDCT en \emph{integer} et devront être traitées en \emph{integer} par le bloc de quantification à la sortie de la MDCT.
 
     \paragraph{}
     Le temps d'exécution des différentes itérations de la MDCT a été mesuré sur base du code de l'\textbf{annexe N.1} compilé par les commandes CMake présentées dans l'\textbf{annexe N.2}. Le code permet de générer plusieurs exécutables en fonction de la variable de préprocesseur définie à la compilation, afin de pouvoir tester :
@@ -1247,21 +1280,6 @@
         \caption{Tests de performances des algorithmes MDCT}
         \label{tab:perf_mdct}
     \end{table}
-    % TODO ajouter plus de données -> demander si des fréquences sont plus intéressantes que d'autre
-    \begin{table}[H]
-        \centering
-        \begin{tabular}{ l | D{.}{.}{-1} | D{x}{\times}{-1} }
-            \multicolumn{1}{c|}{\textbf{MDCT}} & \multicolumn{1}{M{3cm}|}{\textbf{Temps d'exécution moyen (ns)}} &\multicolumn{1}{c}{\textbf{Écart type (ns)}} \\
-            \hline
-            \emph{Ne10 i32 NEON}   &  5738.84              & 0.29399 x 10^{-6} \\
-            \emph{Ne10 i32 C}      & 21805.5               & 0.28367 x 10^{-6} \\
-            \emph{Ne10 f32}        &  8948.4               & 0.26262 x 10^{-6} \\
-            \emph{FFTW3 f32}       &  7574.63              & 0.13941 x 10^{-6} \\
-            \emph{Reference f32}   & 29253.1 \times 10^3   & 4.58387 x 10^{-6} \\
-        \end{tabular}
-        \caption{Tests de performances des algorithmes MDCT}
-        \label{tab:perf_mdct_random}
-    \end{table}
 
     \paragraph{}
     Les résultats montrent que la MDCT optimisée avec les instructions ARM NEON est bien plus rapide que les autres MDCT développées avec un temps d'exécution moyen de \SI{5796.35}{\nano\second}. L'objectif du stage est donc bien atteint.
@@ -1278,25 +1296,29 @@
     \paragraph{}
     Enfin, pour les implémentation \emph{floating point plain C}, la MDCT \emph{Ne10} est un peu plus lente que la MDCT \emph{FFTW3} avec un temps d'exécution moyen de \SI{9020.1}{\nano\second} contre \SI{7446.84}{\nano\second}. Ce résultat est cohérent avec les performances des différentes FFT mesurées à la section \ref{sec:fft_perfs} : la FFT de \emph{FFTW3} en \emph{float 32} est en effet environ \SI{2}{\micro\second} plus rapide que la FFT de \emph{Ne10} en \emph{float 32 plain C}.
 
+    \paragraph{}
+    Ces tests de performances donnent des résultats du même ordre de grandeur avec des signaux différents donnés en entrée des MDCT testées. À titre, la table \ref{tab:perf_mdct_random} montre les résultats des tests de performances réalisés dans les mêmes conditions que ceux présentés plus haut mais avec des données aléatoires différentes à chaque exécution en entrée des MDCT.
 
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{ l | D{.}{.}{-1} | D{x}{\times}{-1} }
+            \multicolumn{1}{c|}{\textbf{MDCT}} & \multicolumn{1}{M{3cm}|}{\textbf{Temps d'exécution moyen (ns)}} &\multicolumn{1}{c}{\textbf{Écart type (ns)}} \\
+            \hline
+            \emph{Ne10 i32 NEON}   &  5738.84              & 0.29399 x 10^{-6} \\
+            \emph{Ne10 i32 C}      & 21805.5               & 0.28367 x 10^{-6} \\
+            \emph{Ne10 f32}        &  8948.4               & 0.26262 x 10^{-6} \\
+            \emph{FFTW3 f32}       &  7574.63              & 0.13941 x 10^{-6} \\
+            \emph{Reference f32}   & 29253.1 \times 10^3   & 4.58387 x 10^{-6} \\
+        \end{tabular}
+        \caption{Tests de performances des algorithmes MDCT}
+        \label{tab:perf_mdct_random}
+    \end{table}
 
-
- 
-    % Comparaison avec un implémentation de référence plain c mais aussi à titre indicatif avec l'algorithme de référence car le plain c est déjà optimisé
-
-
-    % L'impact de la window function : exemple avec un sinus : les composantes fréquentielles du sinus ressortent beaucoup mieux.
-
-    % +difficultés au niveau des performances pas bonnes jusqu'à la fin
-
-    % projet compilé en release pour les tests de perf
-
-    \subsection{Perte de précision}
-    \label{sec:precision}
+    %\subsection{Perte de précision}
+    % \label{sec:precision}
     % Comparaison avec l'algorithme de référence
     % Annexe : algo de référence, test de comparaison, résultats avec des données aléatoires et avec un sinus simple
     % ce serait mieux de voir la perte de précision sur tout l'encodeur mais c'est déjà une indication, maintenant est-ce que ç aprête tellement à conséquence ?
-
 
 
 
@@ -1310,6 +1332,11 @@
         \item code en C
         \item tests de performances plus poussés avec comparaison avec un algo existant
     \end{itemize}
+
+
+    % L'impact de la window function : exemple avec un sinus : les composantes fréquentielles du sinus ressortent beaucoup mieux. mais aussi il n'y a pas de dépassement par rapport à du Q15 -> à voir si ça ne permettrait pas de passer tout en Q15
+
+
     % Améliorations encore possible : faire les premières opérations de prétwiddling en Q15 8 par 8 avant de splitter, mêler les facteurs de la fenêtre aux facteurs de twiddling
     % Pas trop de C++ parce que faire un objet avec plein d'accessors, ce n'est pas très optimisé (on se retrouve avec un gros objet avec plein de variables). Derrière on fait de l'assembleur => il y a un trop grand écart. D'habitude les codesc audio sotn codés en C mais c'est aussi peut-être juste pour une raison historique.
 
@@ -1340,6 +1367,7 @@
         \item rapport à la théorie
         \item frustration par rapport au manque de temps à pouvoir consacrer aux aspects théoriques
     \end{itemize}
+    % +difficultés au niveau des performances pas bonnes jusqu'à la fin
 
     \paragraph{}
     Ce que j'ai appris :
