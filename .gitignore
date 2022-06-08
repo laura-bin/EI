@@ -10,3 +10,5 @@
 *.lof
 *.glo
 *.ist
+*.glg
+*.gls

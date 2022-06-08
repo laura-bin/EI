@@ -2,42 +2,40 @@
 
 \setglossarystyle{altlist}
 
-
 \setacronymstyle{long-short}
-
 
 \makeglossaries
 
-\newacronym{aac}{AAC}{Advanced Audio Coding, codec audio défini par MPEG-2 partie 7 et MPEG-4 partie 3}
+\newacronym{aac}{AAC}{Advanced Audio Coding, codec audio défini par les normes MPEG-2 partie 7 et MPEG-4 partie 3}
 \newacronym{arm}{ARM}{Advanced RISC Machines, type d'architecture de processeur à faible coût et à faible consommation en énergie}
 \newacronym{fpga}{FPGA}{Field-programmable gate array}
 \newacronym{simd}{SIMD}{Single Instruction on Multiple Data}
 \newacronym{vfp}{VFP}{Vector Floating Point, type de FPU spécifique à l'architecture ARM}
-\newacronym{fpu}{FPU}{Floating Point Unit, coprocesseur mathématique conçu pour réaliser des opérations mathématique en floating point}
-\newacronym{pcm}{PCM}{Pulse-Code Modulation}
-\newacronym{mpeg}{MPEG}{Moving Picture Experts Group}
-\newacronym{mdct}{MDCT}{Modified discrete cosine transform}
-\newacronym{mlt}{MLT}{Modulated Lapped Transform}
-\newacronym{dct}{DCT}{Discrete cosine transform}
-\newacronym{dft}{DFT}{Discrete Fourier transform}
-\newacronym{fft}{FFT}{Fast Fourier transform}
-\newacronym{sbc}{SBC}{single-board computer}
-\newacronym{ssh}{SSH}{Secure SHELL}
-\newacronym{gcc}{GCC}{GNU C Compiler}
+\newacronym{fpu}{FPU}{Floating Point Unit, coprocesseur mathématique conçu pour réaliser des opérations mathématiques en floating point}
+\newacronym{pcm}{PCM}{Pulse-Code Modulation, numérisation de signal audio sans perte d'information}
+\newacronym{mpeg}{MPEG}{Moving Picture Experts Group, groupe d'experts à l'origine de normes d'encodage, de décodage et de transmission de données audiovisuelles}
+\newacronym{mdct}{MDCT}{Modified Discrete Cosine Transform, type de transformation utilisée pour l'analyse fréquentielle d'un signal}
+\newacronym{mlt}{MLT}{Modulated Lapped Transform, fonction de fenêtre propre à la MDCT}
+\newacronym{dct}{DCT}{Discrete Cosine Transform, type de transformation utilisée pour l'analyse fréquentielle d'un signal}
+\newacronym{dft}{DFT}{Discrete Fourier Transform, type de transformation utilisée pour l'analyse fréquentielle d'un signal}
+\newacronym{fft}{FFT}{Fast Fourier Transform, type de transformation utilisée pour l'analyse fréquentielle d'un signal}
+\newacronym{sbc}{SBC}{Single-board computer, ordinateur construit sur un seul circuit}
+\newacronym{ssh}{SSH}{Secure SHELL, protocole de connexion réseau}
+\newacronym{gcc}{GCC}{GNU C Compiler, compilateur des langage C et C++}
 
 \newglossaryentry{codec}{
     name={Codec},
     text={codec},
-    description={Un codec est un procédé logiciel composé d'un encodeur (\emph{\textbf{co}der}) et d'un décodeur (\emph{\textbf{dec}oder})\cite{wiki:codec}. Un codec audio permet donc, d'une part, de coder un signal audio dans un flux de données numériques et, d'autre part, de décoder ces données afin de restituer le signal audio.}
+    description={Procédé logiciel composé d'un encodeur (\emph{\textbf{co}der}) et d'un décodeur (\emph{\textbf{dec}oder})}
 }
 
 \newglossaryentry{ne10}{
     name=Ne10,
-    description={Librairie de fonction utiles, optimisée pour les processeurs ARM supportant les instructions NEON}
+    description={Librairie de fonction de traitement de signal optimisée pour les processeurs ARM supportant les instructions NEON}
 }
 
 \newglossaryentry{transtypage}{
-    name={Transtypage},
+    name={Transtypage (cast)},
     text={transtypage},
     description={Conversion d'un type à un autre, pouvant, dans certains cas, engendrer un changement d'encodage}
 }
@@ -45,28 +43,28 @@
 \newglossaryentry{depassement}{
     name={Dépassement},
     text={dépassement},
-    description={Condition qui se produit lorsqu'une opération mathématique produit une valeur numérique supérieure à celle représentable dans l'espace de stockage disponible. Le résultat de l'opération est alors un nombre de signe opposé à la valeur attendue}
+    description={Phénomène survenant lorsqu'une opération mathématique produit une valeur numérique supérieure à celle représentable dans l'espace de stockage disponible : le résultat de l'opération est alors un nombre de signe opposé à la valeur attendue}
 }
 
 \newglossaryentry{saturation}{
     name={Saturation},
     text={saturation},
-    description={Lors d'une opération mathématique, si la valeur résultante sort de la limite des nombres, à la place de causer un dépassement, elle garde la valeur de la limite de son encodage}
+    description={Lors d'une opération mathématique, si la valeur résultante sort de la limite des nombres représentables, au lieu de causer un dépassement, elle garde la valeur de la limite de son encodage}
 }
 
 \newglossaryentry{fftw3}{
     name={FFTW3},
-    description={Librairie permettant de calculer des transformée de Fourier à une ou plusieurs dimensions, de taille variable en complexes ou en réel}
+    description={Librairie permettant de calculer des transformées de Fourier à une ou plusieurs dimensions, de taille variable en complexes ou en réels}
 }
 
 \newglossaryentry{cmake}{
     name={CMake},
-    description={Système de construction logicielle multiplateforme. Il permet de vérifier les prérequis nécessaires à la construction, de déterminer les dépendances entre les différents composants d'un projet, afin de planifier une construction ordonnée et adaptée à la plateforme}
+    description={Système de construction logicielle multiplateforme. Il permet de vérifier les prérequis nécessaires à la construction et de déterminer les dépendances entre les différents composants d'un projet afin de planifier une construction ordonnée et adaptée à la plateforme}
 }
 
 \newglossaryentry{arm-neon}{
     name={ARM NEON / Advanced SIMD},
-    description={Technologie SIMD avancée, extension de l'architecture pour les profils A et R de processeurs}
+    description={Jeu d'instructions SIMD spécifique à l'architecture ARM (ARMv7 et ARMv8)}
 }
 
 \newglossaryentry{wrapper}{
@@ -76,9 +74,9 @@
 }
 
 \newglossaryentry{intrinsic}{
-    name={Intrinsèque},
+    name={Fonction intrinsèque (intrinsic)},
     text={intrinsèque},
-    description={Terme utilisé pour qualifier les fonctions implémentée directement par le compilateur, par opposition aux fonctions fournies par des libraries}
+    description={Terme utilisé pour qualifier les fonctions implémentées directement par le compilateur, par opposition aux fonctions fournies par des librairies}
 }
 
 \newglossaryentry{raspberry}{
@@ -89,7 +87,7 @@
 \newglossaryentry{twiddling}{
     name={Twiddling},
     text={twiddling},
-    description={``Tripotage'', terme utilisé pour désigner l'arrangement nécessaire des données en entrée et sortie de fonctions vectorielles}
+    description={Les opérations de twiddling sont les opérations de réarrangement des données de la MDCT effectuées autour de l'appel à la FFT}
 }
 
 \newglossaryentry{floating-point}{
@@ -101,7 +99,31 @@
 \newglossaryentry{fixed-point}{
     name={Fixed point},
     text={fixed point},
-    description={Méthode d'encodage de nombres possédant un nombre fixe de chiffres après la virgule}
+    description={Méthode d'encodage de nombres possédant un nombre fixe de chiffres avant et après la virgule}
+}
+
+\newglossaryentry{window-function}{
+    name={Window function},
+    text={window function},
+    description={Fonction appliquée à une fenêtre d'un signal temporel avant son analyse fréquentielle dans le but d'améliorer cette analyse}
+}
+
+\newglossaryentry{headroom}{
+    name={Headroom},
+    text={headroom},
+    description={}
+}
+
+\newglossaryentry{overlap}{
+    name={Overlap},
+    text={overlap},
+    description={}
+}
+
+\newglossaryentry{broadcast}{
+    name={Broadcast},
+    text={broadcast},
+    description={pas IP}
 }
 
 \glsaddallunused
