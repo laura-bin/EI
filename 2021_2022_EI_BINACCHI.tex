@@ -67,7 +67,7 @@
     \section*{Remerciements}
 
 
-    
+
     \newpage
     \pagenumbering{arabic}
     \tableofcontents
@@ -1303,23 +1303,56 @@
 
 
     \newpage
-    \section{Améliorations possibles}
+    \section{Pistes d'amélioration}
     \label{sec:ameliorations}
-    \begin{itemize}
-        \item Fonction fenêtre intégrée aux opérations de pre twiddling
-        \item Quantification intégrée au post twiddling
-        \item tests automatisés
-        \item code en C
-        \item tests de performances plus poussés avec comparaison avec un algo existant
-    \end{itemize}
 
+    \paragraph{}
+    L'algorithme MDCT ne constitue qu'une première étape de la construction d'un encodeur AAC. Pour pouvoir être testé plus complètement, e.g. sur des fenêtres d'échantillons provenant d'un signal réel, toute une mécanique de lecture des données avec overlap aurait dû etre mise en place.
+    
+    \paragraph{}
+    Après les lectures des données et leur passage dans la MDCT, le bloc suivant à implémentaer est le bloc de quantification. Les mêmes optimisations que celles aportées à la MDCT doivent lui être apportées avec l'utilisation d'une arithmétique \emph{fixed point} reposant sur les opérations SIMD du proesseur ARM.
 
-    % L'impact de la window function : exemple avec un sinus : les composantes fréquentielles du sinus ressortent beaucoup mieux. mais aussi il n'y a pas de dépassement par rapport à du Q15 -> à voir si ça ne permettrait pas de passer tout en Q15
+    \paragraph{}
+    La MDCT doit être complétée avec une fonction de fenêtre. Cette fonction est typiquement une fonction basée sur un sinus ou un cosinus au travers de laquelle le signal temporel est passé avant d'être analysé par la MDCT. Cette fonction a pour but d'améliorer la transformation effectuée par la MDCT en atténuant l'effet de coupure aux extrémités de la fenêtre d'entrée de la MDCT.
 
+    \paragraph{}
+    Le fonction de fenêtre utilisée pour l'encodeur AAC, aussi aussi appelée MLT (\emph{Mudulated Lapped Transform}) (figure \ref{fig:mlt}), est donnée pour une fenêtre de taille $2N$, par l'équation :
+    $$w_n = sin\left[ \frac{\pi}{2N} \left( n + \frac{1}{2} \right) \right]$$
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.8\linewidth]{./images/mlt.pdf}
+        \caption{Window function (MLT)}
+        \label{fig:mlt}
+    \end{figure}
 
+    \paragraph{}
+    La figure \ref{fig:spectre_mlt} montre la comparaison entre les spectres de fréquences générés par la MDCT \emph{Ne10 i32 neon} pour le même signal d'entrée, passé ou non au travers de la fonction de fenêtre pour le même signal sinusoïdal à \SI{440}{\hertz} que celui montré dans la plupart des exemple de ce travail. La comparaison a également été faite avec quelque autres signaux. À chaque fois, la composante fréquentielle relevée est un peu plus nette avec la fonction de fenêtre.
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.8\linewidth]{./images/validation_ne10_i32_neon_mlt.pdf}
+        \caption{Comparaison des spectres de fréquences générés par la MDCT avec et sans MLT (\SI{440}{\hertz})}
+        \label{fig:spectre_mlt}
+    \end{figure}
+
+    \paragraph{}
+    Le graphique montre également une valeur plus basse pour la fréquence relevée sur base du signal passé par la MLT. Cette valeur tient désormais sur du Q15 sans dépassement. Il aurait été intéressant, si mon stage avait duré plus longtemps, de vérifier si le spectre de fréquences produit après le passage dans la MLT permettait toujours d'avoir ce type de résultats. Les performances de la MDCT pourraient alors encore être améliorées en ramenant plus d'opérations en 16 bits.
+
+    \paragraph{}
+    Pour pouvoir être intégrée intelligemment à la MDCT, la fonction de fenêtre aurait dû être combinée aux facteurs de \emph{pre-twiddling} de la MDCT. Il aurait alors fallu relancer tous les tests afin de valider le nouvel algorithme. De la même manière, pour rendre l'encodeur plus performant, les premières opérations du bloc de quantification pourraient être effectuées en même temps que le \emph{post-twiddling}.
+
+    \paragraph{}
+    Avec des tests automatisés, j'aurais probablement eu plus de temps à la fin de mon stage pour mettre en place cette fonction de fenêtre de manière sûre. Si je devais recommencer ce type de travail aujourd'hui, avec l'expérience acquise durant mon stage, je réfléchirai très probablement en début de développement à une manière plsu simple de valider les donnée, et peut-être également les performances.
+
+    % \begin{itemize}
+    %     \item Fonction fenêtre intégrée aux opérations de pre twiddling
+    %     \item Quantification intégrée au post twiddling
+    %     \item tests automatisés
+    %     \item code en C
+    %     \item tests de performances plus poussés avec comparaison avec un algo existant
+    % \end{itemize}
+    
     % Améliorations encore possible : faire les premières opérations de prétwiddling en Q15 8 par 8 avant de splitter, mêler les facteurs de la fenêtre aux facteurs de twiddling
     % Pas trop de C++ parce que faire un objet avec plein d'accessors, ce n'est pas très optimisé (on se retrouve avec un gros objet avec plein de variables). Derrière on fait de l'assembleur => il y a un trop grand écart. D'habitude les codesc audio sotn codés en C mais c'est aussi peut-être juste pour une raison historique.
-
 
     % \paragraph{Points d'attention}
     % \begin{itemize}
