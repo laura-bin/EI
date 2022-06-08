@@ -203,7 +203,7 @@ Model           : Raspberry Pi 4 Model B Rev 1.2
 Fichier CMake principal placé à la racine du projet. Il permet de compiler :
 \begin{itemize}
     \item le projet \emph{audio\_encoding} contenant les différentes MDCT et leurs tests : les commandes CMake de ce sous-projet sont présentées dans les annexes suivantes sous le code qu'elles permettent de compiler;
-    \item la librairie \emph{Ne10} : les variables suivantes sont initialisées conformément aux recommendations de la documentation pour la compilation de la librairie:
+    \item la librairie \emph{Ne10} : les variables suivantes sont initialisées conformément aux recommandations de la documentation pour la compilation de la librairie :
     \begin{itemize}
         \item \texttt{NE10\_LINUX\_TARGET\_ARCH} est initialisée à \texttt{armv7} (l'architecture du Raspberry Pi 4);
         \item \texttt{GNULINUX\_PLATFORM} est initialisée à \texttt{ON};
@@ -908,7 +908,7 @@ int main()
 
 \subsection{Compilation}\label{app:perf_fft_ne10_cmake}
 \paragraph{}
-Commandes CMake utilisées pour générer les exécutables permettant de mesurer le temps d'exécution de différentes FFT proposées par la librairie \emph{Ne10}. En fonction des variables de préprocesseur définies, les exéctables suivants sont générés :
+Commandes CMake utilisées pour générer les exécutables permettant de mesurer le temps d'exécution de différentes FFT proposées par la librairie \emph{Ne10}. En fonction des variables de préprocesseur définies, les exécutables suivants sont générés :
 \begin{itemize}
     \item \texttt{run\_fft\_f32\_c} est généré si la variable \texttt{F32} est définie pour mesurer le temps d'exécution de la FFT \emph{float 32} \emph{plain C};
     \item \texttt{run\_fft\_i32\_c} est généré si la variable \texttt{I32} est définie pour mesurer le temps d'exécution de la FFT \emph{integer 32} \emph{plain C};
@@ -1483,7 +1483,7 @@ void ne10_mdct_i32_neon::mdct(int16_t *time_signal, int32_t *spectrum)
 \section{Validation des spectres de fréquences produits par les MDCT}\label{app:spectrum_comparison}
 \subsection{Code source}\label{app:spectrum_comparison_code}
 \paragraph{}
-Code permettant de générer les spectres de fréquences par différentes MDCT avec différents signaux d'entrée. Les données sont sorties dans un fichier CSV afin de pouvoir être exmploitées sous forme de graphique.
+Code permettant de générer les spectres de fréquences par différentes MDCT avec différents signaux d'entrée. Les données sont sorties dans un fichier CSV afin de pouvoir être exploitées sous forme de graphique.
 \lstset{language=C++}
 \begin{lstlisting}
 #include <fstream>
