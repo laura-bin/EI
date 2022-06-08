@@ -24,13 +24,6 @@
 }
 \renewcommand\ttdefault{cmvtt}
 
-\usepackage{listings}
-\lstset{%
-    backgroundcolor=\color{black!5}, % set backgroundcolor
-    basicstyle=\footnotesize,% basic font setting
-    language=C++
-}
-
 \usepackage{wrapfig}
 \usepackage{graphicx}
 \usepackage{geometry}
@@ -71,13 +64,16 @@
     \pagenumbering{gobble}
     \includepdf[pages={1}]{pdg}
     \newpage
+    \section*{Remerciements}
+
+
+    
+    \newpage
     \pagenumbering{arabic}
     \tableofcontents
     \newpage
     \listoffigures
 
-    \newpage
-    \section*{Remerciements}
 
     \newpage
     \section*{Glossaire}
@@ -85,53 +81,44 @@
     % TODO
     ARM, Codec, FFT, fixed point, MDCT, Ne10, NEON, twiddling, wrapper, SIMD, ARM NEON/Advanced SIMD, floating point, fixed point
 
+    twiddling : les opérations de twiddling sont les opérations de réarrangement des données de la MDCT effectuées autour de l'appel à la FFT
+    pre-twiddling : nom donné aux opérations de pre-processing effectuées avant l'appel à la FFT
+    post-twiddling : nom donné aux opérations de post-processing effectuées après l'appel de la FFT
+    VFP : nom donné à la FPU de l'ARM
+    FPU
+    broadcast
+
     \newpage
     \section*{Introduction}
     \addcontentsline{toc}{section}{\protect\numberline{}Introduction}
 
-    % Contexte du projet : serveur XT (XT VIA qui succède à ...) et passage d'une architecture Intel à une architecture ARM
-    % Travail qui s'inscrit dans la continuité d'un travail théorique préalable
-    % Optimisations possibles et choix de l'algorithme MDCT (mais on pourrait aussi faire la même chose pour le bloc quantization, etc.)
-    % Optimisations du bloc MDCT mises en place : passage d'une arithmétique floating à fixed point et utilisation des fonctions SIMD qui offrent une meilleur capacité de calcul
-    % Limite de l'optimisation : limite de temps (temps du stage) plutôt que gain de performance par rapport à ce qui est déjà en prod
+    \paragraph{}
+    Ce travail présente les résultats d'un stage consacré à l'optimisation de l'encodeur audio AAC. Il s'inscrit dans la continuité du travail d'analyse de Wafaa Heddari, étudiante qui m'a précédée au sein de l'équipe Hardware-Firmware d'EVS. Son stage a débouché sur une synthèse d'optimisations possibles du codec AAC. Après avoir pris connaissance de son travail, mon stage a eu pour but de concrétiser certaines des améliorations possibles du codec.
 
     \paragraph{}
-    Développement d'une solution de software embarqué sur processeur ARM pour encodage audio AAC optimisé aux applications d'EVS :
-    \begin{itemize}
-        \item Prise de connaissance de l'encodage AAC et de l'environnement EVS qui utilise ce type de format ;
-        \item Prise de connaissance des résultats des optimisations possibles du modèle psycho-acoustique développé par EVS ;
-        \item Développement du code en C ou Assembler pour l'encodage AAC sur plateforme ARM ;
-        \item Test du système et documentation de son implémentation.
-    \end{itemize}
-
-    % mettre en avant le côté pratique de mon travail + dans la présentation orale
+    Il a été décidé que mon stage se concentrerait sur le bloc MDCT de l'encodeur AAC. La MDCT (\emph{Modified Discrete Cosine Transform}) est le bloc de transformation du signal audio du domaine temporel vers le domaine fréquentiel. La compression du codec AAC repose sur l'utilisation d'un modèle psychoacoustique qui détermine les informations à éliminer en partie sur base de l'analyse fréquentielle du signal.
 
     \paragraph{}
-    % sur base du cahier des charges, il a été décidé avec les personnes qui ont supervisé mon travail de me consacrer à l'optimisation du bloc MDCT
+    L'algorithme de MDCT développé dans ce travail est un algorithme basé sur un autre type de transformation : la FFT \emph{Fast Fourier Transform}. Mon travail a débuté par l'implémentation, sur base d'un code d'exemple, de cet algorithme. Ce code d'exemple a ensuite été adapté à l'utilisation de la FFT de la librairie \emph{Ne10}.
 
     \paragraph{}
-    %Mon travail s'inscrit dans la continuité de celui de Wafaa Heddari, stagiaire qui m'a précédée au sein du département hardware-firmware d'EVS pour y travailler sur le codec AAC. Après une étude du codec AAC et des différents blocs qui le composent, son mémoire dégage des pistes d'amélioration des performances du codec AAC : like Removal of block switching, Fast MDCT, and Optimized TNS. And then test their implementation on C Code to compare the compilation speed between the original Codec and the optimized one\cite{Wafaa}. + le fait que certaines choses ont été décidées avant le début de mon stage
+    Une des optimisations de la MDCT consiste à passer d'une arithmétique \emph{floating point} à une \emph{arithmétique fixed point}. La logique à mettre en \oe uvre pour les opérations en \emph{floating point} est plus lourde que celle des opérations sur des entiers. L'arithmétique \emph{fixed point} offre généralement des performances plus intéressantes pour les applications de traitement du signal. Ce travail montrera que ce n'est pas le cas pour les processeurs équipés d'un FPU (\emph{Floating Point Unit}) performant comme celui du processeur ARM.
 
-    %L'amélioration des performances est nécessaire par la qualité grandissante des données audio et video -> de plus en plus grandes, et le besoin de maintenir plusieurs flux en tant réel dans le broadcast
+    \paragraph{}
+    L'utilisation d'instructions SIMD (\emph{Single Instruction on Multiple Data}) est l'optimisation qui permettra réellement à l'algorithme de gagner en performances. Les instructions SIMD reposent sur le principe de vectorisation des données pour pouvoir opérer simultanément une même instruction sur plusieurs données. Les opérations SIMD spécifiques au processeur ARM sont appelées ARM NEON ou \emph{Advanced SIMD}.
 
-    % \paragraph{}
-    % Ce travail commencera par une présentation d'EVS et du département dans lequel s'est déroulé mon stage. Parmi les nombreux produits d'EVS, seul le serveur XT sera brièvement présenté puisque c'est spécifiquement pour ce dernier que le codec AAC est développé et optimisé.
+    \paragraph{}
+    La MDCT a été développée spécifiquement pour une architecture reposant sur un processeur ARM. C'est l'architecture utilisée pour la nouvelle génération du serveur XT-VIA d'EVS, serveur pour lequel est développé le codec AAC. Tous les tests ont été réalisées sur un Raspberry Pi 4 équipé d'un processeur ARMv7.
 
-    % \paragraph{}
-    % Quelques notions théoriques indispensables à la compréhension du travail pratique seront ensuite développées avec une section consacrée au son et sa numérisation et une autre consacrée aux codecs MPEG, à leur fonctionnement et en particulier au fonctionnement du bloc MDCT de l'encodeur AAC.
+    \paragraph{}
+    Les différentes itérations de la MDCT ont été testées dans le double objectif de gagner le maximum de performances tout en perdant le moins possible en précision. Les données de sortie des MDCT ont systématiquement été validées par comparaison avec les spectres de fréquences générés par un algorithme de référence. Ces comparaisons sont présentées pour chaque étape du développement. La section consacrée au protocole de validation présente les résultats pour la dernière itération de la MDCT générés avec un panel plus complet de signaux d'entrée.
 
-    % But : garder la max de performance en perdant le moins en qualité
+    \paragraph{}
+    Les performances constituent l'aspect le plus important du développement. La qualité des données audiovisuelles et leur quantité sont de plus en plus importantes. Dans le \emph{broadcast}, les codec sont utilisés en boucle sur de nombreux flux de données en parallèle. La production en \emph{live} a des exigences de temps réel pour les enregistrements et les diffusions.
 
+    \paragraph{}
+    Les itérations de la MDCT développées au cours de ce travail sont toutes présentées en annexes. L'aboutissement de mon stage est une implémentation de la MDCT basée sur la FFT de la librairie \emph{Ne10} en arithmétique \emph{fixed point} avec optimisations NEON (annexe L).
 
-    %\paragraph{}
-    %Si les sections de présentation des différentes itérations de la MDCT ont déjà permis de mettre en avant certains résultats en terme de performance ou de précision, c'est la section suivante qui présentera la protocole de valitation ainsi que les résultats obtenus pour la version finale de l'algorithme MDCT en \emph{integer}.
-
-    % présenter les annexes et dire laquelle est la plus importante l'annexe x ets particulièrement à souligner car + importante
-
-    % dire ce qu'est une MDCT
-    % parler du fixed point et des avantages attendus
-
-    % but de la section validation : montrer une plus grande variété de tests que dans le reste du travail
 
 
     \newpage
@@ -262,12 +249,16 @@
     L'encodage audionumérique tient déjà compte des seuils de fréquences humainement audibles pour limiter les données audio enregistrées : nous l'avons vu dans la section \ref{audionumerique}, aucun son n'est perçu en-deça de \SI{20}{\hertz} ou au-delà de \SI{20}{\kilo\hertz}. La psychoacoustique permet de mieux dessiner la limite entre ce qui est humainement audible ou non afin d'éliminer un maximum des informations non pertinentes et ainsi augmenter le facteur de compression des données : le facteur de compression des codecs MPEG est environ 15 fois supérieur à celui du CD\cite{2019-Herre-Dick}.
 
     \paragraph{}
-    Les effets de masque sont au centre des différents modèles psychoacoustiques utilisés pour la compression audio. L'enjeu afin d'obtenir le meilleur taux de compression est de calculer le plus finement possible les seuils de masquage, i.e. la limite entre les informations pertinentes et celles qui peuvent être éliminées. Les effets de masque dans le domaine fréquentiel (\emph{spectral masking effects}) sont parmi les plus utilisés mais il en existe d'autres, e.g. dans le domaine temporel. La figure suivante représente différents effets de masque du domaine fréquentiel :
+    Les effets de masque sont au centre des différents modèles psychoacoustiques utilisés pour la compression audio. L'enjeu afin d'obtenir le meilleur taux de compression est de calculer le plus finement possible les seuils de masquage, i.e. la limite entre les informations pertinentes et celles qui peuvent être éliminées. Les effets de masque dans le domaine fréquentiel (\emph{spectral masking effects}) sont parmi les plus utilisés mais il en existe d'autres, e.g. dans le domaine temporel.
     \begin{figure}[H]
         \centering
         \includegraphics[width=.6\linewidth]{./images/2019-Herre-Dick-masking-effect.png}
         \caption{Effets de masque dans le domaine fréquentiel}
+        \label{fig:freq_masking}
     \end{figure}
+
+    \paragraph{}
+    La figure \ref{fig:freq_masking} représente différents effets de masque du domaine fréquentiel.
 
     % \paragraph{}
     % Les lignes représentent le seuil 
@@ -280,17 +271,6 @@
     % SPL) A frequency dependent threshold of in hearing in quiet describes the minimum sound pressure level of a sound to be perceivable isolation and under extremely quite conditions. (SPL) of a sound be perceivable in isolation and curve under extremely conditions. • In the presence of to a masker, the threshold in quiet changes into quite a masking threshold, which bell-shaped increase the in frequencies the vicinity of the masker, depending on its • shows In the a presence of a masker, threshold in in quiet curve changes into a masking threshold, frequency, level, and signal increase type. Any sound beneath threshold is masked by the louder which shows a bell-shaped in frequencies in the this vicinity of the masker, depending on its signal, and level, thus and inaudible the Any average perceptual coding, the louder coding signal, error frequency, signal for type. sound listener. beneath In this threshold audio is masked by the (i.e., the introduced quantization noise) corresponds to the probe signal in this experimental and thus inaudible for the average listener. In perceptual audio coding, the coding error (i.e., scenario. the introduced quantization noise) corresponds to the probe signal in this experimental scenario. • Masking effects are are strongest strongest signals are within the critical bandwidth of the masker. • Masking effects for for signals that that are within the critical bandwidth of the masker. Within Within the critical bandwidth, the masking threshold remains constant. Furthermore, the the critical bandwidth, the masking threshold remains constant. Furthermore, the masking effects masking spread to frequencies the (so-called critical bandwidth (so-called The inter-band spread to effects frequencies beyond the critical beyond bandwidth inter-band masking). upper masking). The upper slope of the masking threshold depends on multiple factors, such as absolute slope of the masking threshold depends on multiple factors, such as absolute frequenLa fonction développée permet de faire ses calculs et d'obtenir un résultat cy and sound frequency and of sound pressure whereas level of the the lower masker, whereas lower slope dependency. hardly shows a level pressure level the masker, slope hardly the shows a level dependency. • Depending on the type of masker, i.e., tone or (narrow-band) noise, the strength of the masking • Depending the type of masker, i.e., can tone or (narrow-band) the strength of the masking effect varies. on While noise-like maskers mask tone-like signals noise, very well (up to a masker-to-probe effect varies. maskers can mask tone-like signals very well (up to a masker-to- level ratio of While about noise-like 6 dB), tone-like maskers can mask noise only to a much weaker extent [29] probe level ratio of about 6 dB), tone-like maskers can mask noise only to a much weaker extent (about 20 dB). [29] (about 20 dB).      \paragraph{}     Le calcul des   
 
 
-    
-    
-    
-    % Le calcul du seuil de masquage tient compte\cite{2019-Herre-Dick} :
-    % \begin{itemize}
-    %     \item des effets de masquage monophonique de la perception non-linéaire des fréquences, plus fine pour les basses fréquences;
-    %     \item des effets de masque dans le temps;
-    %     \item de l'effet de masque dans une bande de fréquence ou entre bandes de fréquences;
-    %     \item l'impact de la tonalité sur le masquage
-    %     \item masking over time
-    % \end{itemize}
 
 
     \newpage
@@ -337,7 +317,7 @@
 
     \begin{figure}[H]
         \centering
-        \includegraphics[width=.55\linewidth]{./images/raspberry.png}
+        \includegraphics[width=.4\linewidth]{./images/raspberry.png}
         \caption{Raspberry Pi 4}
         \label{fig:raspberry}
     \end{figure}
@@ -697,7 +677,7 @@
 
     \subsection{Performances des FFT}
     \label{sec:fft_perfs}
-    Une fois l'utilisation de la librairie \emph{Ne10} validée, j'ai effectué des mesures de performances sur les différentes FFT proposées par \emph{Ne10}. J'ai choisi de mesurer les temps d'exécution moyens des FFT qu'il était alors envisagé d'utiliser en comparant les implémentations en \emph{plain C} ou avec optimisations NEON.
+    Une fois l'utilisation de la librairie \emph{Ne10} validée, des mesures de performances ont été réalisées sur les différentes FFT proposées par \emph{Ne10}. Les FFT pour lesquelles les mesures de performances ont été effectuées sont celles qu'il était alors envisagé d'utiliser pour les futures itérations de la MDCT. Leurs temps d'exécution moyen ont été mesurés avec une comparaison entre les implémentations en \emph{plain C} ou avec optimisations NEON.
 
     \paragraph{}
     La mesure de ces performances a été effectuée par le code présenté dans l'\textbf{annexe I} : le même code (\textbf{annexe I.1}) permet de générer les différents exécutables de mesure des performances des FFT en fonction de la variable de préprocesseur définie à la compilation (\textbf{annexe I.2}).
@@ -820,7 +800,7 @@
     \end{itemize}
 
     \paragraph{}
-    Il est à noter que l'initialisation du facteur de mise à échelle de la fonction de FFT n'est pas documentée dans la librairie \emph{Ne10}. L'effet de ce facteur sur la FFT n'est pas non plus indiqué. J'ai initialisé ce facteur à 0 après avoir testé la FFT de \emph{Ne10} dans le but d'obtenir les mêmes valeurs qu'en \emph{float} mises à une échelle Q15.
+    Il est à noter que l'initialisation du facteur de mise à échelle de la fonction de FFT n'est pas documentée dans la librairie \emph{Ne10}. L'effet de ce facteur sur la FFT n'est pas non plus indiqué. Ce facteur a été initialisé à 0 après avoir testé la FFT de \emph{Ne10} dans le but d'obtenir les mêmes valeurs qu'en \emph{float} mises à une échelle Q15.
 
     \paragraph{}
     La documentation incomplète de la librairie a été une des difficultés de ce travail. En dehors des quelques codes d'exemple disponibles, il est très compliqué de savoir quelles données sont attendues et sont produites par les fonctions de \emph{Ne10}. Il est également très difficile de trouver des ressources externes sur l'utilisation de \emph{Ne10}.
@@ -1153,7 +1133,7 @@
 
     \newpage
     \section{Analyse des résultats}
-    \subsection{Validation des données}
+    \subsection{Protocole de validation}
     \label{sec:validation}
 
 
@@ -1237,7 +1217,7 @@
 
 
 
-    \subsection{Gain en performance}
+    \subsection{Performances des MDCT}
     \label{sec:mdct_perfs}
     \paragraph{}
     La mesure des performances a pour but de valider le bloc MDCT avant de l'intégrer au codec AAC. Le cahier des charges du stage ne contenait pas d'objectif à atteindre en terme de performances, ni absolu (e.g. un temps d'exécution maximal à respecter dans des conditions données), ni relatif (e.g. gagner un certain pourcentage de performances par rapport à une MDCT de référence).
@@ -1277,7 +1257,7 @@
             \emph{FFTW3 f32}       &  7446.84              & 1.29403 x 10^{-6} \\
             \emph{Reference f32}   & 29212.6 \times 10^3   & 0.77552 x 10^{-6} \\
         \end{tabular}
-        \caption{Tests de performances des algorithmes MDCT}
+        \caption{Tests de performances des algorithmes MDCT (données d'entrée identiques)}
         \label{tab:perf_mdct}
     \end{table}
 
@@ -1309,8 +1289,8 @@
             \emph{Ne10 f32}        &  8948.4               & 0.26262 x 10^{-6} \\
             \emph{FFTW3 f32}       &  7574.63              & 0.13941 x 10^{-6} \\
             \emph{Reference f32}   & 29253.1 \times 10^3   & 4.58387 x 10^{-6} \\
-        \end{tabular}
-        \caption{Tests de performances des algorithmes MDCT}
+        \end{tabular}n
+        \caption{Tests de performances des algorithmes MDCT (données d'entrée variables)}
         \label{tab:perf_mdct_random}
     \end{table}
 
