@@ -41,6 +41,8 @@
 \usepackage{enumitem}
 \usepackage{lscape}
 
+\input{glossaire}
+
 \usepackage{fancyhdr}       % en-têtes
 \usepackage{lastpage}       % numéro de dernière page
 
@@ -68,18 +70,19 @@
 
 
 
+
     \newpage
     \pagenumbering{arabic}
     \tableofcontents
     \newpage
     \listoffigures
 
-
     \newpage
     \section*{Glossaire}
-    \addcontentsline{toc}{section}{\protect\numberline{}Glossaire}
+    % \addcontentsline{toc}{section}{\protect\numberline{}Glossaire}
+    \printglossary[toctitle=\protect\numberline{}Glossaire]
     % TODO
-    ARM, Codec, FFT, fixed point, MDCT, Ne10, NEON, twiddling, wrapper, SIMD, ARM NEON/Advanced SIMD, floating point, fixed point
+    Codec, FFT, fixed point, MDCT, Ne10, NEON, twiddling, wrapper, SIMD, ARM NEON/Advanced SIMD, floating point, fixed point
 
     twiddling : les opérations de twiddling sont les opérations de réarrangement des données de la MDCT effectuées autour de l'appel à la FFT
     pre-twiddling : nom donné aux opérations de pre-processing effectuées avant l'appel à la FFT

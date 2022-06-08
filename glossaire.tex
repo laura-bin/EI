@@ -1,0 +1,107 @@
+\usepackage[toc,nonumberlist]{glossaries}
+
+\setglossarystyle{altlist}
+
+
+\setacronymstyle{long-short}
+
+
+\makeglossaries
+
+\newacronym{aac}{AAC}{Advanced Audio Coding, codec audio défini par MPEG-2 partie 7 et MPEG-4 partie 3}
+\newacronym{arm}{ARM}{Advanced RISC Machines, type d'architecture de processeur à faible coût et à faible consommation en énergie}
+\newacronym{fpga}{FPGA}{Field-programmable gate array}
+\newacronym{simd}{SIMD}{Single Instruction on Multiple Data}
+\newacronym{vfp}{VFP}{Vector Floating Point, type de FPU spécifique à l'architecture ARM}
+\newacronym{fpu}{FPU}{Floating Point Unit, coprocesseur mathématique conçu pour réaliser des opérations mathématique en floating point}
+\newacronym{pcm}{PCM}{Pulse-Code Modulation}
+\newacronym{mpeg}{MPEG}{Moving Picture Experts Group}
+\newacronym{mdct}{MDCT}{Modified discrete cosine transform}
+\newacronym{mlt}{MLT}{Modulated Lapped Transform}
+\newacronym{dct}{DCT}{Discrete cosine transform}
+\newacronym{dft}{DFT}{Discrete Fourier transform}
+\newacronym{fft}{FFT}{Fast Fourier transform}
+\newacronym{sbc}{SBC}{single-board computer}
+\newacronym{ssh}{SSH}{Secure SHELL}
+\newacronym{gcc}{GCC}{GNU C Compiler}
+
+\newglossaryentry{codec}{
+    name={Codec},
+    text={codec},
+    description={Un codec est un procédé logiciel composé d'un encodeur (\emph{\textbf{co}der}) et d'un décodeur (\emph{\textbf{dec}oder})\cite{wiki:codec}. Un codec audio permet donc, d'une part, de coder un signal audio dans un flux de données numériques et, d'autre part, de décoder ces données afin de restituer le signal audio.}
+}
+
+\newglossaryentry{ne10}{
+    name=Ne10,
+    description={Librairie de fonction utiles, optimisée pour les processeurs ARM supportant les instructions NEON}
+}
+
+\newglossaryentry{transtypage}{
+    name={Transtypage},
+    text={transtypage},
+    description={Conversion d'un type à un autre, pouvant, dans certains cas, engendrer un changement d'encodage}
+}
+
+\newglossaryentry{depassement}{
+    name={Dépassement},
+    text={dépassement},
+    description={Condition qui se produit lorsqu'une opération mathématique produit une valeur numérique supérieure à celle représentable dans l'espace de stockage disponible. Le résultat de l'opération est alors un nombre de signe opposé à la valeur attendue}
+}
+
+\newglossaryentry{saturation}{
+    name={Saturation},
+    text={saturation},
+    description={Lors d'une opération mathématique, si la valeur résultante sort de la limite des nombres, à la place de causer un dépassement, elle garde la valeur de la limite de son encodage}
+}
+
+\newglossaryentry{fftw3}{
+    name={FFTW3},
+    description={Librairie permettant de calculer des transformée de Fourier à une ou plusieurs dimensions, de taille variable en complexes ou en réel}
+}
+
+\newglossaryentry{cmake}{
+    name={CMake},
+    description={Système de construction logicielle multiplateforme. Il permet de vérifier les prérequis nécessaires à la construction, de déterminer les dépendances entre les différents composants d'un projet, afin de planifier une construction ordonnée et adaptée à la plateforme}
+}
+
+\newglossaryentry{arm-neon}{
+    name={ARM NEON / Advanced SIMD},
+    description={Technologie SIMD avancée, extension de l'architecture pour les profils A et R de processeurs}
+}
+
+\newglossaryentry{wrapper}{
+    name={Wrapper},
+    text={wrapper},
+    description={Un conteneur (wrapper en anglais) est un fichier pouvant contenir divers types de données. Les spécifications du format conteneur décrivent la façon dont sont organisées les données à l'intérieur du fichier}
+}
+
+\newglossaryentry{intrinsic}{
+    name={Intrinsèque},
+    text={intrinsèque},
+    description={Terme utilisé pour qualifier les fonctions implémentée directement par le compilateur, par opposition aux fonctions fournies par des libraries}
+}
+
+\newglossaryentry{raspberry}{
+    name={Raspberry PI},
+    description={Le Raspberry Pi est un nano-ordinateur monocarte à processeur ARM}
+}
+
+\newglossaryentry{twiddling}{
+    name={Twiddling},
+    text={twiddling},
+    description={``Tripotage'', terme utilisé pour désigner l'arrangement nécessaire des données en entrée et sortie de fonctions vectorielles}
+}
+
+\newglossaryentry{floating-point}{
+    name={Floating point},
+    text={floating point},
+    description={Méthode d'encodage de nombres réels utilisée par les ordinateurs, équivalente à la notation scientifique en numération binaire}
+}
+
+\newglossaryentry{fixed-point}{
+    name={Fixed point},
+    text={fixed point},
+    description={Méthode d'encodage de nombres possédant un nombre fixe de chiffres après la virgule}
+}
+
+\glsaddallunused
