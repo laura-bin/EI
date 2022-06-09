@@ -157,9 +157,6 @@
     C'est pour la dernière génération du serveur XT, l'XT-VIA, que le codec AAC est développé. La compression avec perte de données de ce codec permet d'optimiser l'espace occupé par les données audio sans en altérer la qualité perçue. Outre la qualité audio, les performances de l'encodage sont importantes à prendre en compte pour permettre l'enregistrement de plusieurs canaux en parallèle tout en conservant un traitement de l'information qui tienne le temps réel. L'optimisation des performances doit tenir compte de l'architecture de l'XT-VIA : le processeur ARM remplace le processeur Intel de ses prédécesseurs avec des différences importantes dans les fonctions intrinsèques.
 
 
-    \newpage
-    \section{L'encodage audionumérique : généralités}
-    \subsection{Le son}
     % onde acoustique -> 
 
     % - son audible = vibration entre 20 et 20kHz
@@ -173,8 +170,6 @@
 
     % - toute fonction p(x, t) peut être exprimée par une somme de fonctions (co-)sinusoidales : formule pour les fonctions périodiques + transformée de Fourier pour les fonctions n'est pas périodique dans le temps
 
-    \subsection{La numérisation d'un signal}
-    \label{audionumerique}
     % transformation de fourier :
     % https://www.claudegabriel.be/Math%C3%A9matiques%20appliqu%C3%A9es,%20chapitre%204.pdf -> p12 sur N pair / impair
     % à la base -> signaux périodique (faire bref)
@@ -183,12 +178,16 @@
 
     \newpage
     \section{Les codecs audio}
+    \subsection{L'encodage audionumérique}
+    \label{audionumerique}
+
     \subsection{Définition d'un codec}
     \paragraph{}
     Un codec est un procédé logiciel composé d'un encodeur (\emph{\textbf{co}der}) et d'un décodeur (\emph{\textbf{dec}oder})\cite{wiki:codec}. Un codec audio permet donc, d'une part, de coder un signal audio dans un flux de données numériques et, d'autre part, de décoder ces données afin de restituer le signal audio.
 
     \paragraph{}
-    Les codecs sont dits avec perte (\emph{lossy}) ou sans perte (\emph{lossless}). Le PCM est par exemple un codec sans perte puisqu'il encode la totalité des informations sonores dans la bande de fréquences humainement audibles. Ce type de codec permet de conserver la qualité de l'audio mais nécessite en contrepartie un espace de stockage conséquent, même avec une compression des données.
+    Les codecs sont dits avec perte (\emph{lossy}) ou sans perte (\emph{lossless}). Le PCM est par exemple un codec sans perte puisqu'il encode la totalité des informations sonores dans la bande de fréquences humainement audibles. Ce type de codec permet de conserver la qualité de l'audio mais nécessite en contrepartie un espace de stockage conséquent, même avec une compression des données\cite{}.
+    
 
     \paragraph{}
     Afin de réduire l'espace de stockage nécessaire, les codecs avec perte permettent de supprimer une partie des données audio. C'est le cas des codecs définis par les normes MPEG dont fait partie le codec AAC.
@@ -247,7 +246,10 @@
     \end{figure}
 
     \paragraph{}
-    La figure \ref{fig:freq_masking} représente différents effets de masque du domaine fréquentiel.
+    La figure \ref{fig:freq_masking} représente différents effets de masques du domaine fréquentiel. Les lignes pleine et pointillée représentent des limites entre les informations pertinentes et celles qui vont être supprimées à l'encodage :
+    \begin{itemize}
+        \item 
+    \end{itemize}
 
     % \paragraph{}
     % Les lignes représentent le seuil 
@@ -266,6 +268,12 @@
     \section{Le codec AAC}
     \label{sec:AAC}
     \subsection{Fonctionnement de l'encodeur AAC}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=.6\linewidth]{./images/block-diagram-aac.png}
+        \caption{Schéma fonctionnel }
+        \label{fig:bloc-diagram-aac}
+    \end{figure}
     % présentation des différents blocs
     % \cite{wiki:AAC}
 
