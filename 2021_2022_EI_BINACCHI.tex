@@ -103,7 +103,7 @@
     Les différentes itérations de la MDCT ont été testées dans le double objectif de gagner le maximum de performances tout en perdant le moins possible en précision. Les données de sortie des MDCT ont systématiquement été validées par comparaison avec les spectres de fréquences générés par un algorithme de référence. Ces comparaisons sont présentées pour chaque étape du développement. La section consacrée au protocole de validation présente les résultats pour la dernière itération de la MDCT générés avec un panel plus complet de signaux d'entrée.
 
     \paragraph{}
-    Les performances constituent l'aspect le plus important du développement. La qualité des données audiovisuelles et leur quantité sont de plus en plus importantes. Dans le \emph{broadcast}, les codec sont utilisés en boucle sur de nombreux flux de données en parallèle. La production en \emph{live} a des exigences de temps réel pour les enregistrements et les diffusions.
+    Les performances constituent l'aspect le plus important du développement. La qualité des données audiovisuelles et leur quantité sont de plus en plus importantes. Dans le \emph{broadcast}, les codecs sont utilisés en boucle sur de nombreux flux de données en parallèle. La production en \emph{live} a des exigences de temps réel pour les enregistrements et les diffusions.
 
     \paragraph{}
     Les itérations de la MDCT développées au cours de ce travail sont toutes présentées en annexes. L'aboutissement de mon stage est une implémentation de la MDCT basée sur la FFT de la librairie \emph{Ne10} en arithmétique \emph{fixed point} avec optimisations NEON (annexe L).
@@ -186,7 +186,7 @@
     Un codec est un procédé logiciel composé d'un encodeur (\emph{\textbf{co}der}) et d'un décodeur (\emph{\textbf{dec}oder})\cite{wiki:codec}. Un codec audio permet donc, d'une part, de coder un signal audio dans un flux de données numériques et, d'autre part, de décoder ces données afin de restituer le signal audio.
 
     \paragraph{}
-    Les codecs sont dits avec perte (\emph{lossy}) ou sans perte (\emph{lossless}). Le PCM est par exemple un codec sans perte puisqu'il encode la totalité des informations sonores dans la bande de fréquences humainement audibles. Ce type de codec permet de conserver la qualité de l'audio mais nécessite en contrepartie un espace de stockage conséquent, même avec une compression des données\cite{}.
+    Les codecs sont dits avec perte (\emph{lossy}) ou sans perte (\emph{lossless}). Le PCM est par exemple un codec sans perte puisqu'il encode la totalité des informations sonores dans la bande de fréquences humainement audibles. Ce type de codec permet de conserver la qualité de l'audio mais nécessite en contrepartie un espace de stockage conséquent, même avec une compression des données\cite{2005-embrechts}.
 
 
     \paragraph{}
@@ -252,6 +252,7 @@
         \item 
     \end{itemize}
 
+    
     % \paragraph{}
     % Les lignes représentent le seuil 
     % \begin{description}
@@ -378,7 +379,7 @@
     La section suivante présente deux implémentations simples de cette formule. Ces implémentations ne pourraient pas être utilisées sans avoir été optimisées car elles seraient beaucoup trop lentes pour un codec qui doit tenir le temps réel sur plusieurs canaux.
 
     \paragraph{}
-    La complexité de l'implémentation de cette formule est de $O(N^2)$ opérations (où N est la taille de la fenêtre d'entrée). Cette complexité peut être ramenée à $O(N \log N)$ opérations par une factorisation récursive. La complexité peut également être diminuée en se basant sur une autre transformation, e.g. une DFT (\emph{Discrete Fourier Transorm}) ou une autre DCT (\emph{Discrete Cosine Transform}). La complexité sera alors de $O(N)$ opérations de \emph{pre-} et \emph{post-processing} en plus de la complexité de la DFT ou de la DCT choisie\cite{wiki:MDCT}. C'est cette dernière option qui a été retenue pour ce travail.
+    La complexité de l'implémentation de cette formule est de $O(N^2)$ opérations (où N est la taille de la fenêtre d'entrée). Cette complexité peut être ramenée à $O(N \log N)$ opérations par une factorisation récursive. La complexité peut également être diminuée en se basant sur une autre transformation, e.g. une DFT (\emph{Discrete Fourier Transform}) ou une autre DCT (\emph{Discrete Cosine Transform}). La complexité sera alors de $O(N)$ opérations de \emph{pre-} et \emph{post-processing} en plus de la complexité de la DFT ou de la DCT choisie\cite{wiki:MDCT}. C'est cette dernière option qui a été retenue pour ce travail.
 
 
     \subsection{Implémentations des MDCT de référence en \emph{floating point} et \emph{fixed point}}
@@ -530,8 +531,8 @@
     \begin{itemize}
         \item Le header définit la classe \texttt{fftw3\_mdct\_f32} : les données qu'elle contient et les prototypes de ses fonctions (constructeur, destructeur et fonction MDCT);
         \item le constructeur initialise les facteurs de \emph{pre-} et de \emph{post-processing} et la configuration de la FFT;
-        \item le destructeur libère la mémoire allouée dans le construucteur;
-        \item la fonction MDCT opère les opérations de \emph{pre-processing}, fait appel à la FFT et opère les opérations de \emph{pos-processing}.
+        \item le destructeur libère la mémoire allouée dans le constructeur;
+        \item la fonction MDCT opère les opérations de \emph{pre-processing}, fait appel à la FFT et opère les opérations de \emph{post-processing}.
     \end{itemize}
 
     \paragraph{}
@@ -817,7 +818,7 @@
     Le tableau de facteurs de \texttt{twiddle} est initialisé dans le constructeur de la classe \texttt{mdct\_ne10\_i32\_c} (\textbf{annexe K.2}). Ses valeurs sont calculées en \emph{double} puis converties en \emph{integer} (représentation Q15).
     
     \paragraph{}
-    Il aurait été posible de convertir les opérations d'initialisation en \emph{fixed point} mais l'optimisation du constructeur n'est pas nécessaire. En effet, puisque la taille de fenêtre d'entrée ne varie pas, l'appel de l'initialisation ne sera fait qu'une fois et la MDCT est ensuite appelée en boucle avec les mêmes facteurs de \emph{twiddling}.
+    Il aurait été possible de convertir les opérations d'initialisation en \emph{fixed point} mais l'optimisation du constructeur n'est pas nécessaire. En effet, puisque la taille de fenêtre d'entrée ne varie pas, l'appel de l'initialisation ne sera fait qu'une fois et la MDCT est ensuite appelée en boucle avec les mêmes facteurs de \emph{twiddling}.
 
     \subsubsection{Opérations de \emph{pre-twiddling} et de \emph{post-twiddling}}
     \paragraph{}
@@ -1221,7 +1222,7 @@
     \subsection{Performances des MDCT}
     \label{sec:mdct_perfs}
     \paragraph{}
-    La mesure des performances a pour but de valider le bloc MDCT avant de l'intégrer au codec AAC. Le cahier des charges du stage ne contenait pas d'objectif à atteindre en terme de performances, ni absolu (e.g. un temps d'exécution maximal à respecter dans des conditions données), ni relatif (e.g. gagner un certain pourcentage de performances par rapport à une MDCT de référence).
+    La mesure des performances a pour but de valider le bloc MDCT avant de l'intégrer au codec AAC. Le cahier des charges du stage ne contenait pas d'objectif à atteindre en termes de performances, ni absolu (e.g. un temps d'exécution maximal à respecter dans des conditions données), ni relatif (e.g. gagner un certain pourcentage de performances par rapport à une MDCT de référence).
 
     \paragraph{}
     L'objectif en termes de temps d'exécution n'étant pas fini, il a été décidé de tenter de gagner le maximum de performances sur le temps de mon stage. Le critère de réussite est dès lors d'obtenir des performances au moins équivalentes pour la version finale de la MDCT que pour ses itérations précédentes.
