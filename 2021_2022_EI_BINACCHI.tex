@@ -97,7 +97,7 @@
     L'utilisation d'instructions SIMD (\emph{Single Instruction on Multiple Data}) est l'optimisation qui permettra réellement à l'algorithme de gagner en performance. Les instructions SIMD reposent sur le principe de vectorisation des données pour pouvoir opérer simultanément une même instruction sur plusieurs données. Les opérations SIMD spécifiques au processeur ARM sont appelées ARM NEON ou \emph{Advanced SIMD}.
 
     \paragraph{}
-    La MDCT a été développée spécifiquement pour une architecture reposant sur un processeur ARM. C'est l'architecture utilisée pour la nouvelle génération du serveur XT-VIA d'EVS, serveur pour lequel est développé le codec AAC. Tous les tests ont été réalisées sur un Raspberry Pi 4 équipé d'un processeur ARMv7.
+    La MDCT a été développée spécifiquement pour une architecture reposant sur un processeur ARM. C'est l'architecture utilisée pour la nouvelle génération du serveur XT-VIA d'EVS, serveur pour lequel est développé le codec AAC. Tous les tests ont été réalisés sur un Raspberry Pi 4 équipé d'un processeur ARMv7.
 
     \paragraph{}
     Les différentes itérations de la MDCT ont été testées dans le double objectif de gagner le maximum de performances tout en perdant le moins possible en précision. Les données de sortie des MDCT ont systématiquement été validées par comparaison avec les spectres de fréquences générés par un algorithme de référence. Ces comparaisons sont présentées pour chaque étape du développement. La section consacrée au protocole de validation présente les résultats pour la dernière itération de la MDCT générés avec un panel plus complet de signaux d'entrée.
@@ -187,7 +187,7 @@
 
     \paragraph{}
     Les codecs sont dits avec perte (\emph{lossy}) ou sans perte (\emph{lossless}). Le PCM est par exemple un codec sans perte puisqu'il encode la totalité des informations sonores dans la bande de fréquences humainement audibles. Ce type de codec permet de conserver la qualité de l'audio mais nécessite en contrepartie un espace de stockage conséquent, même avec une compression des données\cite{}.
-    
+
 
     \paragraph{}
     Afin de réduire l'espace de stockage nécessaire, les codecs avec perte permettent de supprimer une partie des données audio. C'est le cas des codecs définis par les normes MPEG dont fait partie le codec AAC.
@@ -229,6 +229,7 @@
     Le fonctionnement du décodeur ne sera pas plus développé dans ce travail car le bloc MDCT fait partie de la banque de filtres de l'encodeur. Le fonctionnement spécifique de l'encodeur AAC sera par contre détaillé dans la section \ref{sec:AAC}.
 
 
+
     \subsection{Les modèles psychoacoustiques}
     \paragraph{}
     La section précédente a défini les codecs MPEG comme étant basés sur un modèle psychoacoustique. La psychoacoustique est une branche de la psychophysique qui étudie la manière dont l'oreille humaine perçoit le son\cite{wiki:psychoacoustic}. Cette discipline permet d'améliorer la compression d'un signal audio en éliminant les sons qui sont captés par un microphone mais qui ne peuvent pas être perçus par l'oreille humaine et les avancées dans cette discipline permettent de développer des encodeurs audio de plus en plus performants. Les codecs basés sur un modèle psychoacoustique sont toujours des codecs avec perte puisqu'une partie des informations auditives sera définitivement perdue, ce qui ne nuit pour autant pas à la qualité perçue du son.
@@ -263,7 +264,6 @@
 
 
 
-
     \newpage
     \section{Le codec AAC}
     \label{sec:AAC}
@@ -293,6 +293,8 @@
 
 
     \subsection{Le bloc MDCT}
+    \paragraph{}
+    La MDCT a été développée il y a une trentaine d'années par ..
     % \begin{itemize}
     %     \item particularités par rapport à la FFT
     %     \item basée sur la DCT-IV
@@ -1309,7 +1311,7 @@
     L'algorithme MDCT ne constitue qu'une première étape de la construction d'un encodeur AAC. Pour pouvoir être testé plus complètement, e.g. sur des fenêtres d'échantillons provenant d'un signal réel, toute une mécanique de lecture des données avec overlap aurait dû être mise en place.
 
     \paragraph{}
-    Après la lecture des données et leur passage dans la MDCT, le bloc suivant à implémenter est le bloc de quantification. Les mêmes optimisations que celles aportées à la MDCT doivent lui être apportées avec l'utilisation d'une arithmétique \emph{fixed point} reposant sur les opérations SIMD du processeur ARM.
+    Après la lecture des données et leur passage dans la MDCT, le bloc suivant à implémenter est le bloc de quantification. Les mêmes optimisations que celles apportées à la MDCT doivent lui être apportées avec l'utilisation d'une arithmétique \emph{fixed point} reposant sur les opérations SIMD du processeur ARM.
 
     \paragraph{}
     La MDCT doit être complétée avec une fonction de fenêtre. Cette fonction est typiquement une fonction basée sur un sinus ou un cosinus au travers de laquelle le signal temporel est passé avant d'être analysé par la MDCT. Cette fonction a pour but d'améliorer la transformation effectuée par la MDCT en atténuant l'effet de coupure aux extrémités de la fenêtre d'entrée de la MDCT.
@@ -1325,7 +1327,7 @@
     \end{figure}
 
     \paragraph{}
-    La figure \ref{fig:spectre_mlt} montre la comparaison entre les spectres de fréquences générés par la MDCT \emph{Ne10 i32 neon} pour le même signal d'entrée, passé ou non au travers de la fonction de fenêtre pour le même signal sinusoïdal à \SI{440}{\hertz} que celui montré dans la plupart des exemples de ce travail. La comparaison a également été faite avec quelque autres signaux. À chaque fois, la composante fréquentielle relevée est un peu plus nette avec la fonction de fenêtre.
+    La figure \ref{fig:spectre_mlt} montre la comparaison entre les spectres de fréquences générés par la MDCT \emph{Ne10 i32 neon} pour le même signal d'entrée, passé ou non au travers de la fonction de fenêtre pour le même signal sinusoïdal à \SI{440}{\hertz} que celui montré dans la plupart des exemples de ce travail. La comparaison a également été faite avec quelques autres signaux. À chaque fois, la composante fréquentielle relevée est un peu plus nette avec la fonction de fenêtre.
     \begin{figure}[H]
         \centering
         \includegraphics[width=.8\linewidth]{./images/validation_ne10_i32_neon_mlt.pdf}
@@ -1340,7 +1342,7 @@
     Pour pouvoir être intégrée intelligemment à la MDCT, la fonction de fenêtre aurait dû être combinée aux facteurs de \emph{pre-twiddling} de la MDCT. Il aurait alors fallu relancer tous les tests afin de valider le nouvel algorithme. De la même manière, pour rendre l'encodeur plus performant, les premières opérations du bloc de quantification pourraient être effectuées en même temps que le \emph{post-twiddling}.
 
     \paragraph{}
-    Avec des tests automatisés, j'aurais probablement eu plus de temps à la fin de mon stage pour mettre en place cette fonction de fenêtre de manière sûre. Si je devais recommencer ce type de travail aujourd'hui, avec l'expérience acquise durant mon stage, je réfléchirai très probablement en début de développement à une manière plus simple de valider les données, et peut-être également les performances.
+    Avec des tests automatisés, j'aurais probablement eu plus de temps à la fin de mon stage pour mettre en place cette fonction de fenêtre de manière sûre. Si je devais recommencer ce type de travail aujourd'hui, avec l'expérience acquise durant mon stage, je réfléchirais très probablement en début de développement à une manière plus simple de valider les données, et peut-être également les performances.
 
     % \begin{itemize}
     %     \item Fonction fenêtre intégrée aux opérations de pre twiddling
@@ -1369,7 +1371,7 @@
         \item d'implémenter une MDCT basée sur une FFT existante avec opérations de \emph{pre-} et de \emph{post-processing} sur base d'un code fourni;
         \item d'intégrer la librairie \emph{Ne10} pour utiliser une FFT optimisée avec les instructions \emph{Advanced SIMD};
         \item de passer les opérations de \emph{pre-} et de \emph{post-processing} en arithmétique \emph{fixed point};
-        \item et de mettre en \oe uvre les instructions \emph{Advanced SIMD} dans les opérations de \emph{pre-} et de \emph{post-processing} de la MDCT.
+        \item de mettre en \oe uvre les instructions \emph{Advanced SIMD} dans les opérations de \emph{pre-} et de \emph{post-processing} de la MDCT.
     \end{itemize}
 
     \paragraph{}
@@ -1379,7 +1381,7 @@
     La MDCT implémentée avec les instructions ARM NEON a compensé les lenteurs de l'algorithmique \emph{fixed point}. Le temps d'exécution de la dernière itération de la MDCT est le plus court de tous ceux mesurés au cours de ce travail.
 
     \paragraph{}
-    Pour être réellement complète, la MDCT doit encore intégrer une fonction de fenêtre à appliquer au signal d'entrée. Le bloc MDCT doit lui-même devra être intégré à tout un encodeur qui n'est pas encore construit.
+    Pour être réellement complète, la MDCT doit encore intégrer une fonction de fenêtre à appliquer au signal d'entrée. Le bloc MDCT lui-même devra être intégré à tout un encodeur qui n'est pas encore construit.
 
     \paragraph{}
     La réalisation de ce travail m'a permis de mettre en \oe uvre les connaissances acquises au cours de mon bachelier pour les appliquer à un domaine nouveau. Ce stage a été l'occasion de me confronter pour la première fois aux techniques de traitement du signal audiovisuel du \emph{broadcast}. J'y ai acquis énormément de nouvelles connaissances en peu de temps, avec parfois la frustration de ne pas pouvoir me consacrer plus aux aspects théoriques de l'encodage audionumérique.
