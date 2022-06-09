@@ -1356,30 +1356,30 @@
     \section*{Conclusion}
     \addcontentsline{toc}{section}{\protect\numberline{}Conclusion}
     \paragraph{}
-    Par rapport au cahier des charges reçu en début de stage :
+    Ce travail a abouti avec succès à une version optimisée du bloc MDCT. Les différentes itérations de l'algorithme ont permis successivement :
     \begin{itemize}
-        \item j'ai implémenté une MDCT basée sur une FFT (sur base d'un code d'exemple fourni)
-        \item j'ai bien mis en place l'arithmétique fixed point mais les résultats n'étaient pas satisfaisants
-        \item j'ai utilisé les instructions ARM NEON et j'ai obtenu un algorithme plus rapide que tous les autres algorithmes développés avant
-        \item première brique d'un encodeur complet
+        \item d'implémenter une MDCT basée sur une FFT existante avec opérations de \emph{pre-} et de \emph{post-processing} sur base d'un code fourni;
+        \item d'intégrer la librairie \emph{Ne10} pour utiliser une FFT optimisée avec les instructions \emph{Advanced SIMD};
+        \item de passer les opérations de \emph{pre-} et de \emph{post-processing} en arithmétique \emph{fixed point};
+        \item et de mettre en \oe uvre les instructions \emph{Advanced SIMD} dans les opérations de \emph{pre-} et de \emph{post-processing} de la MDCT.
     \end{itemize}
 
     \paragraph{}
-    Points positifs et négatifs :
-    \begin{itemize}
-        \item découverte d'EVS (technologies modernes, esprit d'entreprise collaboratif et axé sur la qualité de ce qui est délivré), du domaine audiovisuel
-        \item rapport à la théorie
-        \item frustration par rapport au manque de temps à pouvoir consacrer aux aspects théoriques
-    \end{itemize}
-    % +difficultés au niveau des performances pas bonnes jusqu'à la fin
+    Les résultats en performance des itérations en arithmétique \emph{fixed point} ont montré que, pour un processeur disposant d'un jeu d'instructions \emph{floating point} performant, comme c'est le cas de l'ARMv7, travailler en \emph{integer} n'est plus aussi avantageux que sur des processeurs plus anciens. Les effets de bord positifs d'un algorithme en \emph{integer} n'ont pas pu être mesurés puisque le développement de la MDCT était la première étape du développement de l'encodeur AAC.
 
     \paragraph{}
-    Ce que j'ai appris :
-    \begin{itemize}
-        \item traitement de signal audio
-    \end{itemize}
-     %Sur base du cahier des charges de début de stage, il a été décidé que mon travail s
-    % Résultats obtenus + améliorations possibles
+    La MDCT implémentée avec les instructions ARM NEON a compensé les lenteurs de l'algorithmique \emph{fixed point}. Le temps d'exécution de la dernière itération de la MDCT est le plus court de tous ceux mesurés au cours de ce travail.
+
+    \paragraph{}
+    Pour être réellement complète, la MDCT doit encore intégrer une fonction de fenêtre à appliquer au signal d'entrée. Le bloc MDCT doit lui-même devra être intégré à tout un encodeur qui n'est pas encore construit.
+
+    \paragraph{}
+    La réalisation de ce travail m'a permis de mettre en \oe uvre les connaissances acquises au cours de mon bachelier pour les appliquer à un domaine nouveau. Ce stage a été l'occasion de me confronter pour la première fois aux techniques de traitement du signal audiovisuel du \emph{broadcast}. J'y ai acquis énormément de nouvelles connaissances en peu de temps, avec parfois la frustration de ne pas pouvoir me consacrer plus aux aspects théoriques de l'encodage audionumérique.
+
+    \paragraph{}
+    Mon stage m'a enfin permis de découvrir une nouvelle entreprise, différente sur de nombreux aspects des entreprises dans lesquels j'ai travaillé auparavant. C'est une chance incroyable qui m'a été offerte de travailler dans un cadre aussi exceptionnel où tout est mis en \oe uvre pour favoriser le développement de produits de qualité et la collaboration.
+
+
 
     \newpage
     \bibliography{biblio}
