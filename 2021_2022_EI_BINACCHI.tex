@@ -154,26 +154,8 @@
     \end{itemize}
 
     \paragraph{}
-    C'est pour la dernière génération du serveur XT, l'XT-VIA, que le codec AAC est développé. La compression avec perte de données de ce codec permet d'optimiser l'espace occupé par les données audio sans en altérer la qualité perçue. Outre la qualité audio, les performances de l'encodage sont importantes à prendre en compte pour permettre l'enregistrement de plusieurs canaux en parallèle tout en conservant un traitement de l'information qui tienne le temps réel. L'optimisation des performances doit tenir compte de l'architecture de l'XT-VIA : le processeur ARM remplace le processeur Intel de ses prédécesseurs avec des différences importantes dans le fonctions intrinsèques disponibles.
+    C'est pour la dernière génération du serveur XT, l'XT-VIA, que le codec AAC est développé. La compression avec perte de données de ce codec permet d'optimiser l'espace occupé par les données audio sans en altérer la qualité perçue. Outre la qualité audio, les performances de l'encodage sont importantes à prendre en compte pour permettre l'enregistrement de plusieurs canaux en parallèle tout en conservant un traitement de l'information qui tienne le temps réel. L'optimisation des performances doit tenir compte de l'architecture de l'XT-VIA : le processeur ARM remplace le processeur Intel de ses prédécesseurs avec des différences importantes dans le jeu de fonctions intrinsèques disponibles.
 
-
-    % onde acoustique -> 
-
-    % - son audible = vibration entre 20 et 20kHz
-
-    % le signal, analogique (continu) ou discret, peut avoir une représentation :
-    % - temporelle
-    % - fréquentielle
-    % exemple de signaux périodiques (sinus, carré, etc) -> pp 6-7 + truc interactif
-
-    % - spectre d'amplitude (utile) et spectre de phase (pas utile)
-
-    % - toute fonction p(x, t) peut être exprimée par une somme de fonctions (co-)sinusoidales : formule pour les fonctions périodiques + transformée de Fourier pour les fonctions n'est pas périodique dans le temps
-
-    % transformation de fourier :
-    % https://www.claudegabriel.be/Math%C3%A9matiques%20appliqu%C3%A9es,%20chapitre%204.pdf -> p12 sur N pair / impair
-    % à la base -> signaux périodique (faire bref)
-    % -> ce qui nous intéresse : transformation pour signal non périodique discret -> DCT
 
 
     \newpage
@@ -191,6 +173,7 @@
 
     \paragraph{}
     La transformée de Fourier offre une représentation fréquentielle du signal audio temporel. Cette transformation repose sur le principe que tout signal périodique peut être représenté par une somme de composantes sinusoïdales ou cosinusoïdales.
+    % https://www.claudegabriel.be/Math%C3%A9matiques%20appliqu%C3%A9es,%20chapitre%204.pdf -> p12 sur N pair / impair
 
 
     \subsection{Définition d'un codec}
@@ -238,7 +221,7 @@
     Le décodeur a un fonctionnement inverse : le flux de données est décodé (\textbf{decoding of bitstream}), les composantes fréquentielles du signal sont retrouvées par l'opération inverse à la quantification (\textbf{inverse quantization}) et ces sous-bandes fréquentielles sont finalement rassemblées pour reconstituer le signal temporel (\textbf{synthesis filter bank}).
 
     \paragraph{}
-    Le fonctionnement du décodeur ne sera pas plus développé dans ce travail car le bloc MDCT fait partie de la banque de filtres de l'encodeur. Le fonctionnement spécifique de l'encodeur AAC sera par contre détaillé dans la section \ref{sec:AAC}.
+    Le fonctionnement du décodeur ne sera pas plus développé dans ce travail car le bloc MDCT fait partie de la banque de filtres de l'encodeur. Le fonctionnement spécifique de l'encodeur AAC sera par contre détaillé un peu plus dans la section \ref{sec:AAC}.
 
 
 
@@ -274,35 +257,32 @@
     \section{Le codec AAC}
     \label{sec:AAC}
     \subsection{Fonctionnement de l'encodeur AAC}
+    \paragraph{}
+    L'étudiante qui m'a précédée en stage présente dans son travail d'analyse une étude complète de l'encodeur AAC et des normes MPEG qui le définissent\cite{Wafaa}. L'objectif de cette section est d'introduire brièvement le fonctionnement global de l'encodeur AAC avant de consacrer le reste du travail au bloc MDCT.
+
     \begin{figure}[H]
         \centering
-        \includegraphics[width=.6\linewidth]{./images/block-diagram-aac.png}
-        \caption{Schéma fonctionnel }
+        \includegraphics[width=.7\linewidth]{./images/block-diagram-aac.png}
+        \caption{Schéma fonctionnel de l'encodeur AAC}
         \label{fig:bloc-diagram-aac}
     \end{figure}
-    % présentation des différents blocs
-    % \cite{wiki:AAC}
-
-    %In this thesis, we are going to study the different blocks of an AAC encoder based on the standard ISO/IEC 13818-7 such as the psychoacoustic model, Gain control, Transform block, Spectral processing, Quantization and Entropy coding. \cite{Wafaa}
-
-    % Les codecs définis par les normes MPEG sont basés sur le modèle psychoacoustiquev
-    % Les performances des codecs audio définis par les normes MPEG sont rendues possibles par les recherches en psychoacoustique.
-
-
-    %AAC supports inclusion of 48 full-bandwidth (up to 96 kHz) audio channels in one stream plus 16 low frequency effects (LFE, limited to 120 Hz) channels, up to 16 "coupling" or dialog channels, and up to 16 data streams. The quality for stereo is satisfactory to modest requirements at 96 kbit/s in joint stereo mode; however, hi-fi transparency demands data rates of at least 128 kbit/s (VBR). Tests[which?] of MPEG-4 audio have shown that AAC meets the requirements referred to as "transparent" for the ITU at 128 kbit/s for stereo, and 320 kbit/s for 5.1 audio.[citation needed] 
-    % AAC uses only a modified discrete cosine transform (MDCT) algorithm, giving it higher compression efficiency than MP3, which uses a hybrid coding algorithm that is part MDCT and part FFT.[4]
-
-
-    % \paragraph{}
-    % Le codec AAC (Advanced Audio coding) est définit  , défini par la norme . Les recherches en psychoacoustique ont permis de développer un algorithme d'encodage plus performant pour l'AAC que pour le MP3 : il permet d'encoder moins de données audio tout en gardant la même qualité perçue au décodage\cite{1999-Brandenburg}.
-
     \paragraph{}
-    L'étudiante qui m'a précédée en stage présente dans son travail d'analyse une étude complète de l'encodeur AAc et des normes MPEG qui le définissent\cite{Wafaa}.
-
-    
+    L'encodeur AAC est composé des blocs suivants (figure \ref{fig:bloc-diagram-aac})\cite{1999-Brandenburg} :
+    \begin{description}
+        \item[Gain control] bloc actif seulement sur le profil SSR (\emph{Scalable Sampling Rate}) de l'encodeur pour décomposer le signal en quatre bandes fréquentielles avant sont traitement;
+        \item[Filter bank] la banque de filtres de l'AAC se base sur la MDCT (section \ref{sec:mdct});
+        \item[Perceptual model] le modèle psychoacoustique réduit les données encodées à partir du signal temporel et de son analyse fréquentielle;
+        \item[TNS (\emph{Temporal Noise Shaping})] bloc de réduction de bruit particulièrement efficace pour l'encodage des voix humaines;
+        \item[Prediction] outil utilisé seulement pour le profil principal de l'encodeur qui permet d'améliorer l'encodage de sons se rapprochant de sons purs;
+        \item[M/S (mid/side)] bloc utilisé pour l'encodage stereo;
+        \item[Quantization] quantification des valeurs codées basée sur une table de Huffman améliorée;
+        \item[Noiseless coding] encodage des données basée sur une méthode entropique en évitant d'introduire du bruit;
+        \item[Bitstream multiplexer] le \emph{bitstream} est multiplexé à partir des données quantifiées et codées du spectre de fréquences et d'autres informations issues des différents autres blocs.
+    \end{description}
 
 
     \subsection{Le bloc MDCT}
+    \label{sec:mdct}
     \paragraph{}
     Les transformations de type DFT (\emph{Discrete Fourier Transform}) ou DCT (\emph{Discrete Cosine Transform}), aussi appelées \emph{block transorms}, fonctionnent sur base d'une fenêtre d'échantillons temporels dont elles permettent de représenter les composantes fréquentielles\cite{wiki:MDCT}.
 
@@ -310,7 +290,10 @@
     Les \emph{block transforms} produisent des \emph{blocking artifacts} : des discontinuités peuvent apparaître dans le signal à cause de la coupure nette entre les différents blocs analysés. Pour atténuer ces artéfacts, il est possible d'arrondir les valeurs aux extrémités du bloc analysé avec une \emph{window function} (fonction de fenêtre). Certains échantillons seront alors dupliqués. La transformation est dite avec \emph{overlap} car les parties aux extrémités du bloc analysé correspondent aux échantillons des blocs voisins\cite{2014-edler}.
 
     \paragraph{}
-    La particularité de la MDCT est de proposer un \emph{overlapping} qui ne produise pas d'échantillons supplémentaires. La banque de filtres de la MDCT repose sur le TDAC (\emph{Time-domain Aliasing Cancellation}) : les échantillons créés par l'\emph{overlapping} sont supprimé lors du processus de transformation\cite{1987-princen-bradley}
+    La particularité de la MDCT est de proposer un \emph{overlapping} qui ne produise pas d'échantillons supplémentaires. La banque de filtres de la MDCT repose sur le TDAC (\emph{Time-domain Aliasing Cancellation}) : les échantillons créés par l'\emph{overlapping} sont supprimé lors du processus de transformation\cite{1987-princen-bradley}.
+
+    \paragraph{}
+    La MDCT fonctionne avec un \emph{overlap} de 50\% : la seconde moitié des échantillons temporels de la fenêtre analysée correspond à la première moitié des échantillons de la fenêtre suivante. La fenêtre d'entrée de la MDCT est adaptative mais elle a été implémentée dans ce travail avec une taille fixe de 1024 échantillons.
 
 
 
