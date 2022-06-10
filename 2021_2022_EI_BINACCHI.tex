@@ -176,12 +176,29 @@
     % https://www.claudegabriel.be/Math%C3%A9matiques%20appliqu%C3%A9es,%20chapitre%204.pdf -> p12 sur N pair / impair
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     \subsection{Définition d'un codec}
     \paragraph{}
     Un codec est un procédé logiciel composé d'un encodeur (\emph{\textbf{co}der}) et d'un décodeur (\emph{\textbf{dec}oder})\cite{wiki:codec}. Un codec audio permet donc, d'une part, de coder un signal audio dans un flux de données numériques et, d'autre part, de décoder ces données afin de restituer le signal audio.
 
     \paragraph{}
-    La compression audio réduit la quantité d'information contenue dans un flux audionumérique (\emph{bistream}). La quantité de données à stocker limite les possibilités des systèmes audio. Les limitations dues à la taille des données sont un enjeu encore plus grand pour la transmision des données, limitée en bande passante\cite{2005-embrechts}.
+    La compression audio réduit la quantité d'information contenue dans un flux audionumérique (\emph{bistream}). La quantité de données à stocker limite les possibilités des systèmes audio. Les limitations dues à la taille des données sont un enjeu encore plus grand pour la transmission des données, limitée en bande passante\cite{2005-embrechts}.
 
     \paragraph{}
     La compression audio peut se faire avec perte (\emph{lossy}) ou sans perte (\emph{lossless}). L'encodage PCM, par exemple, est dit sans perte puisque la totalité de l'information sonore est encodée et peut être retrouvée au décodage. L'encodage avec perte supprime les données inaudibles d'un signal. Il permet théoriquement de retrouver la même qualité sonore perçue au décodage sans reproduire toutes les données captées.
@@ -230,7 +247,7 @@
     La section précédente a défini les codecs MPEG comme étant basés sur un modèle psychoacoustique. La psychoacoustique est une branche de la psychophysique qui étudie la manière dont l'oreille humaine perçoit le son\cite{wiki:psychoacoustic}. Cette discipline permet d'améliorer la compression d'un signal audio en éliminant les sons qui sont captés par un microphone mais qui ne peuvent pas être perçus par l'oreille humaine. Les avancées dans cette discipline permettent de développer des encodeurs audio de plus en plus performants. Les codecs basés sur un modèle psychoacoustique sont toujours des codecs avec perte puisqu'une partie des informations auditives sera définitivement perdue, ce qui ne nuit pour autant pas à la qualité perçue du son.
 
     \paragraph{}
-    L'encodage audionumérique tient déjà compte des seuils de fréquences humainement audibles pour limiter les données audio enregistrées(cf. section \ref{audionumerique}) : aucun son n'est perçu en deça de \SI{20}{\hertz} ou au-delà de \SI{20}{\kilo\hertz}. La psychoacoustique permet de mieux dessiner la limite entre ce qui est humainement audible ou non afin d'éliminer un maximum des informations non pertinentes et ainsi augmenter le facteur de compression des données : le facteur de compression des codecs MPEG est environ 15 fois supérieur à celui du CD\cite{2019-Herre-Dick}.
+    L'encodage audionumérique tient déjà compte des seuils de fréquences humainement audibles pour limiter les données audio enregistrées(cf. section \ref{audionumerique}) : aucun son n'est perçu en deçà de \SI{20}{\hertz} ou au-delà de \SI{20}{\kilo\hertz}. La psychoacoustique permet de mieux dessiner la limite entre ce qui est humainement audible ou non afin d'éliminer un maximum des informations non pertinentes et ainsi augmenter le facteur de compression des données : le facteur de compression des codecs MPEG est environ 15 fois supérieur à celui du CD\cite{2019-Herre-Dick}.
 
     \paragraph{}
     Les effets de masque sont au centre des différents modèles psychoacoustiques utilisés pour la compression audio. L'enjeu afin d'obtenir le meilleur taux de compression est de calculer le plus finement possible les seuils de masquage, i.e. la limite entre les informations pertinentes et celles qui peuvent être éliminées. Les effets de masque dans le domaine fréquentiel (\emph{spectral masking effects}) sont parmi les plus utilisés mais il en existe d'autres, e.g. dans le domaine temporel.
@@ -244,7 +261,7 @@
     \paragraph{}
     La figure \ref{fig:freq_masking} représente différents effets de masques du domaine fréquentiel :
     \begin{itemize}
-        \item la ligne en pointillé représente le seuil de masquage dans le silence : en-deçà de ce seuil, aucun son n'est audible pour l'oreille humaine\cite{1924-wegel};
+        \item la ligne en pointillé représente le seuil de masquage dans le silence : en deçà de ce seuil, aucun son n'est audible pour l'oreille humaine\cite{1924-wegel};
         \item la ligne pleine représente le seuil de masquage lié à la composante fréquentielle : le son d'intensité plus forte représenté sur le graphique masque le son d'intensité plus faible\cite{1974-Vogten}.
     \end{itemize}
 
@@ -284,7 +301,7 @@
     \subsection{Le bloc MDCT}
     \label{sec:mdct}
     \paragraph{}
-    Les transformations de type DFT (\emph{Discrete Fourier Transform}) ou DCT (\emph{Discrete Cosine Transform}), aussi appelées \emph{block transorms}, fonctionnent sur base d'une fenêtre d'échantillons temporels dont elles permettent de représenter les composantes fréquentielles\cite{wiki:MDCT}.
+    Les transformations de type DFT (\emph{Discrete Fourier Transform}) ou DCT (\emph{Discrete Cosine Transform}), aussi appelées \emph{block transforms}, fonctionnent sur base d'une fenêtre d'échantillons temporels dont elles permettent de représenter les composantes fréquentielles\cite{wiki:MDCT}.
 
     \paragraph{}
     Les \emph{block transforms} produisent des \emph{blocking artifacts} : des discontinuités peuvent apparaître dans le signal à cause de la coupure nette entre les différents blocs analysés. Pour atténuer ces artéfacts, il est possible d'arrondir les valeurs aux extrémités du bloc analysé avec une \emph{window function} (fonction de fenêtre). Certains échantillons seront alors dupliqués. La transformation est dite avec \emph{overlap} car les parties aux extrémités du bloc analysé correspondent aux échantillons des blocs voisins\cite{2014-edler}.
