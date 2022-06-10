@@ -82,13 +82,13 @@
     \addcontentsline{toc}{section}{\protect\numberline{}Introduction}
 
     \paragraph{}
-    Ce travail présente les résultats d'un stage consacré à l'optimisation de l'encodeur audio AAC. Il s'inscrit dans la continuité du travail d'analyse de Wafaa Heddari, étudiante qui m'a précédée au sein de l'équipe Hardware-Firmware d'EVS. Son stage a débouché sur une synthèse d'optimisations possibles du codec AAC. Le mien a eu pour but d'en concrétiser certaines.
+    Ce travail présente les résultats d'un stage consacré à l'optimisation de l'encodeur audio AAC (\emph{Advanced Audio Coding}). Il s'inscrit dans la continuité du travail d'analyse de Wafaa Heddari, étudiante qui m'a précédée au sein de l'équipe Hardware-Firmware d'EVS. Son stage a débouché sur une synthèse d'optimisations possibles du codec AAC. Le mien a eu pour but d'en concrétiser certaines.
 
     \paragraph{}
-    Il a été décidé que mon stage se concentrerait sur le bloc MDCT de l'encodeur AAC. La MDCT (\emph{Modified Discrete Cosine Transform}) est le bloc de transformation du signal audio du domaine temporel vers le domaine fréquentiel. La compression du codec AAC repose sur l'utilisation d'un modèle psychoacoustique qui détermine les informations à éliminer en partie sur base de l'analyse fréquentielle du signal.
+    Il a été décidé que mon stage se concentrerait sur le bloc MDCT (\emph{Modified Discrete Cosine Transform}) de l'encodeur AAC. La MDCT est le bloc de transformation du signal audio du domaine temporel vers le domaine fréquentiel. La compression du codec AAC repose sur l'utilisation d'un modèle psychoacoustique qui détermine les informations à éliminer en partie sur base de l'analyse fréquentielle du signal.
 
     \paragraph{}
-    L'algorithme MDCT développé dans ce travail est un algorithme basé sur un autre type de transformation : la FFT \emph{Fast Fourier Transform}. Mon travail a débuté par l'implémentation, sur base d'un code d'exemple, de cet algorithme. Ce code d'exemple a ensuite été adapté à l'utilisation de la FFT de la librairie \emph{Ne10}.
+    L'algorithme MDCT développé dans ce travail est un algorithme basé sur un autre type de transformation : la FFT (\emph{Fast Fourier Transform}). Mon travail a débuté par l'implémentation, sur base d'un code d'exemple, de cet algorithme. Ce code d'exemple a ensuite été adapté à l'utilisation de la FFT de la librairie \emph{Ne10}.
 
     \paragraph{}
     Une des optimisations de la MDCT consiste à passer d'une arithmétique \emph{floating point} à une arithmétique \emph{fixed point}. La logique à mettre en \oe uvre pour les opérations en \emph{floating point} est plus lourde que celle des opérations sur des entiers. L'arithmétique \emph{fixed point} offre généralement des performances plus intéressantes pour les applications de traitement du signal. Ce travail montrera que ce n'est pas le cas pour les processeurs équipés d'un FPU (\emph{Floating Point Unit}) performant comme celui du processeur ARM.
@@ -100,7 +100,7 @@
     La MDCT a été développée spécifiquement pour une architecture reposant sur un processeur ARM. C'est l'architecture utilisée pour la nouvelle génération du serveur XT-VIA d'EVS, serveur pour lequel est développé le codec AAC. Tous les tests ont été réalisés sur un Raspberry Pi 4 équipé d'un processeur ARMv7.
 
     \paragraph{}
-    Les différentes itérations de la MDCT ont été testées dans le double objectif de gagner le maximum de performances tout en perdant le moins possible en précision. Les données de sortie des MDCT ont systématiquement été validées par comparaison avec les spectres de fréquences générés par un algorithme de référence. Ces comparaisons sont présentées pour chaque étape du développement. La section consacrée au protocole de validation présente les résultats pour la dernière itération de la MDCT générés avec un panel plus complet de signaux d'entrée.
+    Les différentes itérations de la MDCT ont été testées dans le double objectif de gagner le maximum de performance tout en perdant le moins possible en précision. Les données de sortie des MDCT ont systématiquement été validées par comparaison avec les spectres de fréquences générés par un algorithme de référence. Ces comparaisons sont présentées pour chaque étape du développement. La section consacrée au protocole de validation présente les résultats pour la dernière itération de la MDCT générés avec un panel plus complet de signaux d'entrée.
 
     \paragraph{}
     Les performances constituent l'aspect le plus important du développement. La qualité des données audiovisuelles et leur quantité sont de plus en plus importantes. Dans le \emph{broadcast}, les codecs sont utilisés en boucle sur de nombreux flux de données en parallèle. La production en \emph{live} a des exigences de temps réel pour les enregistrements et les diffusions.
@@ -117,10 +117,10 @@
     Mon stage s'est déroulé au sein de la société EVS Broadcast Equipment. EVS est une entreprise d'origine liégeoise devenue internationale. Fondée en 1994 par Pierre L'Hoest, Laurent Minguet et Michel Counson, EVS compte aujourd'hui plus de 600 employés dans plus de 20 bureaux à travers le monde mais son siège principal se situe toujours à Liège\cite{EVS:website}.
 
     \paragraph{}
-    EVS est devenu leader dans le monde du broadcast avec ses serveurs permettant l'accès et la diffusion instantanée des données audiovisuelles enregistrées sur ses serveurs. L'entreprise est également célèbre pour ses ralentis instantanés. Ces technologies sont utilisées pour la production live des plus importants événements sportifs dans le monde : le matériel EVS est notamment utilisé pour la retransmission des Jeux Olympiques depuis 1998.
+    EVS est devenu leader dans le monde du \emph{broadcast} avec ses serveurs permettant l'accès et la diffusion instantanée de données audiovisuelles. L'entreprise est également célèbre pour ses ralentis instantanés. Ces technologies sont utilisées pour la production live des plus importants événements sportifs dans le monde : le matériel EVS est notamment utilisé pour la retransmission des Jeux Olympiques depuis 1998.
 
     \paragraph{}
-    Plus de 50\% des employés d'EVS travaillent en recherche et développement afin de répondre au marché du broadcast en constante évolution. Outre ses solutions techniques innovantes, EVS se différencie de ses concurrents par la proximité entretenue avec les clients en leur proposant des solutions à l'écoute de leurs besoins et en leur offrant un service de support de qualité.
+    Plus de 50\% des employés d'EVS travaillent en recherche et développement afin de répondre au marché du \emph{broadcast} en constante évolution. Outre ses solutions techniques innovantes, EVS se différencie de ses concurrents par la proximité entretenue avec les clients en leur proposant des solutions à l'écoute de leurs besoins et en leur offrant un service de support de qualité.
 
     \paragraph{}
     C'est en R\&D, dans l'équipe Hardware-Firmware, que s'est déroulé mon stage. Sous la direction de Justin Mannesberg, cette équipe se compose d'une vingtaine d'employés spécialisés en développement embarqué et en développement FPGA. La situation particulière dans laquelle s'est déroulé mon stage, en pleine pandémie de Covid et alors que tous les employés étaient confinés, ne m'a pas permis d'interagir avec beaucoup de membres de l'équipe ni de pouvoir observer leur travail. Bernard Thilmant (Software Engineer dans l'équipe Hardware-Firmware) a cependant réussi à m'apporter le soutien nécessaire à la bonne réalisation de mon stage : il m'a permis de m'initier au C++, m'a aidée à ne pas me perdre dans les concepts parfois complexes de l'encodage audio et m'a aidée à apporter la rigueur scientifique nécessaire à la réalisation de mon travail. J'ai également pu bénéficier de l'expertise technique de Frédéric Lefranc (Principal Embedded System Architect dans l'équipe Hardware-Firmware) ainsi que du suivi de Justin Mannesberg (Manager de l'équipe Hardware-Firmware).
@@ -140,21 +140,21 @@
     \end{figure}
 
     \paragraph{}
-    EVS développe et commercialise de nombreux produits allant des serveurs de production aux interfaces permettant d'exploiter des données audiovisuelles ou de monitorer des systèmes de production\cite{EVS:products}. Le serveur de production live XT est un des produits emblématiques d'EVS. Il permet de stocker de grandes quantités de données audiovisuelles et d'y accéder en temps réel afin de répondre aux besoins de la production en live. La remote LSM (\emph{Live Slow Motion}) permet d'accéder aux contenus des serveurs XT afin de créer les ralentis pour lesquels EVS est célèbre dans le monde.
+    EVS développe et commercialise de nombreux produits allant des serveurs de production aux interfaces permettant d'exploiter des données audiovisuelles ou de monitorer des systèmes de production\cite{EVS:products}. Le serveur de production \emph{live} XT est un des produits emblématiques d'EVS. Il permet de stocker de grandes quantités de données audiovisuelles et d'y accéder en temps réel. La \emph{remote} LSM (\emph{Live Slow Motion}) permet d'accéder aux contenus des serveurs XT afin de créer les ralentis pour lesquels EVS est célèbre dans le monde.
 
     \paragraph{}
-    Le serveur XT a connu plusieurs versions : XT, XT2, XT2+, XT3 et enfin l'XT-VIA. L'XT-VIA (cf. figure \ref{fig:xt-via}), la plus récente version du serveur XT, en quelques informations clés\cite{EVS:products} :
+    Le serveur XT a connu plusieurs versions : XT, XT2, XT2+, XT3 et enfin l'XT-VIA. L'XT-VIA (figure \ref{fig:xt-via}), la plus récente version du serveur XT, en quelques informations clés\cite{EVS:products} :
     \begin{itemize}
         \item offre un espace de stockage de 18 à 54 TB, soit plus de 130h d'enregistrement en UHD-4K;
         \item dispose de 2 à plus de 16 canaux selon le format choisi : 2 canaux en UHD-8K (4320p), 6 canaux en UHD-4K (2160p) et plus de 16 canaux en FHD and HD (720p, 1080i, 1080p);
         \item permet une configuration hybride de ses entrées et sorties en IP (10G Ethernet SFP+, 100G en option, ST2022-6, ST2022-7, ST2022-8, ST2110, NMOS IS-04, IS-05, EMBER+, PTP) ou SDI (1.5G-SDI, 3G-SDI et 12G-SDI);
         \item supporte de nombreux formats d'encodage vidéo : UHD-4K (XAVC-Intra et DNxHR), HD/FHD (XAVC-I, AVC-I, DNxHD et ProRes), PROXY (MJPEG et H264);
         \item peut enregistrer 192 canaux audio non compressés et supporte les standards AES et MADI;
-        \item offre de nombreuses possibilités de connexion avec du matériel EVS ou non.
+        \item offre de nombreuses possibilités de connexion, avec du matériel EVS ou non.
     \end{itemize}
 
     \paragraph{}
-    C'est pour la dernière génération du serveur XT, l'XT-VIA, que le codec AAC est développé. La compression avec perte de données de ce codec permet d'optimiser l'espace occupé par les données audio sans en altérer la qualité perçue. Outre la qualité audio, les performances de l'encodage sont importantes à prendre en compte pour permettre l'enregistrement de plusieurs canaux en parallèle tout en conservant un traitement de l'information qui tienne le temps réel. L'optimisation des performances doit tenir compte de l'architecture de l'XT-VIA : le processeur ARM remplace le processeur Intel de ses prédécesseurs avec des différences importantes dans les fonctions intrinsèques.
+    C'est pour la dernière génération du serveur XT, l'XT-VIA, que le codec AAC est développé. La compression avec perte de données de ce codec permet d'optimiser l'espace occupé par les données audio sans en altérer la qualité perçue. Outre la qualité audio, les performances de l'encodage sont importantes à prendre en compte pour permettre l'enregistrement de plusieurs canaux en parallèle tout en conservant un traitement de l'information qui tienne le temps réel. L'optimisation des performances doit tenir compte de l'architecture de l'XT-VIA : le processeur ARM remplace le processeur Intel de ses prédécesseurs avec des différences importantes dans le fonctions intrinsèques disponibles.
 
 
     % onde acoustique -> 
@@ -180,17 +180,29 @@
     \section{Les codecs audio}
     \subsection{L'encodage audionumérique}
     \label{audionumerique}
+    \paragraph{}
+    Le son est un phénomène physique. Les microphones transforment la pression acoustique en une tension. Pour pouvoir la transmettre et travailler dessus, cette tension va être numérisée par un système de conversion analogique-numérique (DAC, \emph{Digital-to-Analog Converter})\cite{2005-embrechts}.
+
+    \paragraph{}
+    L'oreille humaine perçoit au mieux les fréquences entre \SI{20}{\emph{\hertz}} et \SI{20}{\emph{\kilo\hertz}}. Les systèmes audio sont donc toujours limités à cette bande passante, avec une fréquence d'échantillonnage typiquement à \SI{44.1}{\emph{\kilo\hertz}} ou à \SI{48}{\emph{\kilo\hertz}} pour respecter le théorème de Nyquist-Shannon et éviter les phénomènes de recouvrement (\emph{aliasing}).
+
+    \paragraph{}
+    Le signal compris dans cette bande fréquences est quantifié : une valeur numérique lui est attribuée en fonction de son amplitude. La donnée audio peut alors être traitée ou enregistrée.
+
+    \paragraph{}
+    La transformée de Fourier offre une représentation fréquentielle du signal audio temporel. Cette transformation repose sur le principe que tout signal périodique peut être représenté par une somme de composantes sinusoïdales ou cosinusoïdales.
+
 
     \subsection{Définition d'un codec}
     \paragraph{}
     Un codec est un procédé logiciel composé d'un encodeur (\emph{\textbf{co}der}) et d'un décodeur (\emph{\textbf{dec}oder})\cite{wiki:codec}. Un codec audio permet donc, d'une part, de coder un signal audio dans un flux de données numériques et, d'autre part, de décoder ces données afin de restituer le signal audio.
 
     \paragraph{}
-    Les codecs sont dits avec perte (\emph{lossy}) ou sans perte (\emph{lossless}). Le PCM est par exemple un codec sans perte puisqu'il encode la totalité des informations sonores dans la bande de fréquences humainement audibles. Ce type de codec permet de conserver la qualité de l'audio mais nécessite en contrepartie un espace de stockage conséquent, même avec une compression des données\cite{2005-embrechts}.
-
+    La compression audio réduit la quantité d'information contenue dans un flux audionumérique (\emph{bistream}). La quantité de données à stocker limite les possibilités des systèmes audio. Les limitations dues à la taille des données sont un enjeu encore plus grand pour la transmision des données, limitée en bande passante\cite{2005-embrechts}.
 
     \paragraph{}
-    Afin de réduire l'espace de stockage nécessaire, les codecs avec perte permettent de supprimer une partie des données audio. C'est le cas des codecs définis par les normes MPEG dont fait partie le codec AAC.
+    La compression audio peut se faire avec perte (\emph{lossy}) ou sans perte (\emph{lossless}). L'encodage PCM, par exemple, est dit sans perte puisque la totalité de l'information sonore est encodée et peut être retrouvée au décodage. L'encodage avec perte supprime les données inaudibles d'un signal. Il permet théoriquement de retrouver la même qualité sonore perçue au décodage sans reproduire toutes les données captées.
+
 
     \subsection{Les codecs MPEG}
     \paragraph{}
@@ -232,10 +244,10 @@
 
     \subsection{Les modèles psychoacoustiques}
     \paragraph{}
-    La section précédente a défini les codecs MPEG comme étant basés sur un modèle psychoacoustique. La psychoacoustique est une branche de la psychophysique qui étudie la manière dont l'oreille humaine perçoit le son\cite{wiki:psychoacoustic}. Cette discipline permet d'améliorer la compression d'un signal audio en éliminant les sons qui sont captés par un microphone mais qui ne peuvent pas être perçus par l'oreille humaine et les avancées dans cette discipline permettent de développer des encodeurs audio de plus en plus performants. Les codecs basés sur un modèle psychoacoustique sont toujours des codecs avec perte puisqu'une partie des informations auditives sera définitivement perdue, ce qui ne nuit pour autant pas à la qualité perçue du son.
+    La section précédente a défini les codecs MPEG comme étant basés sur un modèle psychoacoustique. La psychoacoustique est une branche de la psychophysique qui étudie la manière dont l'oreille humaine perçoit le son\cite{wiki:psychoacoustic}. Cette discipline permet d'améliorer la compression d'un signal audio en éliminant les sons qui sont captés par un microphone mais qui ne peuvent pas être perçus par l'oreille humaine. Les avancées dans cette discipline permettent de développer des encodeurs audio de plus en plus performants. Les codecs basés sur un modèle psychoacoustique sont toujours des codecs avec perte puisqu'une partie des informations auditives sera définitivement perdue, ce qui ne nuit pour autant pas à la qualité perçue du son.
 
     \paragraph{}
-    L'encodage audionumérique tient déjà compte des seuils de fréquences humainement audibles pour limiter les données audio enregistrées : nous l'avons vu dans la section \ref{audionumerique}, aucun son n'est perçu en deça de \SI{20}{\hertz} ou au-delà de \SI{20}{\kilo\hertz}. La psychoacoustique permet de mieux dessiner la limite entre ce qui est humainement audible ou non afin d'éliminer un maximum des informations non pertinentes et ainsi augmenter le facteur de compression des données : le facteur de compression des codecs MPEG est environ 15 fois supérieur à celui du CD\cite{2019-Herre-Dick}.
+    L'encodage audionumérique tient déjà compte des seuils de fréquences humainement audibles pour limiter les données audio enregistrées(cf. section \ref{audionumerique}) : aucun son n'est perçu en deça de \SI{20}{\hertz} ou au-delà de \SI{20}{\kilo\hertz}. La psychoacoustique permet de mieux dessiner la limite entre ce qui est humainement audible ou non afin d'éliminer un maximum des informations non pertinentes et ainsi augmenter le facteur de compression des données : le facteur de compression des codecs MPEG est environ 15 fois supérieur à celui du CD\cite{2019-Herre-Dick}.
 
     \paragraph{}
     Les effets de masque sont au centre des différents modèles psychoacoustiques utilisés pour la compression audio. L'enjeu afin d'obtenir le meilleur taux de compression est de calculer le plus finement possible les seuils de masquage, i.e. la limite entre les informations pertinentes et celles qui peuvent être éliminées. Les effets de masque dans le domaine fréquentiel (\emph{spectral masking effects}) sont parmi les plus utilisés mais il en existe d'autres, e.g. dans le domaine temporel.
@@ -247,21 +259,14 @@
     \end{figure}
 
     \paragraph{}
-    La figure \ref{fig:freq_masking} représente différents effets de masques du domaine fréquentiel. Les lignes pleine et pointillée représentent des limites entre les informations pertinentes et celles qui vont être supprimées à l'encodage :
+    La figure \ref{fig:freq_masking} représente différents effets de masques du domaine fréquentiel :
     \begin{itemize}
-        \item 
+        \item la ligne en pointillé représente le seuil de masquage dans le silence : en-deçà de ce seuil, aucun son n'est audible pour l'oreille humaine\cite{1924-wegel};
+        \item la ligne pleine représente le seuil de masquage lié à la composante fréquentielle : le son d'intensité plus forte représenté sur le graphique masque le son d'intensité plus faible\cite{1974-Vogten}.
     \end{itemize}
 
-    
-    % \paragraph{}
-    % Les lignes représentent le seuil 
-    % \begin{description}
-    %     \item[Threshold in quiet] la ligne en pointillé représente le seuil d'audibilité dans le calme, indépendamment de tout autre élément qui pourrait interférer
-    %     \item[Masking threshold] 
-    % \end{description}
-
-
-    % SPL) A frequency dependent threshold of in hearing in quiet describes the minimum sound pressure level of a sound to be perceivable isolation and under extremely quite conditions. (SPL) of a sound be perceivable in isolation and curve under extremely conditions. • In the presence of to a masker, the threshold in quiet changes into quite a masking threshold, which bell-shaped increase the in frequencies the vicinity of the masker, depending on its • shows In the a presence of a masker, threshold in in quiet curve changes into a masking threshold, frequency, level, and signal increase type. Any sound beneath threshold is masked by the louder which shows a bell-shaped in frequencies in the this vicinity of the masker, depending on its signal, and level, thus and inaudible the Any average perceptual coding, the louder coding signal, error frequency, signal for type. sound listener. beneath In this threshold audio is masked by the (i.e., the introduced quantization noise) corresponds to the probe signal in this experimental and thus inaudible for the average listener. In perceptual audio coding, the coding error (i.e., scenario. the introduced quantization noise) corresponds to the probe signal in this experimental scenario. • Masking effects are are strongest strongest signals are within the critical bandwidth of the masker. • Masking effects for for signals that that are within the critical bandwidth of the masker. Within Within the critical bandwidth, the masking threshold remains constant. Furthermore, the the critical bandwidth, the masking threshold remains constant. Furthermore, the masking effects masking spread to frequencies the (so-called critical bandwidth (so-called The inter-band spread to effects frequencies beyond the critical beyond bandwidth inter-band masking). upper masking). The upper slope of the masking threshold depends on multiple factors, such as absolute slope of the masking threshold depends on multiple factors, such as absolute frequenLa fonction développée permet de faire ses calculs et d'obtenir un résultat cy and sound frequency and of sound pressure whereas level of the the lower masker, whereas lower slope dependency. hardly shows a level pressure level the masker, slope hardly the shows a level dependency. • Depending on the type of masker, i.e., tone or (narrow-band) noise, the strength of the masking • Depending the type of masker, i.e., can tone or (narrow-band) the strength of the masking effect varies. on While noise-like maskers mask tone-like signals noise, very well (up to a masker-to-probe effect varies. maskers can mask tone-like signals very well (up to a masker-to- level ratio of While about noise-like 6 dB), tone-like maskers can mask noise only to a much weaker extent [29] probe level ratio of about 6 dB), tone-like maskers can mask noise only to a much weaker extent (about 20 dB). [29] (about 20 dB).      \paragraph{}     Le calcul des   
+    \paragraph{}
+    Ces quelques explications permettent de comprendre l'intérêt de l'analyse fréquentielle d'un signal. L'analyse fréquentielle entre en jeu dans la compression des données pour déterminer une partie des informations qui peuvent être éliminées. Elle contribue ainsi à augmenter les capacités de traitement du système audio.
 
 
 
