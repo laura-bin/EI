@@ -1,6 +1,3 @@
-% recherche psycho acoustique avec ou sans tiret, spectre de fréquence, connection, effet de masque, range, en moyenne entre virgules, "je", enlever les articles des titre de section
-
-
 \documentclass{article}
 
 \usepackage[french]{babel}
@@ -123,7 +120,7 @@
     Plus de 50\% des employés d'EVS travaillent en recherche et développement afin de répondre au marché du \emph{broadcast} en constante évolution. Outre ses solutions techniques innovantes, EVS se différencie de ses concurrents par la proximité entretenue avec les clients en leur proposant des solutions à l'écoute de leurs besoins et en leur offrant un service de support de qualité.
 
     \paragraph{}
-    C'est en R\&D, dans l'équipe Hardware-Firmware, que s'est déroulé mon stage. Sous la direction de Justin Mannesberg, cette équipe se compose d'une vingtaine d'employés spécialisés en développement embarqué et en développement FPGA. La situation particulière dans laquelle s'est déroulé mon stage, en pleine pandémie de Covid et alors que tous les employés étaient confinés, ne m'a pas permis d'interagir avec beaucoup de membres de l'équipe ni de pouvoir observer leur travail. Bernard Thilmant (Software Engineer dans l'équipe Hardware-Firmware) a cependant réussi à m'apporter le soutien nécessaire à la bonne réalisation de mon stage : il m'a permis de m'initier au C++, m'a aidée à ne pas me perdre dans les concepts parfois complexes de l'encodage audio et m'a aidée à apporter la rigueur scientifique nécessaire à la réalisation de mon travail. J'ai également pu bénéficier de l'expertise technique de Frédéric Lefranc (Principal Embedded System Architect dans l'équipe Hardware-Firmware) ainsi que du suivi de Justin Mannesberg (Manager de l'équipe Hardware-Firmware).
+    C'est en R\&D, dans l'équipe Hardware-Firmware, que s'est déroulé mon stage. Sous la direction de Justin Mannesberg, cette équipe se compose d'une vingtaine d'employés spécialisés en développement embarqué et en développement FPGA (\emph{Field-programmable gate array}). La situation particulière dans laquelle s'est déroulé mon stage, en pleine pandémie de Covid et alors que tous les employés étaient confinés, ne m'a pas permis d'interagir avec beaucoup de membres de l'équipe ni de pouvoir observer leur travail. Bernard Thilmant (Software Engineer dans l'équipe Hardware-Firmware) a cependant réussi à m'apporter le soutien nécessaire à la bonne réalisation de mon stage : il m'a permis de m'initier au C++, m'a aidée à ne pas me perdre dans les concepts parfois complexes de l'encodage audio et m'a aidée à apporter la rigueur scientifique nécessaire à la réalisation de mon travail. J'ai également pu bénéficier de l'expertise technique de Frédéric Lefranc (Principal Embedded System Architect dans l'équipe Hardware-Firmware) ainsi que du suivi de Justin Mannesberg (Manager de l'équipe Hardware-Firmware).
 
     \subsection{Le serveur XT}
 
@@ -159,7 +156,7 @@
 
 
     \newpage
-    \section{L'encodage audionumérique}
+    \section{Les codecs audio}
     \subsection{L'encodage audionumérique}
     \label{audionumerique}
     \paragraph{}
@@ -169,7 +166,7 @@
     L'oreille humaine perçoit au mieux les fréquences entre \SI{20}{\emph{\hertz}} et \SI{20}{\emph{\kilo\hertz}}. Les systèmes audio sont donc toujours limités à cette bande passante, avec une fréquence d'échantillonnage typiquement à \SI{44.1}{\emph{\kilo\hertz}} ou à \SI{48}{\emph{\kilo\hertz}} pour respecter le théorème de Nyquist-Shannon et éviter les phénomènes de recouvrement (\emph{aliasing}).
 
     \paragraph{}
-    Le signal compris dans cette bande fréquences est quantifié : une valeur numérique lui est attribuée en fonction de son amplitude. La donnée audio peut alors être traitée ou enregistrée.
+    Le signal compris dans cette bande de fréquences est quantifié : une valeur numérique lui est attribuée en fonction de son amplitude. La donnée audio peut alors être traitée ou enregistrée.
 
     \paragraph{}
     La transformée de Fourier offre une représentation fréquentielle du signal audio temporel. Cette transformation repose sur le principe que tout signal périodique peut être représenté par une somme de composantes sinusoïdales ou cosinusoïdales.
@@ -178,7 +175,7 @@
 
     \subsection{Définition d'un codec}
     \paragraph{}
-    Un codec est un procédé logiciel composé d'un encodeur (\emph{\textbf{co}der}) et d'un décodeur (\emph{\textbf{dec}oder})\cite{wiki:codec}. Un codec audio permet donc, d'une part, de coder un signal audio dans un flux de données numériques et, d'autre part, de décoder ces données afin de restituer le signal audio.
+    Un codec est un procédé logiciel composé d'un encodeur (\emph{\textbf{co}der}) et d'un décodeur (\emph{\textbf{dec}oder})\cite{wiki:codec}. Un codec audio permet donc, d'une part, de coder un signal audio dans un flux de données numériques et, d'autre part, de décoder ces données afin de restituer le signal audio d'origine.
 
     \paragraph{}
     La compression audio réduit la quantité d'information contenue dans un flux audionumérique (\emph{bistream}). La quantité de données à stocker limite les possibilités des systèmes audio. Les limitations dues à la taille des données sont un enjeu encore plus grand pour la transmission des données, limitée en bande passante\cite{2005-embrechts}.
@@ -192,10 +189,10 @@
     MPEG (\emph{Moving Picture Experts Group}) désigne une alliance de différents groupes de travail définissant des normes d'encodage, de compression, de décompression et de transmission de média audio, vidéo et graphiques\cite{wiki:MPEG}. MPEG est actif depuis 1988 et a produit depuis de nombreuses normes.
 
     \paragraph{}
-    Les codecs audio qui implémentent les normes MPEG ont pour point commun d'être des codecs avec perte de données basés sur un modèle psychoacoustique. Le premier est le MP3, défini par la norme MPEG-1 Layer-3 ISO/IEC 11172-3:1993. Le codec AAC est conçu en 1997 pour remplacer le MP3. Il est défini par les normes MPEG-2 partie 7 ISO/IEC 13818-7:2006\cite{ISO13818-7} et MPEG-4 partie 3 ISO/IEC 14496-3:2019\cite{ISO14496-3}.
+    Les codecs audio qui implémentent les normes MPEG ont pour point commun d'être des codecs avec perte de données basés sur un modèle psychoacoustique (section \ref{sec:pychoacoustic}). Le premier est le MP3, défini par la norme MPEG-1 Layer-3 ISO/IEC 11172-3:1993. Le codec AAC est conçu en 1997 pour remplacer le MP3\cite{wiki:AAC}. Il est défini par les normes MPEG-2 partie 7 ISO/IEC 13818-7:2006\cite{ISO13818-7} et MPEG-4 partie 3 ISO/IEC 14496-3:2019\cite{ISO14496-3}.
 
     \paragraph{}
-    Les normes MPEG définissent les grandes lignes de l'encodage et du décodage ainsi que le format du conteneur mais pas l'implémentation du codec qui peut de ce fait être plus ou moins performant. Les codecs MPEG sont typiquement composés des blocs suivants\cite{1999-Brandenburg} :
+    Les normes MPEG définissent les grandes lignes de l'encodage et du décodage ainsi que le format du conteneur (\emph{wrapper}). Elles ne définissent pas l'implémentation du codec, qui peut de ce fait être plus ou moins performant. Les codecs MPEG sont typiquement composés des blocs suivants\cite{1999-Brandenburg} :
     \begin{figure}[H]
         \centering
         \begin{subfigure}[b]{.6\linewidth}
@@ -208,8 +205,6 @@
         \end{subfigure}
         \caption{Vue simplifiée d'un codec MPEG basé sur un modèle psychoacoustique}
     \end{figure}
-    \paragraph{}
-    L'encodeur est composé des blocs suivants :
     \begin{description}
         \item[filter bank] la banque de filtres décompose le signal temporel d'entrée en différentes composantes fréquentielles
         \item[perceptual model] le modèle psychoacoustique utilise le signal temporel et/ou sa décomposition fréquentielle pour éliminer les données audio dont l'absence ne nuira pas à la qualité perçue à l'écoute
@@ -226,11 +221,12 @@
 
 
     \subsection{Les modèles psychoacoustiques}
+    \label{sec:pychoacoustic}
     \paragraph{}
     La section précédente a défini les codecs MPEG comme étant basés sur un modèle psychoacoustique. La psychoacoustique est une branche de la psychophysique qui étudie la manière dont l'oreille humaine perçoit le son\cite{wiki:psychoacoustic}. Cette discipline permet d'améliorer la compression d'un signal audio en éliminant les sons qui sont captés par un microphone mais qui ne peuvent pas être perçus par l'oreille humaine. Les avancées dans cette discipline permettent de développer des encodeurs audio de plus en plus performants. Les codecs basés sur un modèle psychoacoustique sont toujours des codecs avec perte puisqu'une partie des informations auditives sera définitivement perdue, ce qui ne nuit pour autant pas à la qualité perçue du son.
 
     \paragraph{}
-    L'encodage audionumérique tient déjà compte des seuils de fréquences humainement audibles pour limiter les données audio enregistrées(cf. section \ref{audionumerique}) : aucun son n'est perçu en deçà de \SI{20}{\hertz} ou au-delà de \SI{20}{\kilo\hertz}. La psychoacoustique permet de mieux dessiner la limite entre ce qui est humainement audible ou non afin d'éliminer un maximum des informations non pertinentes et ainsi augmenter le facteur de compression des données : le facteur de compression des codecs MPEG est environ 15 fois supérieur à celui du CD\cite{2019-Herre-Dick}.
+    L'encodage audionumérique tient déjà compte des seuils de fréquences humainement audibles pour limiter les données audio enregistrées (cf. section \ref{audionumerique}) : aucun son n'est perçu en deçà de \SI{20}{\hertz} ou au-delà de \SI{20}{\kilo\hertz}. La psychoacoustique permet de mieux dessiner la limite entre ce qui est humainement audible ou non afin d'éliminer un maximum des informations non pertinentes et ainsi augmenter le facteur de compression des données : le facteur de compression des codecs MPEG est environ 15 fois supérieur à celui du CD\cite{2019-Herre-Dick}.
 
     \paragraph{}
     Les effets de masque sont au centre des différents modèles psychoacoustiques utilisés pour la compression audio. L'enjeu afin d'obtenir le meilleur taux de compression est de calculer le plus finement possible les seuils de masquage, i.e. la limite entre les informations pertinentes et celles qui peuvent être éliminées. Les effets de masque dans le domaine fréquentiel (\emph{spectral masking effects}) sont parmi les plus utilisés mais il en existe d'autres, e.g. dans le domaine temporel.
@@ -269,14 +265,14 @@
     \paragraph{}
     L'encodeur AAC est composé des blocs suivants (figure \ref{fig:bloc-diagram-aac})\cite{1999-Brandenburg} :
     \begin{description}
-        \item[Gain control] bloc actif seulement sur le profil SSR (\emph{Scalable Sampling Rate}) de l'encodeur pour décomposer le signal en quatre bandes fréquentielles avant sont traitement;
+        \item[Gain control] bloc actif seulement sur le profil SSR (\emph{Scalable Sampling Rate}) de l'encodeur pour décomposer le signal en quatre bandes fréquentielles avant son traitement;
         \item[Filter bank] la banque de filtres de l'AAC se base sur la MDCT (section \ref{sec:mdct});
         \item[Perceptual model] le modèle psychoacoustique réduit les données encodées à partir du signal temporel et de son analyse fréquentielle;
-        \item[TNS (\emph{Temporal Noise Shaping})] bloc de réduction de bruit particulièrement efficace pour l'encodage des voix humaines;
+        \item[TNS (\emph{Temporal Noise Shaping})] bloc de réduction du bruit particulièrement efficace pour l'encodage des voix humaines;
         \item[Prediction] outil utilisé seulement pour le profil principal de l'encodeur qui permet d'améliorer l'encodage de sons se rapprochant de sons purs;
-        \item[M/S (mid/side)] bloc utilisé pour l'encodage stereo;
+        \item[M/S (mid/side)] bloc utilisé pour l'encodage stéréo;
         \item[Quantization] quantification des valeurs codées basée sur une table de Huffman améliorée;
-        \item[Noiseless coding] encodage des données basée sur une méthode entropique en évitant d'introduire du bruit;
+        \item[Noiseless coding] encodage des données basé sur une méthode entropique en évitant d'introduire du bruit;
         \item[Bitstream multiplexer] le \emph{bitstream} est multiplexé à partir des données quantifiées et codées du spectre de fréquences et d'autres informations issues des différents autres blocs.
     \end{description}
 
@@ -290,7 +286,7 @@
     Les \emph{block transforms} produisent des \emph{blocking artifacts} : des discontinuités peuvent apparaître dans le signal à cause de la coupure nette entre les différents blocs analysés. Pour atténuer ces artéfacts, il est possible d'arrondir les valeurs aux extrémités du bloc analysé avec une \emph{window function} (fonction de fenêtre). Certains échantillons seront alors dupliqués. La transformation est dite avec \emph{overlap} car les parties aux extrémités du bloc analysé correspondent aux échantillons des blocs voisins\cite{2014-edler}.
 
     \paragraph{}
-    La particularité de la MDCT est de proposer un \emph{overlapping} qui ne produise pas d'échantillons supplémentaires. La banque de filtres de la MDCT repose sur le TDAC (\emph{Time-domain Aliasing Cancellation}) : les échantillons créés par l'\emph{overlapping} sont supprimé lors du processus de transformation\cite{1987-princen-bradley}.
+    La particularité de la MDCT est de proposer un \emph{overlapping} qui ne produise pas d'échantillons supplémentaires. La banque de filtres de la MDCT repose sur le TDAC (\emph{Time-domain Aliasing Cancellation}) : les échantillons créés par l'\emph{overlapping} sont supprimés lors du processus de transformation\cite{1987-princen-bradley}.
 
     \paragraph{}
     La MDCT fonctionne avec un \emph{overlap} de 50\% : la seconde moitié des échantillons temporels de la fenêtre analysée correspond à la première moitié des échantillons de la fenêtre suivante. La fenêtre d'entrée de la MDCT est adaptative mais elle a été implémentée dans ce travail avec une taille fixe de 1024 échantillons.
@@ -319,7 +315,7 @@
     \end{itemize}
 
     \paragraph{}
-    Les instructions ARM NEON sont les instructions SIMD (\emph{Single Instruction on Multiple Data}) de l'ARMv7. C'est l'utilisation de ces instructions dans la dernière itération de la MDCT qui va lui permettre de réellement gagner en performances.
+    Les instructions ARM NEON sont les instructions SIMD spécifiques à l'ARMv7. C'est l'utilisation de ces instructions dans la dernière itération de la MDCT qui va lui permettre de réellement gagner en performances.
 
     \paragraph{}
     Le Raspberry Pi 4 possède également des instructions VFP (\emph{Vector Floating Point}) qui offrent des performances très intéressantes pour les opérations en \emph{float}. Les instructions VFP ne sont pas liées aux instructions NEON : la plupart des ARM possèdent les deux mais ce n'est pas toujours le cas. Les mesures de performances de différentes MDCT développées dans ce travail mettront plusieurs fois en évidence l'influence de ces instructions sur les très bonnes performances observées dans les algorithmes en \emph{floating point}.
@@ -352,13 +348,13 @@
     La transformation effectuée par la MDCT est donnée par l'équation suivante\cite{wiki:MDCT} :
     $$X_k = \sum_{n=0}^{2N-1} x_n \cos \left[ \frac{\pi}{N} \left( n + \frac{1}{2} + \frac{N}{2} \right) \left( k + \frac{1}{2} \right) \right]$$
     \begin{description}
-        \item[$X_k$] avec $k \in [0, N[$ pour une fenêtre d'entrée de 2N échantillons
+        \item[$X_k$] avec $k \in [0, N[$ pour une fenêtre d'entrée de 2N échantillons (N échantillons utiles et N échantillons réservés à l'\emph{overlap})
         \item[$x_n$] avec $n \in [0, 2N[$ : la fenêtre d'entrée
         \item[$F: R^{2N} \rightarrow R^N$] la MDCT est une fonction linéaire qui pour 2N nombres réels en entrée produit N nombres réels en sortie
     \end{description}\label{test}
 
     \paragraph{}
-    À cette équation s'ajoute le facteur d'échelle $\frac{2}{\sqrt{2N}}$.
+    À cette équation s'ajoute le facteur d'échelle $\frac{2}{\sqrt{2N}}$. Ce facteur a été déterminé empiriquement sur base du code d'exemple fourni pour l'implémentation de la MDCT.
 
     \paragraph{}
     La MDCT a été implémentée avec une fenêtre d'entrée de $2N = 1024$ échantillons : $N = 512$ échantillons utiles et $N = 512$ échantillons pour l'\emph{overlap}. Le bloc de sortie, i.e. le spectre de fréquences de la fenêtre d'entrée a une taille de $N = 512$ composantes fréquentielles en nombres complexes, ou de $\frac{N}{2} = 256$ composantes fréquentielles en nombres réels. Ces valeurs, utilisées à de très nombreux endroits du code, sont rassemblées dans le header \texttt{mdct\_constants.h} présenté dans l'\textbf{annexe C}. Ce fichier contient également d'autres valeurs pré-calculées sur base de la taille de la fenêtre d'entrée.
@@ -1142,12 +1138,12 @@
     \begin{figure}[H]
         \centering
         \includegraphics[width=.8\linewidth]{./images/validation_ne10_i32_neon_10k.pdf}
-        \caption{Spectre de fréquences généré par la MDCT Ne10 i32 NEON comparé au spectre de référence (\SI{20}{\kilo\hertz})}
+        \caption{Spectre de fréquences généré par la MDCT Ne10 i32 NEON comparé au spectre de référence (\SI{10}{\kilo\hertz})}
         \label{fig:validation_ne10_i32_neon_10k}
     \end{figure}
 
     \paragraph{}
-    La figure \ref{fig:validation_ne10_i32_neon_10k} montre que le spectre de fréquences généré par la MDCT optimisée se superpose bien au spectre de fréquences de référence. Toutes les MDCT optimisées ont été validées par comparaison du spectre de fréquences : comparaison visuelle, comme ici avec un graphique, ou calcul de la différence entre les données des deux spectres. Cette validation a pu mettre en évidence les dépassements produits afin de les corriger.
+    La figure \ref{fig:validation_ne10_i32_neon_10k} montre que le spectre de fréquences généré par la MDCT optimisée se superpose bien au spectre de fréquences de référence. Toutes les MDCT optimisées ont été validées par comparaison aec le spectre de fréquences de référence : comparaison visuelle, comme ici avec un graphique, ou calcul de la différence entre les données des deux spectres. Cette validation a pu mettre en évidence les dépassements produits afin de les corriger.
 
     \paragraph{}
     Les spectres de fréquences ont également été comparés avec les spectres de fréquences générés par la MDCT basée sur la FFT de \emph{FFTW3}, directement en \emph{float} ou mis à échelle Q15. Ces comparaisons ne sont pas reproduites dans ce travail à cause du manque de lisibilité de graphiques superposant trois spectres de fréquences.
@@ -1190,7 +1186,7 @@
     \end{figure}
 
     \paragraph{}
-    Un signal composé de multiples fréquences de même amplitude (\ref{fig:signal_multi_freq}) confirme la validité de la MDCT. La figure \ref{fig:validation_multi_freq} met bien en évidence les composantes fréquentielles attendues à \SI{440}{\hertz}, \SI{880}{\hertz}, \SI{4.4}{\kilo\hertz}, \SI{8.8}{\kilo\hertz} et \SI{17.6}{\kilo\hertz}.
+    Un signal composé de multiples fréquences de même amplitude (\ref{fig:signal_multi_freq}) confirme la validité de la MDCT. La figure \ref{fig:validation_multi_freq} met bien en évidence les composantes fréquentielles à \SI{440}{\hertz}, \SI{880}{\hertz}, \SI{4.4}{\kilo\hertz}, \SI{8.8}{\kilo\hertz} et \SI{17.6}{\kilo\hertz} du signal composé qui lui a été donné en entrée.
 
     \begin{figure}[H]
         \centering
@@ -1234,7 +1230,7 @@
     Les tests de performances sont lancés sur le Raspberry via une connexion SSH. Un script permet d'appeler tous les exécutables avec les paramètres voulus et les résultats affichés en console sont redirigés vers un fichier texte. Les tests sont réalisés en isolation, i.e. aucun processus non nécessaire au fonctionnement du Raspberry n'est lancé durant la réalisation des tests pour ne pas interférer et risquer d'allonger le temps d'exécution. Les mesures de performances ont été prises avec des exécutables compilés en mode \emph{release} avec l'option \texttt{CMAKE\_BUILD\_TYPE=RELEASE}.
 
     \paragraph{}
-    Les résultats présentés dans la table \ref{tab:perf_mdct} ont été mesurés sur \SI{10000000}{} d'exécutions (\SI{10000}{} pour l'algorithme de référence). Afin de ne pas introduire d'aléatoire dans ces mesures, les MDCT ont toutes été testées avec le même signal temporel en entrée : un signal sinusoïdal à \SI{440}{\hertz}.
+    Les résultats présentés dans la table \ref{tab:perf_mdct} ont été mesurés sur \SI{10000000}{} d'exécutions (\SI{10000}{} pour l'algorithme de référence) avec en entrée l'échantillon d'un son pur à \SI{440}{\hertz}.
 
     \begin{table}[H]
         \centering
@@ -1267,7 +1263,7 @@
     Enfin, pour les implémentations \emph{floating point plain C}, la MDCT \emph{Ne10} est un peu plus lente que la MDCT \emph{FFTW3} avec un temps d'exécution moyen de \SI{9020.1}{\nano\second} contre \SI{7446.84}{\nano\second}. Ce résultat est cohérent avec les performances des différentes FFT mesurées à la section \ref{sec:fft_perfs} : la FFT de \emph{FFTW3} en \emph{float 32} est en effet environ \SI{2}{\micro\second} plus rapide que la FFT de \emph{Ne10} en \emph{float 32 plain C}.
 
     \paragraph{}
-    Ces tests de performances donnent des résultats du même ordre de grandeur avec des signaux différents donnés en entrée des MDCT testées. À titre indicatif, la table \ref{tab:perf_mdct_random} montre les résultats des tests de performances réalisés dans les mêmes conditions que ceux présentés plus haut mais avec des données aléatoires différentes à chaque exécution en entrée des MDCT.
+    La MDCT est un algorithme déterministe : elle a des performances identiques quelles que soient ces données d'entrée. À titre indicatif, la table \ref{tab:perf_mdct_random} montre les résultats des tests de performances réalisés dans les mêmes conditions que ceux présentés plus haut mais avec des données aléatoires différentes à chaque exécution en entrée des MDCT.
 
     \begin{table}[H]
         \centering
