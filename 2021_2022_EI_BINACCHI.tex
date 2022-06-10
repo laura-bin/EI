@@ -266,7 +266,7 @@
     \end{itemize}
 
     \paragraph{}
-    Ces quelques explications permettent de comprendre l'intérêt de l'analyse fréquentielle d'un signal. L'analyse fréquentielle entre en jeu dans la compression des données pour déterminer une partie des informations qui peuvent être éliminées. Elle contribue ainsi à augmenter les capacités de traitement du système audio.
+    Ces quelques explications montrent déjà en quoi l'analyse fréquentielle d'un signal est essentielle au système audio. Combinée au modèle psychoacoustique de l'encodeur, elle permet une compression plus efficace des données. Elle contribue ainsi à augmenter les capacités de traitement du système audio.
 
 
 
@@ -296,21 +296,21 @@
     % \paragraph{}
     % Le codec AAC (Advanced Audio coding) est définit  , défini par la norme . Les recherches en psychoacoustique ont permis de développer un algorithme d'encodage plus performant pour l'AAC que pour le MP3 : il permet d'encoder moins de données audio tout en gardant la même qualité perçue au décodage\cite{1999-Brandenburg}.
 
+    \paragraph{}
+    L'étudiante qui m'a précédée en stage présente dans son travail d'analyse une étude complète de l'encodeur AAc et des normes MPEG qui le définissent\cite{Wafaa}.
+
+    
 
 
     \subsection{Le bloc MDCT}
     \paragraph{}
-    La MDCT a été développée il y a une trentaine d'années par ..
-    % \begin{itemize}
-    %     \item particularités par rapport à la FFT
-    %     \item basée sur la DCT-IV
-    %     \item niveaux de complexité (O...)
-    % \end{itemize}
+    Les transformations de type DFT (\emph{Discrete Fourier Transform}) ou DCT (\emph{Discrete Cosine Transform}), aussi appelées \emph{block transorms}, fonctionnent sur base d'une fenêtre d'échantillons temporels dont elles permettent de représenter les composantes fréquentielles\cite{wiki:MDCT}.
 
-    % faire un scema fonctionnel des 3 blocs de l'implementation de MDCT choisie : pre-processig - FFT - post-processing
-    \begin{itemize}
-        \item overlap
-    \end{itemize}
+    \paragraph{}
+    Les \emph{block transforms} produisent des \emph{blocking artifacts} : des discontinuités peuvent apparaître dans le signal à cause de la coupure nette entre les différents blocs analysés. Pour atténuer ces artéfacts, il est possible d'arrondir les valeurs aux extrémités du bloc analysé avec une \emph{window function} (fonction de fenêtre). Certains échantillons seront alors dupliqués. La transformation est dite avec \emph{overlap} car les parties aux extrémités du bloc analysé correspondent aux échantillons des blocs voisins\cite{2014-edler}.
+
+    \paragraph{}
+    La particularité de la MDCT est de proposer un \emph{overlapping} qui ne produise pas d'échantillons supplémentaires. La banque de filtres de la MDCT repose sur le TDAC (\emph{Time-domain Aliasing Cancellation}) : les échantillons créés par l'\emph{overlapping} sont supprimé lors du processus de transformation\cite{1987-princen-bradley}
 
 
 
